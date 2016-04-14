@@ -567,6 +567,6 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
     rsp->SetItemString("shipState", rspShipState);
 
 
-	return new PyObject( "util.KeyVal", rsp );
+	return new PyObject( "utillib.KeyVal", rsp );
 }
 

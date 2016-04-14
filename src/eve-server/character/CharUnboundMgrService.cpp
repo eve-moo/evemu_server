@@ -54,6 +54,7 @@ CharUnboundMgrService::CharUnboundMgrService()
     PyCallable_REG_CALL(CharUnboundMgrService, GetCharCreationInfo)
     PyCallable_REG_CALL(CharUnboundMgrService, GetCharNewExtraCreationInfo)
     PyCallable_REG_CALL(CharUnboundMgrService, CreateCharacterWithDoll)
+    PyCallable_REG_CALL(CharUnboundMgrService, GetCharacterSelectionData)
 }
 
 CharUnboundMgrService::~CharUnboundMgrService() {
@@ -70,14 +71,14 @@ PyResult CharUnboundMgrService::Handle_IsUserReceivingCharacter(PyCallArgs &call
 
 PyResult CharUnboundMgrService::Handle_ValidateNameEx(PyCallArgs &call)
 {
-    Call_SingleWStringArg arg;
+    Call_ValidateNameEx arg;
     if (!arg.Decode(&call.tuple))
     {
         codelog(CLIENT__ERROR, "Failed to decode args for ValidateNameEx call");
         return NULL;
     }
 
-    return new PyBool(CharacterDB::ValidateCharName(arg.arg.c_str()));
+    return new PyBool(CharacterDB::ValidateCharName(arg.name.c_str()));
 }
 
 PyResult CharUnboundMgrService::Handle_SelectCharacterID(PyCallArgs &call) {
@@ -402,4 +403,82 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     ItemFactory::UnsetUsingClient();
 
     return new PyInt( char_item->itemID() );
+}
+
+PyResult CharUnboundMgrService::Handle_GetCharacterSelectionData(PyCallArgs &call)
+{
+    uint32 accountID = call.client->GetAccountID();
+
+    PyTuple *rtn = new PyTuple(3);
+
+    // userDetails
+    DBQueryResult res;
+    if (!DBcore::RunQuery(res, "SELECT\n"
+            "    accountName AS userName,\n"
+            "    %lu AS creationDate,\n"
+            "    3 AS characterSlots,\n"
+            "    CAST(3 AS CHAR) AS maxCharacterSlots,\n"
+            "    %lu AS subscriptionEndTime\n"
+            "FROM `srvAccount`\n"
+            "WHERE accountID = %u", (Win32TimeNow() - Win32Time_Month), (Win32TimeNow() + Win32Time_Year), accountID))
+    {
+        codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
+        return NULL;
+    }
+    DBResultRow row;
+    if(!res.GetRow(row))
+    {
+        codelog(SERVICE__ERROR, "Failed to get row for userDetails");
+        return NULL;
+    }
+    rtn->SetItem(0, new_tuple(DBRowToKeyVal(row)));
+
+    // trainingEnds
+    rtn->SetItem(1, new PyList(0));
+
+    res.Reset();
+    if (!DBcore::RunQuery(res,"SELECT \n"
+            "    characterID,\n"
+            "    srvEntity.itemName AS characterName,\n"
+            "    srvCharacter.balance,\n"
+            "    skillPoints,\n"
+            "    srvEntity.typeID,\n"
+            "    gender,\n"
+            "    bloodlineID,\n"
+            "    corporationID,\n"
+            "    NULLIF(allianceID, 0) AS allianceID,\n"
+            "    ship.typeID AS shipTypeID,\n"
+            "    srvCharacter.stationID,\n"                                    // NULL if in space
+            "    solarSystemID,\n"
+            "    security AS locationSecurity,\n"
+            "    NULLIF(deletePrepareDateTime, 0) AS deletePrepareDateTime,\n"
+            "    NULLIF(skillQueueEndTime, 0) AS queueEndTime,\n"
+            "    0 AS logoffDate,\n"                                           // All of these values need to be pulled from the DB in the future
+            "    0 AS paperdollState,\n"
+            "    0 AS balanceChange,\n"            // 0.0 never NULL
+            "    0 AS unreadMailCount,\n"          // 0 never NULL
+            "    0 AS unprocessedNotifications,\n" // 0 never NULL
+            "    0 AS petitionMessage,\n"          // Bool never NULL
+            "    0 AS finishedSkills,\n"           // 0 never NULL
+            "    0 AS skillsInQueue,\n"            // 0 never NULL
+            "    NULL AS skillTypeID,\n"           // Can be NULL, Null if no skill in training
+            "    NULL AS toLevel,\n"               // Can be NULL, ^
+            "    NULL AS trainingStartTime,\n"     // Can be NULL, ^
+            "    NULL AS trainingEndTime,\n"       // Can be NULL, ^
+            "    NULL AS finishSP,\n"              // Can be NULL, ^
+            "    NULL AS trainedSP,\n"             // Can be NULL, ^
+            "    NULL AS fromSP\n"                 // Can be NULL, ^
+            "FROM `srvCharacter`\n"
+            "    LEFT JOIN srvEntity ON characterID = itemID\n"
+            "    LEFT JOIN chrAncestries USING(ancestryID)\n"
+            "    LEFT JOIN srvCorporation USING(corporationID)\n"
+            "    LEFT JOIN srvEntity AS ship ON ship.itemID = shipID\n"
+            "    LEFT JOIN mapSolarSystems USING(solarSystemID)\n"
+            "WHERE accountID = %u", accountID))
+    {
+        codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
+        return NULL;
+    }
+    rtn->SetItem(2, DBResultToTupleKeyVal(res));
+    return rtn;
 }

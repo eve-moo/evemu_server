@@ -314,18 +314,18 @@ PyResult CorpRegistryBound::Handle_GetMember(PyCallArgs &call) {
 
 /*
 PyClass
-  PyString:"macho.CallRsp"
+  PyString:"carbon.common.script.net.machoNetPacket.CallRsp"
   PyTuple:6
     itr[0]:0x7
     itr[1]:PyClass
-      PyString:"macho.MachoAddress"
+      PyString:"carbon.common.script.net.machoNetPacket.MachoAddress"
       PyTuple:4
         itr[0]:0x1
         itr[1]:0xACA03
         itr[2]:None
         itr[3]:None
     itr[2]:PyClass
-      PyString:"macho.MachoAddress"
+      PyString:"carbon.common.script.net.machoNetPacket.MachoAddress"
       PyTuple:4
         itr[0]:0x2
         itr[1]:0x18BD39F1529E

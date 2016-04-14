@@ -114,7 +114,7 @@ PyResult MailMgrService::Handle_SyncMail(PyCallArgs &call)
     dummy->SetItemString("oldMail", new PyNone());
     dummy->SetItemString("newMail", MailDB::GetNewMail(call.client->GetCharacterID()));
     dummy->SetItemString("mailStatus", MailDB::GetMailStatus(call.client->GetCharacterID()));
-    return new PyObject("util.KeyVal", dummy);
+    return new PyObject("utillib.KeyVal", dummy);
 }
 
 PyResult MailMgrService::Handle_AssignLabels(PyCallArgs &call)

@@ -29,12 +29,12 @@
 // Client version info
 // (supported client is Crucible v1.6.5 build 360229)
 // (this is ALL CPP information needed by the client)
-static const double EVEVersionNumber = 7.31;
-static const uint16 MachoNetVersion = 320;
-static const int32 EVEBuildVersion = 360229;
-static const char *const EVEProjectCodename = "EVE-EVE-TRANQUILITY";
+static const double EVEVersionNumber = 14.02;
+static const uint16 MachoNetVersion = 419;
+static const int32 EVEBuildVersion = 1005138;
+static const char *const EVEProjectCodename = "EVE-TRANQUILITY";
 static const char *const EVEProjectRegion = "ccp";
-static const char *const EVEProjectVersion = "EVE-EVE-TRANQUILITY@ccp";
+static const char *const EVEProjectVersion = "EVE-TRANQUILITY@ccp";
 
 static const int32 EVEBirthday = 170472;
 

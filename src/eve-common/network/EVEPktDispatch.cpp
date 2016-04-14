@@ -39,7 +39,7 @@ bool EVEPacketDispatcher::DispatchPacket( PyPacket* packet )
         case AUTHENTICATION_REQ:
         {
             //check the string part, just for good measure
-            if( packet->type_string != "macho.AuthenticationReq" )
+            if( packet->type_string != "carbon.common.script.net.machoNetPacket.AuthenticationReq" )
             {
                 SysLog::Error("EVEPacketDispatcher","Received AUTHENTICATION_RSP with invalid type string '%s'", packet->type_string.c_str());
                 return false;
@@ -58,7 +58,7 @@ bool EVEPacketDispatcher::DispatchPacket( PyPacket* packet )
         case AUTHENTICATION_RSP:
         {
             //check the string part, just for good measure
-            if( packet->type_string != "macho.AuthenticationRsp" )
+            if( packet->type_string != "carbon.common.script.net.machoNetPacket.AuthenticationRsp" )
             {
                 SysLog::Error("EVEPacketDispatcher","Received AUTHENTICATION_RSP with invalid type string '%s'", packet->type_string.c_str());
                 return false;
@@ -77,7 +77,7 @@ bool EVEPacketDispatcher::DispatchPacket( PyPacket* packet )
         case CALL_REQ:
         {
             //check the string part, just for good measure
-            if( packet->type_string != "macho.CallReq" )
+            if( packet->type_string != "carbon.common.script.net.machoNetPacket.CallReq" )
             {
                 SysLog::Error("EVEPacketDispatcher","Received CALL_REQ with invalid type string '%s'", packet->type_string.c_str());
                 return false;
@@ -96,7 +96,7 @@ bool EVEPacketDispatcher::DispatchPacket( PyPacket* packet )
         case CALL_RSP:
         {
             //check the string part, just for good measure
-            if( packet->type_string != "macho.CallRsp" )
+            if( packet->type_string != "carbon.common.script.net.machoNetPacket.CallRsp" )
             {
                 SysLog::Error("EVEPacketDispatcher","Received CALL_RSP with invalid type string '%s'", packet->type_string.c_str());
                 return false;
@@ -110,7 +110,7 @@ bool EVEPacketDispatcher::DispatchPacket( PyPacket* packet )
         case NOTIFICATION:
         {
             //check the string part, just for good measure
-            if( packet->type_string != "macho.Notification" )
+            if( packet->type_string != "carbon.common.script.net.machoNetPacket.Notification" )
             {
                 SysLog::Error("EVEPacketDispatcher","Received NOTIFICATION with invalid type string '%s'", packet->type_string.c_str());
                 return false;
@@ -122,7 +122,7 @@ bool EVEPacketDispatcher::DispatchPacket( PyPacket* packet )
         case ERRORRESPONSE:
         {
             //check the string part, just for good measure
-            if( packet->type_string != "macho.ErrorResponse" )
+            if( packet->type_string != "carbon.common.script.net.machoNetPacket.ErrorResponse" )
             {
                 SysLog::Error("EVEPacketDispatcher","Received ERRORRESPONSE with invalid type string '%s'", packet->type_string.c_str());
                 return false;
@@ -141,7 +141,7 @@ bool EVEPacketDispatcher::DispatchPacket( PyPacket* packet )
         case SESSIONCHANGENOTIFICATION:
         {
             //check the string part, just for good measure
-            if( packet->type_string != "macho.SessionChangeNotification" )
+            if( packet->type_string != "carbon.common.script.net.machoNetPacket.SessionChangeNotification" )
             {
                 SysLog::Error("EVEPacketDispatcher","Received SESSIONCHANGENOTIFICATION with invalid type string '%s'", packet->type_string.c_str());
                 return false;
@@ -160,7 +160,7 @@ bool EVEPacketDispatcher::DispatchPacket( PyPacket* packet )
         case PING_REQ:
         {
             //check the string part, just for good measure
-            if( packet->type_string != "macho.PingReq" )
+            if( packet->type_string != "carbon.common.script.net.machoNetPacket.PingReq" )
             {
                 SysLog::Error("EVEPacketDispatcher","Received PING_REQ with invalid type string '%s'", packet->type_string.c_str());
                 return false;
@@ -172,7 +172,7 @@ bool EVEPacketDispatcher::DispatchPacket( PyPacket* packet )
         case PING_RSP:
         {
             //check the string part, just for good measure
-            if( packet->type_string != "macho.PingRsp" )
+            if( packet->type_string != "carbon.common.script.net.machoNetPacket.PingRsp" )
             {
                 SysLog::Error("EVEPacketDispatcher","Received PING_RSP with invalid type string '%s'", packet->type_string.c_str());
                 return false;

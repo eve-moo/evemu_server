@@ -303,7 +303,7 @@ PyRep *ObjCacheDB::Generate_Schematicspinmap()
 PyRep *ObjCacheDB::Generate_OverviewDefaults()
 {
     DBQueryResult res;
-    const char *q = "SELECT dataID, overviewID, overviewName, overviewShortName FROM blkDefaultOverviews";
+    const char *q = "SELECT dataID, overviewID, overviewName, overviewShortName FROM blkChrDefaultOverviews";
     if (DBcore::RunQuery(res, q) == false)
     {
         _log(SERVICE__ERROR, "Error in query for cached object 'config.BulkData.overviewDefaults': %s", res.error.c_str());

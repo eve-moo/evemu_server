@@ -57,7 +57,7 @@ PyResult InfoGatheringMgr::Handle_GetStateAndConfig(PyCallArgs &call) {
 
     rsp->SetItemString("infoTypes", new PyObjectEx_Type1( new PyToken("__builtin__.set"), new_tuple(infoTypes)));
 
-    return new PyObject( "util.KeyVal", rsp );
+    return new PyObject( "utillib.KeyVal", rsp );
 }
 
 PyResult InfoGatheringMgr::Handle_LogInfoEventsFromClient(PyCallArgs &call) {

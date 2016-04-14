@@ -236,7 +236,7 @@ PyResult PlanetMgrBound::Handle_GetResourceData(PyCallArgs &call) {
     int numBands = row.GetInt(10+offset);
 
     PyDict *args = new PyDict();
-    PyObject *rtn = new PyObject("util.KeyVal", args);
+    PyObject *rtn = new PyObject("utillib.KeyVal", args);
     args->SetItemString("data", new PyBuffer(numBands*numBands*4, bufferData));
     args->SetItemString("numBands", new PyInt(numBands));
     args->SetItemString("proximity", new PyInt(proximity));

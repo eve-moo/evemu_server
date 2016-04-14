@@ -73,7 +73,7 @@ PyObject* FleetService::CreateFleet(Client *pClient)
     dict->SetItemString( "skills", list );
     //dict->SetItemString( "Init", new PyInt(fleetID) );
 
-    PyObject* res = new PyObject( "util.KeyVal", dict );
+    PyObject* res = new PyObject( "utillib.KeyVal", dict );
     return res;
 }
 

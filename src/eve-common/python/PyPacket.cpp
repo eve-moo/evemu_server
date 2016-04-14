@@ -160,9 +160,9 @@ bool PyPacket::Decode(PyRep **in_packet)
 
     PyTuple *tuple = (PyTuple *) packeto->arguments();
 
-    if(tuple->items.size() != 7)
+    if(tuple->items.size() != 9)
     {
-        codelog(NET__PACKET_ERROR, "failed: packet body does not contain a tuple of length 7");
+        codelog(NET__PACKET_ERROR, "failed: packet body does not contain a tuple of length 9");
         PyDecRef(packet);
 
         return false;
@@ -265,7 +265,7 @@ bool PyPacket::Decode(PyRep **in_packet)
 
 
 PyRep *PyPacket::Encode() {
-    PyTuple *arg_tuple = new PyTuple(7);
+    PyTuple *arg_tuple = new PyTuple(9);
 
     //command
     arg_tuple->items[0] = new PyInt(type);
@@ -296,6 +296,8 @@ PyRep *PyPacket::Encode() {
 
     //TODO: Not sure what this is, On packets so far they always have as PyNone
     arg_tuple->items[6] = new PyNone();
+    arg_tuple->items[7] = new PyNone();
+    arg_tuple->items[8] = new PyNone();
 
     return new PyObject( type_string.c_str(), arg_tuple );
 }
@@ -361,7 +363,7 @@ bool PyAddress::Decode(PyRep *&in_object) {
     }
 
     PyObject *obj = (PyObject *) base;
-    //do we care about the object type? should be "macho.MachoAddress"
+    //do we care about the object type? should be "carbon.common.script.net.machoNetPacket.MachoAddress"
 
     if(!obj->arguments()->IsTuple()) {
         codelog(NET__PACKET_ERROR, "Invalid argument type, expected tuple");
@@ -550,7 +552,7 @@ PyRep *PyAddress::Encode() {
         break;
     }
 
-    return new PyObject( "macho.MachoAddress", t );
+    return new PyObject( "carbon.common.script.net.machoNetPacket.MachoAddress", t );
 }
 
 bool PyAddress::_DecodeService(PyRep *rep) {
@@ -648,7 +650,7 @@ bool PyCallStream::Decode(const std::string &type, PyTuple *&in_payload) {
     arg_tuple = NULL;
     arg_dict = NULL;
 
-    if(type != "macho.CallReq") {
+    if(type != "carbon.common.script.net.machoNetPacket.CallReq") {
         codelog(NET__PACKET_ERROR, "failed: packet payload has unknown string type '%s'", type.c_str());
         PyDecRef(payload);
         return false;
@@ -836,7 +838,7 @@ bool EVENotificationStream::Decode(const std::string &pkt_type, const std::strin
     PySafeDecRef(args);
     args = NULL;
 
-    if(pkt_type != "macho.Notification") {
+    if(pkt_type != "carbon.common.script.net.machoNetPacket.Notification") {
         codelog(NET__PACKET_ERROR, "notification payload has unknown string type %s", pkt_type.c_str());
         PyDecRef(payload);
         return false;

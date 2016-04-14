@@ -424,7 +424,7 @@ PyDict *Ship::ShipGetInfo()
     if( !Populate( entry ) )
         return NULL;    //print already done.
 
-    result->SetItem(new PyInt( itemID()), new PyObject("util.KeyVal", entry.Encode()));
+    result->SetItem(new PyInt( itemID()), new PyObject("utillib.KeyVal", entry.Encode()));
 
     //now encode contents...
     std::vector<InventoryItemRef> equipped;
@@ -445,7 +445,7 @@ PyDict *Ship::ShipGetInfo()
             codelog( ITEM__ERROR, "%s (%u): Failed to load item %u for ShipGetInfo", itemName().c_str(), itemID(), (*cur)->itemID() );
         }
         else
-            result->SetItem(new PyInt((*cur)->itemID()), new PyObject("util.KeyVal", entry.Encode()));
+            result->SetItem(new PyInt((*cur)->itemID()), new PyObject("utillib.KeyVal", entry.Encode()));
     }
 
     return result;

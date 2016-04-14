@@ -711,7 +711,7 @@ void Client::_SendCallReturn( const PyAddress& source, uint64 callID, PyRep** re
 {
     //build the packet:
     PyPacket* p = new PyPacket;
-    p->type_string = "macho.CallRsp";
+    p->type_string = "carbon.common.script.net.machoNetPacket.CallRsp";
     p->type = CALL_RSP;
 
     p->source = source;
@@ -739,7 +739,7 @@ void Client::_SendException( const PyAddress& source, uint64 callID, MACHONETMSG
 {
     //build the packet:
     PyPacket* p = new PyPacket;
-    p->type_string = "macho.ErrorResponse";
+    p->type_string = "carbon.common.script.net.machoNetPacket.ErrorResponse";
     p->type = ERRORRESPONSE;
 
     p->source = source;
@@ -780,7 +780,7 @@ void Client::_SendSessionChange()
 
     //build the packet:
     PyPacket* p = new PyPacket;
-    p->type_string = "macho.SessionChangeNotification";
+    p->type_string = "carbon.common.script.net.machoNetPacket.SessionChangeNotification";
     p->type = SESSIONCHANGENOTIFICATION;
 
     p->source.type = PyAddress::Node;
@@ -814,7 +814,7 @@ void Client::_SendPingRequest()
     PyPacket *ping_req = new PyPacket();
 
     ping_req->type = PING_REQ;
-    ping_req->type_string = "macho.PingReq";
+    ping_req->type_string = "carbon.common.script.net.machoNetPacket.PingReq";
 
     ping_req->source.type = PyAddress::Node;
     ping_req->source.typeID = PyServiceMgr::GetNodeID();
@@ -837,7 +837,7 @@ void Client::_SendPingResponse( const PyAddress& source, uint64 callID )
 {
     PyPacket* ret = new PyPacket;
     ret->type = PING_RSP;
-    ret->type_string = "macho.PingRsp";
+    ret->type_string = "carbon.common.script.net.machoNetPacket.PingRsp";
 
     ret->source = source;
 
@@ -853,6 +853,12 @@ void Client::_SendPingResponse( const PyAddress& source, uint64 callID )
     */
     PyList* pingList = new PyList;
     PyTuple* pingTuple;
+
+    pingTuple = new PyTuple(3);
+    pingTuple->SetItem(0, new PyLong(Win32TimeNow() - 20));
+    pingTuple->SetItem(1, new PyLong(Win32TimeNow()));
+    pingTuple->SetItem(2, new PyString("client::start"));
+    pingList->AddItem( pingTuple );
 
     pingTuple = new PyTuple(3);
     pingTuple->SetItem(0, new PyLong(Win32TimeNow() - 20));        // this should be the time the packet was received (we cheat here a bit)
@@ -979,7 +985,7 @@ void Client::SendNotification(const PyAddress &dest, EVENotificationStream &noti
 
     //build the packet:
     PyPacket *p = new PyPacket();
-    p->type_string = "macho.Notification";
+    p->type_string = "carbon.common.script.net.machoNetPacket.Notification";
     p->type = NOTIFICATION;
 
     p->source.type = PyAddress::Node;
@@ -1688,8 +1694,18 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     // binascii.crc_hqx of marshaled single-element tuple containing 64 zero-bytes string
     server_shake.challenge_responsehash = "55087";
 
-    // the image server used by the client to download images
-            server_shake.imageserverurl = ImageServer::getURL(m_networkConfig);
+    // begin config_vals
+            server_shake.imageserverurl = ImageServer::getURL(m_networkConfig); // Image server used to download images
+    server_shake.serverInfo = "EVEMU,127.0.0.1,127.0.0.1:8080,0"; // serverName, serverIP, espIP:espPort, isLive
+    server_shake.publicCrestUrl = "";
+    server_shake.bugReporting_BugReportServer = "";
+    server_shake.sessionChangeDelay = "10";       // yea yea, the client has this as a default anyway, Live sends it therefor we do too
+    server_shake.experimental_scanners = "1";     // Hey they look nice.
+    server_shake.experimental_map_default = "1";  // OK, this is ugly as hell, but live has forced it so do we.
+    server_shake.experimental_newcam3 = "1";      // See above remark
+    server_shake.isProjectDiscoveryEnabled = "0"; // Why...
+    server_shake.bugReporting_ShowButton = "0";   // We do not have that service.
+
 
     server_shake.macho_version = MachoNetVersion;
     server_shake.boot_version = EVEVersionNumber;
@@ -1706,7 +1722,7 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     mSession.SetString( "languageID", ccp.user_languageid.c_str() );
 
     //user type 1 is normal user, type 23 is a trial account user.
-    mSession.SetInt( "userType", 1 );
+    mSession.SetInt( "userType", 20); // That was old, 1 is not defined by the client, 20 is userTypePBC //1 );
     mSession.SetInt( "userid", account_info.id );
     mSession.SetLong( "role", account_info.role );
 
@@ -1727,17 +1743,19 @@ bool Client::_VerifyFuncResult( CryptoHandshakeResult& result )
 
     //send this before session change
     CryptoHandshakeAck ack;
-    ack.jit = GetLanguageID();
+    ack.access_token = new PyNone;
+    ack.client_hash = new PyNone;
+    ack.sessionID = 123456789;              // TODO: Generate random sessionID for every client.
+    ack.user_clientid = GetAccountID();
+    ack.live_updates = new PyList(0);       // No, we will never update the client with this method.
+    ack.languageID = GetLanguageID();
     ack.userid = GetAccountID();
     ack.maxSessionTime = new PyNone;
-    ack.userType = 1;
-    ack.role = GetAccountRole();
+    ack.userType = 20; // userTypePBC = 20
+    ack.role = 6917529027641081856;         // (ROLE_LOGIN & ROLE_PLAYER) Live player role.
     ack.address = GetAddress();
     ack.inDetention = new PyNone;
-    // no client update available
-    ack.client_hash = new PyNone;
-    ack.user_clientid = GetAccountID();
-    ack.live_updates = LiveUpdateDB::GetUpdates();
+
 
     PyRep* r = ack.Encode();
             m_tcpConnecton->QueueRep(r);

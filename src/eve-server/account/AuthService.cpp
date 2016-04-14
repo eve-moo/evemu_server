@@ -53,7 +53,7 @@ PyResult AuthService::Handle_GetPostAuthenticationMessage(PyCallArgs &call)
         PyDict* args = new PyDict;
         args->SetItemString( "message", new PyString( EVEServerConfig::account.loginMessage ) );
 
-        return new PyObject( "util.KeyVal", args );
+        return new PyObject( "utillib.KeyVal", args );
     }
     else
         return new PyNone;

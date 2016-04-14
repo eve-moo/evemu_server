@@ -50,6 +50,7 @@ ConfigService::ConfigService()
     PyCallable_REG_CALL(ConfigService, GetDynamicCelestials)
     PyCallable_REG_CALL(ConfigService, GetMapLandmarks)
     PyCallable_REG_CALL(ConfigService, SetMapLandmarks)
+    PyCallable_REG_CALL(ConfigService, GetAverageMarketPrices)
 }
 
 ConfigService::~ConfigService() {
@@ -331,4 +332,9 @@ PyResult ConfigService::Handle_GetMapLandmarks(PyCallArgs &call) {
 
 PyResult ConfigService::Handle_SetMapLandmarks(PyCallArgs &call) {
         return NULL;
+}
+
+PyResult ConfigService::Handle_GetAverageMarketPrices(PyCallArgs &call)
+{
+    return NULL;
 }

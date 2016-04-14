@@ -75,5 +75,5 @@ PyResult PaperDollService::Handle_GetMyPaperDollData(PyCallArgs &call)
     args->SetItemString("appearance", PaperDollDB::GetPaperDollAvatar(call.client->GetCharacterID()));
     args->SetItemString("sculpts", PaperDollDB::GetPaperDollAvatarSculpts(call.client->GetCharacterID()));
 
-    return new PyObject("util.KeyVal", args);
+    return new PyObject("utillib.KeyVal", args);
 }
