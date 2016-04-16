@@ -33,8 +33,8 @@
     </pre>
     Install the crucible client with EVE_Online_Installer_360229.exe.<br>
     Make sure to uncheck the run eve box before finishing the install, this may be difficult to see on some wine builds as the dialog is partially obscured.<br>
-    Then get a copy of the <a href="https://github.com/bluepatcher/blue_patcher">blue patcher</a> and follow the instructions in README.md.<br>
-    Your client is now ready to run.  To run the client use the /EVE/bin/ExeFile.exe or you will get the launcher and that will attempt to contact CCP and automatically update the client.  Now to set up a server.<br>
+        Then get a copy of the <a href="https://github.com/comet0/blue_patcher">blue patcher</a> and follow the instructions in README.md.<br>
+            Your client is now ready to run.  To run the client use the /EVE/bin/ExeFile.exe or you will get the launcher and that will attempt to contact CCP and automatically update the client.  Now to set up a server.<br>
 
     <h3>Server setup</h3>
 
@@ -48,13 +48,13 @@
     Run the script merge-ofic-updates.sh if your running Linux or merge-ofic-updates.bat on windows<br>
 
 <h3>setup mysql</h3>
-Get a copy of the crucible static data dump <a href="http://eve.alasiya.net/files/cruc/cru16-mysql5-v1.sql.bz2">cru16-mysql5-v1.sql.bz2</a>.<br>
-    Extract the file cru16-mysql5-v1.sql to %serverRoot%.
-Open a mysql client and execute the following commands in this order.<br>
+Get a copy of the crucible static data dump <a href="https://www.fuzzwork.co.uk/dump/mysql56-yc118-2-116998.tbz2">mysql56-yc118-2-116998.tbz2</a>.<br>
+    Extract the file mysql56-yc118-2-116998.sql to %serverRoot%.
+    Open a mysql client and execute the following commands in this order.<br>
 <pre class="brush: sql">
   create database evemu;
   use evemu;
-  source %serverRoot%/cru16-mysql5-v1.sql;
+  source %serverRoot%/mysql56-yc118-2-116998.sql;
   source %devRoot%/evemu_server/sql/evemu_dynamic-dump.sql;
   source %devRoot%/evemu_server/sql/evemu_static-dump.sql;
   source %devRoot%/evemu_server/sql/ofic-updates.sql;
