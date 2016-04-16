@@ -119,7 +119,7 @@ float ItemSystemEntity::GetRadius() const
         }
     }
     // Use type default.
-    return Item()->type()->radius;
+    return Item()->type()->getDoubleAttribute(AttrRadius);
 }
 
 const Vector3D &ItemSystemEntity::GetPosition() const {

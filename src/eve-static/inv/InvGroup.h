@@ -43,11 +43,8 @@ public:
     InvGroup(uint32 _groupID,
              uint32 _categoryID,
              std::string &_groupName,
-             std::string &_description,
              uint32 _iconID,
              bool _useBasePrice,
-             bool _allowManufacture,
-             bool _allowRecycler,
              bool _anchored,
              bool _anchorable,
              bool _fittableNonSingleton,
@@ -58,11 +55,8 @@ public:
     const uint32 groupID;
     const uint32 categoryID;
     const std::string groupName;
-    const std::string description;
     const uint32 iconID;
     const bool useBasePrice;
-    const bool allowManufacture;
-    const bool allowRecycler;
     const bool anchored;
     const bool anchorable;
     const bool fittableNonSingleton;

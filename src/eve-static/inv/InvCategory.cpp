@@ -36,14 +36,12 @@ std::map<uint32, std::shared_ptr<InvCategory>> InvCategory::s_AllCategories;
 
 InvCategory::InvCategory(uint32 _categoryID,
                          std::string _categoryName,
-                         std::string _description,
                          uint32 _iconID,
                          bool _published,
                          std::vector<uint32> &_groups
                          ) :
 categoryID(_categoryID),
 categoryName(_categoryName),
-description(_description),
 iconID(_iconID),
 published(_published)
 {
@@ -91,7 +89,7 @@ bool EVEStatic::loadInvCategories(std::map<uint32, std::vector < uint32>> &categ
     DBRowDescriptor *header;
     CRowSet *rowset;
     DBResultRow row;
-    std::string columns = "categoryID, categoryName, description, 0 as graphicID, iconID, published, 0 as dataID";
+    std::string columns = "categoryID, categoryName, 0 as graphicID, iconID, published, 0 as dataID";
     std::string qry = "SELECT " + columns + " FROM invCategories";
     if (!DBcore::RunQuery(result, qry.c_str()))
     {
@@ -106,17 +104,15 @@ bool EVEStatic::loadInvCategories(std::map<uint32, std::vector < uint32>> &categ
         FillPackedRow(row, into);
         uint32 categoryID = row.GetInt(0);
         std::string CategoryName = row.GetText(1);
-        std::string description = row.GetText(2);
-        uint32 iconID = row.getIntNC(4);
-        bool published = row.GetBool(5);
+        uint32 iconID = row.getIntNC(3);
+        bool published = row.GetBool(4);
         std::vector<uint32> categoryGroups;
         auto itr = categoryGroupList.find(categoryID);
         if (itr != categoryGroupList.end())
         {
             categoryGroups = itr->second;
         }
-        new InvCategory(categoryID, CategoryName,
-                        description, iconID, published, categoryGroups);
+        new InvCategory(categoryID, CategoryName, iconID, published, categoryGroups);
     }
     m_InvCategoriesCache = rowset;
 

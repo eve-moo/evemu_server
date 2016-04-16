@@ -79,7 +79,7 @@ ShipRef Ship::Spawn(ItemData &data) {
     sShipRef->setAttribute(AttrShieldCharge, sShipRef->getAttribute(AttrShieldCapacity), true); // Shield Charge
     sShipRef->setAttribute(AttrArmorDamage, 0.0, true); // Armor Damage
     sShipRef->setAttribute(AttrMass, sShipRef->type()->mass, true); // Mass
-    sShipRef->setAttribute(AttrRadius, sShipRef->type()->radius, true); // Radius
+    sShipRef->setAttribute(AttrRadius, sShipRef->type()->getDoubleAttribute(AttrRadius), true); // Radius
     sShipRef->setAttribute(AttrVolume, sShipRef->type()->volume, true); // Volume
     sShipRef->setAttribute(AttrCapacity, sShipRef->type()->capacity, true); // Capacity
     sShipRef->setAttribute(AttrInertia, 1, true); // Inertia

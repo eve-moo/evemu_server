@@ -508,7 +508,7 @@ PyResult Command_spawnn( Client* who, const Seperator& args )
     Vector3D loc( who->GetPosition() );
     // Calculate a random coordinate on the sphere centered on the player's position with
     // a radius equal to the radius of the ship/celestial being spawned times 10 for really good measure of separation:
-    double radius = (type->radius * 5.0) * (double) (MakeRandomInt(1, 3)); // Scale the distance from player that the object will spawn to between 10x and 15x the object's radius
+    double radius = (type->getDoubleAttribute(AttrRadius) * 5.0) * (double) (MakeRandomInt(1, 3)); // Scale the distance from player that the object will spawn to between 10x and 15x the object's radius
     loc.MakeRandomPointOnSphere( radius );
 
     // Spawn the item:
@@ -642,7 +642,7 @@ PyResult Command_spawn( Client* who, const Seperator& args )
 		{
 			// Calculate a random coordinate on the sphere centered on the player's position with
 			// a radius equal to the radius of the ship/celestial being spawned times 10 for really good measure of separation:
-            radius = (type->radius * 5.0) * (double) (MakeRandomInt(1, 3)); // Scale the distance from player that the object will spawn to between 10x and 15x the object's radius
+            radius = (type->getDoubleAttribute(AttrRadius) * 5.0) * (double) (MakeRandomInt(1, 3)); // Scale the distance from player that the object will spawn to between 10x and 15x the object's radius
 			loc.MakeRandomPointOnSphere( radius );
 		}
 

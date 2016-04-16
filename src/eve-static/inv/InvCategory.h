@@ -40,7 +40,6 @@ class InvCategory
 public:
     InvCategory(uint32 _categoryID,
                 std::string _categoryName,
-                std::string _description,
                 uint32 _iconID,
                 bool _published,
                 std::vector<uint32> &_groups
@@ -48,7 +47,6 @@ public:
 
     const uint32 categoryID;
     const std::string categoryName;
-    const std::string description;
     const uint32 iconID;
     const bool published;
 
