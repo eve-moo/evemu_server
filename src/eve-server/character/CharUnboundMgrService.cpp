@@ -301,15 +301,11 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     cdata.createDateTime = cdata.startDateTime;
     cdata.corporationDateTime = cdata.startDateTime;
 
-    typedef std::map<uint32, uint32>        CharSkillMap;
-    typedef CharSkillMap::iterator          CharSkillMapItr;
-
     //load skills
-    CharSkillMap startingSkills;
-    if (!CharacterDB::GetSkillsByRace(char_type->raceID, startingSkills))
+    std::map<uint32, uint32> startingSkills;
+    if(!CharacterDB::GetSkillsByRace(char_type->raceID, startingSkills))
     {
-        codelog(CLIENT__ERROR, "Failed to load char create skills. Bloodline %u, Ancestry %u.",
-            char_type->bloodlineID, cdata.ancestryID);
+        codelog(CLIENT__ERROR, "Failed to load char create skills. RaceID=%u", char_type->raceID);
         return NULL;
     }
 
@@ -337,21 +333,19 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
 
     //spawn all the skills
     uint32 skillLevel;
-    CharSkillMapItr cur, end;
-    cur = startingSkills.begin();
-    end = startingSkills.end();
-    for(; cur != end; cur++)
+    for(auto cur : startingSkills)
     {
-        ItemData skillItem( cur->first, char_item->itemID(), char_item->itemID(), flagSkill );
+        ItemData skillItem(cur.first, char_item->itemID(), char_item->itemID(), flagSkill);
         SkillRef i = ItemFactory::SpawnSkill(skillItem);
-        if( !i ) {
-            _log(CLIENT__ERROR, "Failed to add skill %u to char %s (%u) during char create.", cur->first, char_item->itemName().c_str(), char_item->itemID());
+        if( !i )
+        {
+            _log(CLIENT__ERROR, "Failed to add skill %u to char %s (%u) during char create.", cur.first, char_item->itemName().c_str(), char_item->itemID());
             continue;
         }
 
-        skillLevel = cur->second;
+        skillLevel = cur.second;
         i->setAttribute(AttrSkillLevel, skillLevel );
-        i->setAttribute(AttrSkillPoints, i->GetSPForLevel(cur->second));
+        i->setAttribute(AttrSkillPoints, i->GetSPForLevel(cur.second));
         i->SaveAttributes();
     }
 
