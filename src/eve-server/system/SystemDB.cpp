@@ -156,12 +156,12 @@ PyObject *SystemDB::ListJumps(uint32 stargateID) {
     DBQueryResult res;
 
     if(!DBcore::RunQuery(res,
-        "SELECT "
-        " celestialID AS toCelestialID,"
-        " solarSystemID AS locationID"
-        " FROM mapJumps "
-        "    LEFT JOIN mapDenormalize ON celestialID=itemID"
-        " WHERE stargateID=%u", stargateID))
+                         "SELECT "
+                         " destinationID AS toCelestialID,"
+                         " solarSystemID AS locationID"
+                         " FROM mapJumps "
+                         " LEFT JOIN mapDenormalize ON destinationID=itemID"
+                         " WHERE stargateID=%u", stargateID))
     {
         codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
         return NULL;
