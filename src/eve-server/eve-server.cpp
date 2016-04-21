@@ -72,6 +72,7 @@ trapfpe()
 #include "character/CharFittingMgrService.h"
 #include "character/CharMgrService.h"
 #include "character/CharUnboundMgrService.h"
+#include "character/CrimeWatchService.h"
 #include "character/PaperDollService.h"
 #include "character/PhotoUploadService.h"
 #include "character/SkillMgrService.h"
@@ -321,6 +322,7 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new CorpStationMgrService());
     PyServiceMgr::RegisterService(new ContractMgrService());
     PyServiceMgr::RegisterService(new ContractProxyService());
+    PyServiceMgr::RegisterService(new CrimeWatchService());
     PyServiceMgr::RegisterService(new DevToolsProviderService());
     PyServiceMgr::RegisterService(new DogmaIMService());
     PyServiceMgr::RegisterService(new DogmaService());
