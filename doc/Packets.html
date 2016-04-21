@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h3>Incoming packets</h3>
+        Incoming packets are a PyObject with a PyTuple containing 9 elements.<br>
+        The first element is an int containing the packet type defined in the MACHONETMSG_TYPE enum.<br>
+        The second element is an object containing the source address (PyAddress).<br>
+        The third element is the destination address (PyAddress).<br>
+        The fourth element is the userID.<br>
+        The fifth element is the payload as a PyTuple.<br>
+        The sixth element is a dictionary of named elements (PyDict).<br>
+        The last three elements are PyNone.<br>
+        <h3>Call Requests</h3>
+        The payload is a single element PyTuple containing a PyTuple that contains 2 elements.<br>
+        The first value is a PyInt that is currently an unknown and unused value.<br>
+        The second value is a PyTuple that contains 4 elements decoded as a PyCallStream.<br>
+        The first element is eight an int of string, and is decoded into either remoteObject or remoteObjectStr values.<br>
+        The second element is the method name.<br>
+        The third element is the argument list decoded into arg_tuple.<br>
+        The fourth element is PyDict containing key value pairs decoded into arg_dict.<br>
+        <h3>Calling a service</h3>
+        When a PyService is called the PyService->Call function is passed the method name, arg_tuple and arg_dict values from the PyCallStream.<br>
+        A method MachoResolveObject return the nodeID (PyInt).<br>
+        A method MachoBindObject the arg_tuple is a 2 element tuple decoded into CallMachoBindObject.  The first tuple is the bindParams the second is an optional call parameters as a callName, arguments and argument dictionary.<br>
+
+        <!--
+                <pre class="brush: bash">
+                </pre>
+        -->
+    </body>
+</html>
