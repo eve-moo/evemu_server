@@ -1038,7 +1038,8 @@ void Character::UpdateSkillQueueEndTime(const SkillQueue &queue)
     return;
 }
 
-PyDict *Character::CharGetInfo() {
+PyTuple *Character::CharGetInfo()
+{
     //TODO: verify that we are a char?
 
     if( !LoadContents( ) ) {
@@ -1046,31 +1047,71 @@ PyDict *Character::CharGetInfo() {
         return NULL;
     }
 
-    PyDict *result = new PyDict;
+    PyDict *chrDict = new PyDict;
     Rsp_CommonGetInfo_Entry entry;
 
     if(!Populate(entry))
         return NULL;
-    result->SetItem(new PyInt(m_itemID), new PyObject("utillib.KeyVal", entry.Encode()));
+    chrDict->SetItem(new PyInt(m_itemID), new PyObject("utillib.KeyVal", entry.Encode()));
 
-    //now encode skills...
-    std::vector<InventoryItemRef> skills;
-    //find all the skills contained within ourself.
-    FindByFlag( flagSkill, skills );
-    FindByFlag( flagSkillInTraining, skills );
+    PyTuple *chrTup = new PyTuple(3);
+    PyList *chrMods = new PyList();
+    PyList *otherMods = new PyList();
+    chrTup->SetItem(0, new PyInt(1));
+    chrTup->SetItem(1, chrMods);
+    chrTup->SetItem(2, otherMods);
+    // TO-DO: add modifiers to lists.
+    // sample packet:
+    //[PyObjectEx Type2]
+    //[PyTuple 2 items]
+    //    [PyTuple 1 items]
+    //        [PyToken eve.common.script.dogma.effect.BrainEffect]
+    //    [PyDict 8 kvp]
+    //        [PyString "modifierType"]
+    //        [PyString "M"]        << defined in eve\common\script\dogma\effect.py
+    //        [PyString "operation"]
+    //        [PyInt 2]
+    //        [PyString "skills"]
+    //        [PyList 2 items]
+    //            [PyInt 13283]
+    //            [PyInt 13286]
+    //        [PyString "toItemID"]
+    //        [PyIntegerVar 123456] << characterID in characterMods unknown value in otherMods.
+    //        [PyString "value"]
+    //        [PyFloat 1]
+    //        [PyString "toAttribID"]
+    //        [PyInt 164]
+    //        [PyString "extras"]
+    //        [PyTuple 0 items]
+    //        [PyString "fromAttrib"]
+    //        [PyNone]
 
-    //encode an entry for each one.
-    std::vector<InventoryItemRef>::iterator cur, end;
-    cur = skills.begin();
-    end = skills.end();
-    for(; cur != end; cur++) {
-        if(!(*cur)->Populate(entry)) {
-            codelog(ITEM__ERROR, "%s (%u): Failed to load skill item %u for CharGetInfo", m_itemName.c_str(), itemID(), (*cur)->itemID());
-        } else {
-            result->SetItem(new PyInt((*cur)->itemID()), new PyObject("utillib.KeyVal", entry.Encode()));
-        }
-    }
+    //    PyObjectEx_Type2 *t2 = new PyObjectEx_Type2(
+    //                                                new_tuple(new PyToken("eve.common.script.dogma.effect.BrainEffect")),
+    //                                                new PyDict());
 
+    //    //now encode skills...
+    //    std::vector<InventoryItemRef> skills;
+    //    //find all the skills contained within ourself.
+    //    FindByFlag( flagSkill, skills );
+    //    FindByFlag( flagSkillInTraining, skills );
+    //
+    //    //encode an entry for each one.
+    //    std::vector<InventoryItemRef>::iterator cur, end;
+    //    cur = skills.begin();
+    //    end = skills.end();
+    //    for(; cur != end; cur++) {
+    //        if(!(*cur)->Populate(entry)) {
+    //            codelog(ITEM__ERROR, "%s (%u): Failed to load skill item %u for CharGetInfo", m_itemName.c_str(), itemID(), (*cur)->itemID());
+    //        } else
+    //        {
+    //            //chrDict->SetItem(new PyInt((*cur)->itemID()), new PyObject("utillib.KeyVal", entry.Encode()));
+    //        }
+    //    }
+
+    PyTuple *result = new PyTuple(2);
+    result->SetItem(0, chrDict);
+    result->SetItem(1, chrTup);
     return result;
 }
 

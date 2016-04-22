@@ -164,8 +164,9 @@
             <int name="duration"/>
             <!-- saw 0 -->
             <int name="repeat"/>
-            <!-- randomSeed -->
+            <!-- randomSeed
             <raw name="randomSeed" />
+            -->
         </listInline>
     </elementDef>
 
@@ -188,6 +189,9 @@
             </dictInlineEntry>
             <dictInlineEntry key="time">
                 <long name="time" />
+            </dictInlineEntry>
+            <dictInlineEntry key="wallclockTime">
+                <long name="wallclockTime" />
             </dictInlineEntry>
         </dictInline>
     </elementDef>

@@ -493,9 +493,10 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
 	// Create the response dictionary:
     PyDict *rsp = new PyDict;
 
-    rsp->SetItemString("charInfo", new PyNone);
+    rsp->SetItemString("charInfo", new PyDict);
     rsp->SetItemString("activeShipID", new PyInt(call.client->GetShipID()));
-    rsp->SetItemString("locationInfo", new PyDict);
+    rsp->SetItemString("locationInfo", new PyNone);
+    rsp->SetItemString("structureInfo", new PyDict);
     rsp->SetItemString("shipInfo", new PyNone);
     rsp->SetItemString("shipModifiedCharAttribs", new PyNone);
     rsp->SetItemString("shipState", new PyNone);
@@ -505,7 +506,7 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
 	// Setting "charInfo" in the Dictionary:
     if(args.arg1)
     {
-        PyDict *charResult = call.client->GetChar()->CharGetInfo();
+        PyTuple *charResult = call.client->GetChar()->CharGetInfo();
         if(charResult == NULL) {
             codelog(SERVICE__ERROR, "Unable to build char info for char %u", call.client->GetCharacterID());
             return NULL;
@@ -545,7 +546,7 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
 	// ========================================================================
 	// Setting "shipState" in the Dictionary:
     //Get some attributes about the ship and its modules for shipState
-    PyTuple *rspShipState = new PyTuple(3);
+    PyTuple *rspShipState = new PyTuple(4);
 
     //Contains a dict of the ship and its modules
 
@@ -564,9 +565,37 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
     //Some PyObjectEx
     rspShipState->items[2] = new BuiltinSet();
 
+    // Report heat state.
+    // TO-DO: Find out what all these params are for.  See also, onHeatAdded and onHeatRemoved messages.
+    PyDict *shipStateItem4 = new PyDict();
+    PyTuple *heatLow = new PyTuple(6);
+    heatLow->SetItem(0, new PyFloat(0)); // possible heat level % (i.e. 21.499 = 21.499%)
+    heatLow->SetItem(1, new PyFloat(100));
+    heatLow->SetItem(2, new PyInt(0));
+    heatLow->SetItem(3, new PyFloat(1));
+    heatLow->SetItem(4, new PyFloat(0.01));
+    heatLow->SetItem(5, new PyLong(Win32TimeNow()));
+    PyTuple *heatMed = new PyTuple(6);
+    heatMed->SetItem(0, new PyFloat(0));
+    heatMed->SetItem(1, new PyFloat(100));
+    heatMed->SetItem(2, new PyInt(0));
+    heatMed->SetItem(3, new PyFloat(1));
+    heatMed->SetItem(4, new PyFloat(0.01));
+    heatMed->SetItem(5, new PyLong(Win32TimeNow()));
+    PyTuple *heatHi = new PyTuple(6);
+    heatHi->SetItem(0, new PyFloat(0));
+    heatHi->SetItem(1, new PyFloat(100));
+    heatHi->SetItem(2, new PyInt(0));
+    heatHi->SetItem(3, new PyFloat(1));
+    heatHi->SetItem(4, new PyFloat(0.01));
+    heatHi->SetItem(5, new PyLong(Win32TimeNow()));
+    shipStateItem4->SetItem(new PyInt(AttrHeatLow), heatLow);
+    shipStateItem4->SetItem(new PyInt(AttrHeatMed), heatMed);
+    shipStateItem4->SetItem(new PyInt(AttrHeatHi), heatHi);
+    rspShipState->items[3] = shipStateItem4;
+
     rsp->SetItemString("shipState", rspShipState);
 
 
 	return new PyObject( "utillib.KeyVal", rsp );
 }
-

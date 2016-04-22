@@ -837,7 +837,6 @@ bool InventoryItem::Populate( Rsp_CommonGetInfo_Entry& result )
         es.startTime = Win32TimeNow() - Win32Time_Hour; //act like it happened an hour ago
         es.duration = INT_MAX;
         es.repeat = 0;
-        es.randomSeed = new PyNone;
 
         result.activeEffects[es.env_effectID] = es.Encode();
     }
@@ -854,6 +853,7 @@ bool InventoryItem::Populate( Rsp_CommonGetInfo_Entry& result )
 
     //no idea what time this is supposed to be
     result.time = Win32TimeNow();
+    result.wallclockTime = Win32TimeNow();
 
     return true;
 }

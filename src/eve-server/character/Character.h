@@ -348,7 +348,7 @@ public:
     /*
      * Primary public packet builders:
      */
-    PyDict *CharGetInfo();
+    PyTuple *CharGetInfo();
     PyObject *GetDescription() const;
     /* GetSkillQueue()
      *
