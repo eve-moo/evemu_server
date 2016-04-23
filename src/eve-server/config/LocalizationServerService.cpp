@@ -35,6 +35,7 @@ LocalizationServerService::LocalizationServerService()
 {
     PyCallable_REG_CALL(LocalizationServerService, GetAllTextChanges);
     PyCallable_REG_CALL(LocalizationServerService, UpdateLocalizationQASettings);
+    PyCallable_REG_CALL(LocalizationServerService, UpdateLocalizationQAWrap);
 }
 
 LocalizationServerService::~LocalizationServerService() {
@@ -46,6 +47,11 @@ PyResult LocalizationServerService::Handle_GetAllTextChanges(PyCallArgs &call)
 }
 
 PyResult LocalizationServerService::Handle_UpdateLocalizationQASettings(PyCallArgs &call)
+{
+    return new PyNone();
+}
+
+PyResult LocalizationServerService::Handle_UpdateLocalizationQAWrap(PyCallArgs &call)
 {
     return new PyNone();
 }

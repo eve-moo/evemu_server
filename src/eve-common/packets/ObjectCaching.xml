@@ -2,7 +2,7 @@
 
     <elementDef name="objectCaching_CachedObject">
         <objectInline>
-            <stringInline value="objectCaching.CachedObject" />
+            <stringInline value="carbon.common.script.net.objectCaching.CachedObject" />
             <tupleInline>
                 <!-- 0 -->
                 <tupleInline>
@@ -50,7 +50,7 @@
 
     <elementDef name="objectCaching_CachedMethodCallResult">
         <objectInline>
-            <stringInline value="objectCaching.CachedMethodCallResult" />
+            <stringInline value="carbon.common.script.net.objectCaching.CachedMethodCallResult" />
             <tupleInline>
                 <!-- 0: details -->
                 <dictInline>
@@ -90,7 +90,7 @@
 
     <elementDef name="objectCaching_CachedMethodCallResult_object">
         <objectInline>
-            <stringInline value="objectCaching.CachedMethodCallResult" />
+            <stringInline value="carbon.common.script.net.objectCaching.CachedMethodCallResult" />
             <tupleInline>
                 <!-- 0: details -->
                 <dictInline>
@@ -112,7 +112,7 @@
     <!-- The packet structure for CachedMethodCalls with versioncheck as Always has changed-->
     <elementDef name="objectCaching_SessionCachedMethodCallResult_object">
         <objectInline>
-            <stringInline value="objectCaching.CachedMethodCallResult" />
+            <stringInline value="carbon.common.script.net.objectCaching.CachedMethodCallResult" />
             <tupleInline>
                 <!-- 0: details -->
                 <dictInline>

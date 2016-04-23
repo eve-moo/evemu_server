@@ -90,6 +90,7 @@ AgentMgrService::AgentMgrService()
     PyCallable_REG_CALL(AgentMgrService, GetMyJournalDetails)
     PyCallable_REG_CALL(AgentMgrService, GetMyEpicJournalDetails)
     PyCallable_REG_CALL(AgentMgrService, GetSolarSystemOfAgent)
+    PyCallable_REG_CALL(AgentMgrService, GetAgentsInSpace)
 }
 
 AgentMgrService::~AgentMgrService() {
@@ -189,7 +190,15 @@ PyResult AgentMgrService::Handle_GetSolarSystemOfAgent(PyCallArgs &call) {
     return NULL;
 }
 
-PyResult AgentMgrBound::Handle_GetInfoServiceDetails( PyCallArgs& call )
+PyResult AgentMgrService::Handle_GetAgentsInSpace(PyCallArgs &call)
+{
+
+    SysLog::Debug("AgentMgrService", "Called GetSolarSystemOfAgent Stub.");
+
+    return NULL;
+}
+
+PyResult AgentMgrBound::Handle_GetInfoServiceDetails(PyCallArgs& call)
 {
     //takes no arguments
 

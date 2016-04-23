@@ -65,6 +65,7 @@ public:
         PyCallable_REG_CALL(CorpRegistryBound, UpdateDivisionNames)
         PyCallable_REG_CALL(CorpRegistryBound, UpdateCorporation)
         PyCallable_REG_CALL(CorpRegistryBound, UpdateLogo)
+        PyCallable_REG_CALL(CorpRegistryBound, GetAggressionSettings)
 
         // STUBBS
         PyCallable_REG_CALL(CorpRegistryBound, GetMember)
@@ -99,6 +100,7 @@ public:
     PyCallable_DECL_CALL(UpdateDivisionNames)
     PyCallable_DECL_CALL(UpdateCorporation)
     PyCallable_DECL_CALL(UpdateLogo)
+    PyCallable_DECL_CALL(GetAggressionSettings)
 
     // STUBBS
     PyCallable_DECL_CALL(GetMember)
@@ -1006,7 +1008,16 @@ PyResult CorpRegistryBound::Handle_UpdateLogo(PyCallArgs &call) {
     return CorporationDB::GetCorporation(notif.key);
 }
 
-PyResult CorpRegistryBound::Handle_GetSharesByShareholder(PyCallArgs &call) {
+PyResult CorpRegistryBound::Handle_GetAggressionSettings(PyCallArgs &call)
+{
+    PyDict * dict = new PyDict();
+    dict->SetItem(new PyString("_enableAfter"), new PyNone);
+    dict->SetItem(new PyString("_disableAfter"), new PyInt(0));
+    return new PyObject("crimewatch.corp_aggression.settings.AggressionSettings", dict);
+}
+
+PyResult CorpRegistryBound::Handle_GetSharesByShareholder(PyCallArgs &call)
+{
     SysLog::Log("CorpRegisrtyBound", "Called GetSharesByShareholder stub.");
 
     return NULL;

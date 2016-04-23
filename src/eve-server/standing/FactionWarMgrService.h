@@ -36,6 +36,7 @@ public:
 
     PyCallable_DECL_CALL(GetWarFactions)
     PyCallable_DECL_CALL(GetFWSystems)
+    PyCallable_DECL_CALL(GetFacWarSystems)
     PyCallable_DECL_CALL(GetMyCharacterRankOverview)
     PyCallable_DECL_CALL(GetMyCharacterRankInfo)
     PyCallable_DECL_CALL(GetFactionMilitiaCorporation)

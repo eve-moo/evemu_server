@@ -55,6 +55,7 @@ CharMgrService::CharMgrService()
     PyCallable_REG_CALL(CharMgrService, AddContact)
     PyCallable_REG_CALL(CharMgrService, EditContact)
     PyCallable_REG_CALL(CharMgrService, GetRecentShipKillsAndLosses)
+    PyCallable_REG_CALL(CharMgrService, GetCharacterSettings)
 
     //these 2 are for labels in PnP window
     PyCallable_REG_CALL(CharMgrService, GetLabels)
@@ -209,16 +210,16 @@ PyResult CharMgrService::Handle_SetActivityStatus( PyCallArgs& call )
 
 PyResult CharMgrService::Handle_GetSettingsInfo( PyCallArgs& call )
 {
- PyTuple* res = new PyTuple( 2 );
+    PyTuple *res = new PyTuple(2);
     // type code? unknown what the value should be!
     // Value should be a string according to client exception in function UpdateSettingsStatistics
     res->items[ 0 ] = new PyString(" ");
 
- // error code? 0 = no error
- // if called with any value other than zero the exception output will show 'Verified = False'
- // if called with zero 'Verified = True'
- res->items[ 1 ] = new PyInt( 0 );
- return res;
+    // error code? 0 = no error
+    // if called with any value other than zero the exception output will show 'Verified = False'
+    // if called with zero 'Verified = True'
+    res->items[ 1 ] = new PyInt(0);
+    return res;
 }
 
 //  this is a return call from client after GetSettingsInfo
@@ -313,7 +314,12 @@ PyResult CharMgrService::Handle_GetRecentShipKillsAndLosses( PyCallArgs& call )
   return NULL;
 }
 
-PyResult CharMgrService::Handle_GetLabels( PyCallArgs& call )
+PyResult CharMgrService::Handle_GetCharacterSettings(PyCallArgs& call)
+{
+    return NULL;
+}
+
+PyResult CharMgrService::Handle_GetLabels(PyCallArgs& call)
 {
     //  will add this completed code at a later date  -allan 25Jul14
   return NULL;
