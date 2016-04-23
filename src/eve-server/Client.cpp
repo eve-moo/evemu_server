@@ -767,6 +767,8 @@ void Client::_SendSessionChange()
 
     SessionChangeNotification scn;
     scn.changes = new PyDict;
+    // TO-DO: This should be a unique value for each login.
+    scn.sessionID = GetAccountID();
 
     mSession.EncodeChanges( scn.changes );
     if( scn.changes->empty() )
@@ -1696,7 +1698,6 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
 
     // begin config_vals
             server_shake.imageserverurl = ImageServer::getURL(m_networkConfig); // Image server used to download images
-    server_shake.serverInfo = "EVEMU,127.0.0.1,127.0.0.1:8080,0"; // serverName, serverIP, espIP:espPort, isLive
     server_shake.publicCrestUrl = "";
     server_shake.bugReporting_BugReportServer = "";
     server_shake.sessionChangeDelay = "10";       // yea yea, the client has this as a default anyway, Live sends it therefor we do too

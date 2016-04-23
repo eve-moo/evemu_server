@@ -185,9 +185,6 @@
                         <dictInlineEntry key="bugReporting_ShowButton">
                             <string name="bugReporting_ShowButton" />
                         </dictInlineEntry>
-                        <dictInlineEntry key="serverInfo">
-                            <string name="serverInfo" />
-                        </dictInlineEntry>
                     </dictInline>
                 </dictInlineEntry>
             </dictInline>

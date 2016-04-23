@@ -30,7 +30,7 @@
 
     <elementDef name="objectCaching_CachedObject_spec">
         <objectInline>
-            <stringInline value="util.CachedObject" />
+            <stringInline value="carbon.common.script.net.CachedObject" />
             <tupleInline>
                 <!-- 0 -->
                 <raw name="objectID" />
