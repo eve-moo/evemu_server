@@ -83,7 +83,7 @@ const char* const s_mStringTable[] =
     "modules",
     "name",
     "objectCaching",
-    "objectCaching.CachedObject",
+    "carbon.common.script.net.objectCaching.CachedObject",
     "OnChatJoin",
     "OnChatLeave",
     "OnChatSpeak",

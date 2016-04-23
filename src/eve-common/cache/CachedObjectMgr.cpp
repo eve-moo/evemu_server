@@ -756,7 +756,7 @@ PyObject *PyCachedObject::Encode()
     //same cloning stattement as above.
     arg_tuple->items[6] = objectID->Clone();
 
-    return new PyObject( "objectCaching.CachedObject", arg_tuple );
+    return new PyObject("carbon.common.script.net.objectCaching.CachedObject", arg_tuple);
 }
 
 PyObject *PyCachedObjectDecoder::EncodeHint() {
