@@ -6,32 +6,106 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>TODO supply a title</title>
+        <title>Packets</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <h3>Incoming packets</h3>
-        Incoming packets are a PyObject with a PyTuple containing 9 elements.<br>
-        The first element is an int containing the packet type defined in the MACHONETMSG_TYPE enum.<br>
-        The second element is an object containing the source address (PyAddress).<br>
-        The third element is the destination address (PyAddress).<br>
-        The fourth element is the userID.<br>
-        The fifth element is the payload as a PyTuple.<br>
-        The sixth element is a dictionary of named elements (PyDict).<br>
-        The last three elements are PyNone.<br>
-        <h3>Call Requests</h3>
-        The payload is a single element PyTuple containing a PyTuple that contains 2 elements.<br>
-        The first value is a PyInt that is currently an unknown and unused value.<br>
-        The second value is a PyTuple that contains 4 elements decoded as a PyCallStream.<br>
-        The first element is eight an int of string, and is decoded into either remoteObject or remoteObjectStr values.<br>
-        The second element is the method name.<br>
-        The third element is the argument list decoded into arg_tuple.<br>
-        The fourth element is PyDict containing key value pairs decoded into arg_dict.<br>
-        <h3>Calling a service</h3>
-        When a PyService is called the PyService->Call function is passed the method name, arg_tuple and arg_dict values from the PyCallStream.<br>
-        A method MachoResolveObject return the nodeID (PyInt).<br>
-        A method MachoBindObject the arg_tuple is a 2 element tuple decoded into CallMachoBindObject.  The first tuple is the bindParams the second is an optional call parameters as a callName, arguments and argument dictionary.<br>
+        <h3>General packet format</h3>
+        The general form of a PyPacket has the following format.
+        <pre class="brush: bash">
+[PyObjectData Name: ] = PyPacket::type_string
+    [PyTuple 9 items]
+        [PyInt] = PyPacket::type
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 3 or 4 items] = PyPacket::source as PyAddress
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 3 or 4 items] = PyPacket::dest as PyAddress
+        [PyInt] = PyPacket::userid
+        [PyTuple 1 items] = PyPacket::payload
+            [PyTuple 2 items]
+        [PyNone/PyDict] = PyPacket::named_payload
+        [PyNone]
+        [PyNone]
+        [PyNone]
+        </pre>
+        <h3>PyAddress</h3>
+        An address has the following basic format.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 3 or 4 items]
+                [PyInt] = PyAddress::type
+        </pre>
+        An address is one of 4 formats as follows.<br>
+        An address of type NODE (PyAddress::type = 1) address.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 4 items]
+                [PyInt 1]
+                [PyInt] = PyAddress::typeID
+                [PyString] = PyAddress::service
+                [PyNone/PyInt] = PyAddress::callID
+        </pre>
+        An address of type CLIENT (PyAddress::type = 2) address.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 4 items]
+                [PyInt 2]
+                [PyInt] = PyAddress::typeID
+                [PyInt] = PyAddress::callID
+                [PyNone/PyString] = PyAddress::service
+        </pre>
+        An address of type BROADCAST (PyAddress::type = 4) address.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 4 items]
+                [PyInt 4]
+                [PyNone/PyString] = PyAddress::service
+                [PyList/PyTuple]
+                [PyNone/PyString] = PyAddress::bcast_idtype
+        </pre>
+        An address of type ANY (PyAddress::type = 8) address.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 3 items]
+                [PyInt 8]
+                [PyNone/PyString] = PyAddress::service
+                [PyInt] = PyAddress::callID
+        </pre>
+        <h3>Packet Type: 6 - Call Request</h3>
+        Decodes PyPacket::payload into a PyCallStream.<br>
+        <pre class="brush: bash">
+        [PyTuple 1 items] from PyPacket::payload
+            [PyTuple 2 items]
+                [PyInt 0]
+                [PyTuple 4 items]
+                    [PyInt/PyString] = PyCallStream::remoteObject/remoteObjectStr
+                    [PyString] = PyCallStream::method
+                    [PyTuple 0 items] = PyCallStream::arg_tuple
+                    [PyDict 1 kvp] = PyCallStream::arg_dict
+        </pre>
+        When received the PyService is looked up based on either the PyService::dest::service value or PyCallStream::remoteObjectStr if calling a bound object.<br>
+        A PyCallArgs is then created from the PyCallStream with PyCallArgs::tuple = PyCallStream::arg_tuple and PyCallArgs::byname = PyCallStream::arg_dict.<br>
+        If the method is MachoBindObject, then the PyService::_CreateBoundObject function is called to create a bound object.  If a call is also provided the call is executed.  The bound object and optionally the call results are returned as follows.<br>
+        <pre class="brush: bash">
+            [PyTuple 2 items]
+                [PySubStruct]
+                    [PyTuple 2 items]
+                        [PyString] = PyBoundObject::GetBindStr()
+                        [PyInt] = expiration time
+                [PyNone/PyObjectData Name: utillib.KeyVal] = optional call results.
+        </pre>
+        If the method is MachoResolveObject, then the node ID is returned.
+        <pre class="brush: bash">
+            [PyInt] = nodeID
+        </pre>
+        If any other method is called then the service dispatcher calls the appropriate Handle_XXX function of the service.
+        <h3>Packet Type: 7 - Call Response</h3>
+        Decodes PyPacket::payload into a PyCallStream.<br>
+        <pre class="brush: bash">
+        [PyTuple 1 items]
+            [PyRep] = Handle_CallReq return value
+        </pre>
 
         <!--
                 <pre class="brush: bash">
