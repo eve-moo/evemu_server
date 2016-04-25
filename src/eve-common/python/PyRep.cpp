@@ -861,6 +861,17 @@ PyRep* PyObjectEx_Type1::FindKeyword( const char* keyword ) const
     return NULL;
 }
 
+PyRep *PyObjectEx_Type1::createBuiltinSetList(std::vector<int32> vals)
+{
+    PyList *list = new PyList();
+    for(int32 val : vals)
+    {
+        list->AddItem(new PyInt(val));
+    }
+    PyRep *set = new PyObjectEx_Type1(new PyToken("__builtin__.set"), new_tuple(list));
+    return set;
+}
+
 PyTuple* PyObjectEx_Type1::_CreateHeader( PyToken* type, PyTuple* args )
 {
     if( args == NULL )

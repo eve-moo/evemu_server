@@ -76,7 +76,7 @@
 
     <elementDef name="MaterialList">
         <objectInline>
-            <stringInline value="util.Rowset" />
+            <stringInline value="eve.common.script.sys.rowset.Rowset" />
             <dictInline>
                 <dictInlineEntry key="header">
                     <listInline>

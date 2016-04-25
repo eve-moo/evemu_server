@@ -112,7 +112,7 @@ PyObject *DBResultToRowset(DBQueryResult &result)
     uint32 cc = result.ColumnCount();
 
     PyDict *args = new PyDict();
-    PyObject *res = new PyObject( "util.Rowset" , args
+    PyObject *res = new PyObject("eve.common.script.sys.rowset.Rowset", args
     );
 
     /* check if we have a empty query result and return a empty RowSet */

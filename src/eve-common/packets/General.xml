@@ -16,7 +16,7 @@
 
     <elementDef name="util_Rowset">
         <objectInline>
-            <stringInline value="util.Rowset" />
+            <stringInline value="eve.common.script.sys.rowset.Rowset" />
             <dictInline>
                 <dictInlineEntry key="header">
                     <listStr name="header" />

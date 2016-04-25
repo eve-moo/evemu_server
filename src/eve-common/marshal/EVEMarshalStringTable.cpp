@@ -110,7 +110,7 @@ const char* const s_mStringTable[] =
     "util.IndexRowset",
     "util.Moniker",
     "util.Row",
-    "util.Rowset",
+    "eve.common.script.sys.rowset.Rowset",
     "*multicastID",
     "AddBalls",
     "AttackHit3",

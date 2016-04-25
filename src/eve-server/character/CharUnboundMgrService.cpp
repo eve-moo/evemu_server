@@ -474,5 +474,89 @@ PyResult CharUnboundMgrService::Handle_GetCharacterSelectionData(PyCallArgs &cal
         return NULL;
     }
     rtn->SetItem(2, DBResultToTupleKeyVal(res));
+    //rtn->Dump(DEBUG__DEBUG, "GetCharacterSelectionData");
     return rtn;
 }
+
+/*
+Tuple: 3 elements
+  [ 0] Tuple: 1 elements
+  [ 0]   [ 0] Object:
+  [ 0]   [ 0]   Type: String: 'utillib.KeyVal'
+  [ 0]   [ 0]   Args: Dictionary: 5 entries
+  [ 0]   [ 0]   Args:   [ 0] Key: String: 'maxCharacterSlots'
+  [ 0]   [ 0]   Args:   [ 0] Value: WString: '3'
+  [ 0]   [ 0]   Args:   [ 1] Key: String: 'subscriptionEndTime'
+  [ 0]   [ 0]   Args:   [ 1] Value: Integer field: 131370906800000000
+  [ 0]   [ 0]   Args:   [ 2] Key: String: 'characterSlots'
+  [ 0]   [ 0]   Args:   [ 2] Value: Integer field: 3
+  [ 0]   [ 0]   Args:   [ 3] Key: String: 'creationDate'
+  [ 0]   [ 0]   Args:   [ 3] Value: Integer field: 131033946800000000
+  [ 0]   [ 0]   Args:   [ 4] Key: String: 'userName'
+  [ 0]   [ 0]   Args:   [ 4] Value: WString: 'avianrr'
+  [ 1] List: Empty
+  [ 2] Tuple: 1 elements
+  [ 2]   [ 0] Object:
+  [ 2]   [ 0]   Type: String: 'utillib.KeyVal'
+  [ 2]   [ 0]   Args: Dictionary: 30 entries
+  [ 2]   [ 0]   Args:   [ 0] Key: String: 'fromSP'
+  [ 2]   [ 0]   Args:   [ 0] Value: (None)
+  [ 2]   [ 0]   Args:   [ 1] Key: String: 'finishSP'
+  [ 2]   [ 0]   Args:   [ 1] Value: (None)
+  [ 2]   [ 0]   Args:   [ 2] Key: String: 'trainingEndTime'
+  [ 2]   [ 0]   Args:   [ 2] Value: (None)
+  [ 2]   [ 0]   Args:   [ 3] Key: String: 'trainingStartTime'
+  [ 2]   [ 0]   Args:   [ 3] Value: (None)
+  [ 2]   [ 0]   Args:   [ 4] Key: String: 'skillsInQueue'
+  [ 2]   [ 0]   Args:   [ 4] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [ 5] Key: String: 'trainedSP'
+  [ 2]   [ 0]   Args:   [ 5] Value: (None)
+  [ 2]   [ 0]   Args:   [ 6] Key: String: 'shipTypeID'
+  [ 2]   [ 0]   Args:   [ 6] Value: Integer field: 596
+  [ 2]   [ 0]   Args:   [ 7] Key: String: 'allianceID'
+  [ 2]   [ 0]   Args:   [ 7] Value: (None)
+  [ 2]   [ 0]   Args:   [ 8] Key: String: 'corporationID'
+  [ 2]   [ 0]   Args:   [ 8] Value: Integer field: 1000166
+  [ 2]   [ 0]   Args:   [ 9] Key: String: 'gender'
+  [ 2]   [ 0]   Args:   [ 9] Value: Integer field: 1
+  [ 2]   [ 0]   Args:   [10] Key: String: 'typeID'
+  [ 2]   [ 0]   Args:   [10] Value: Integer field: 1385
+  [ 2]   [ 0]   Args:   [11] Key: String: 'queueEndTime'
+  [ 2]   [ 0]   Args:   [11] Value: (None)
+  [ 2]   [ 0]   Args:   [12] Key: String: 'skillPoints'
+  [ 2]   [ 0]   Args:   [12] Value: Real field: 56484.000000
+  [ 2]   [ 0]   Args:   [13] Key: String: 'characterID'
+  [ 2]   [ 0]   Args:   [13] Value: Integer field: 140000000
+  [ 2]   [ 0]   Args:   [14] Key: String: 'characterName'
+  [ 2]   [ 0]   Args:   [14] Value: WString: 'Keldren Kobain'
+  [ 2]   [ 0]   Args:   [15] Key: String: 'bloodlineID'
+  [ 2]   [ 0]   Args:   [15] Value: Integer field: 13
+  [ 2]   [ 0]   Args:   [16] Key: String: 'stationID'
+  [ 2]   [ 0]   Args:   [16] Value: Integer field: 60014629
+  [ 2]   [ 0]   Args:   [17] Key: String: 'toLevel'
+  [ 2]   [ 0]   Args:   [17] Value: (None)
+  [ 2]   [ 0]   Args:   [18] Key: String: 'solarSystemID'
+  [ 2]   [ 0]   Args:   [18] Value: Integer field: 30003489
+  [ 2]   [ 0]   Args:   [19] Key: String: 'balance'
+  [ 2]   [ 0]   Args:   [19] Value: Real field: 6665999872.000000
+  [ 2]   [ 0]   Args:   [20] Key: String: 'locationSecurity'
+  [ 2]   [ 0]   Args:   [20] Value: Real field: 1.000000
+  [ 2]   [ 0]   Args:   [21] Key: String: 'finishedSkills'
+  [ 2]   [ 0]   Args:   [21] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [22] Key: String: 'logoffDate'
+  [ 2]   [ 0]   Args:   [22] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [23] Key: String: 'deletePrepareDateTime'
+  [ 2]   [ 0]   Args:   [23] Value: (None)
+  [ 2]   [ 0]   Args:   [24] Key: String: 'balanceChange'
+  [ 2]   [ 0]   Args:   [24] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [25] Key: String: 'paperdollState'
+  [ 2]   [ 0]   Args:   [25] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [26] Key: String: 'unreadMailCount'
+  [ 2]   [ 0]   Args:   [26] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [27] Key: String: 'unprocessedNotifications'
+  [ 2]   [ 0]   Args:   [27] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [28] Key: String: 'skillTypeID'
+  [ 2]   [ 0]   Args:   [28] Value: (None)
+  [ 2]   [ 0]   Args:   [29] Key: String: 'petitionMessage'
+  [ 2]   [ 0]   Args:   [29] Value: Integer field: 0
+ */

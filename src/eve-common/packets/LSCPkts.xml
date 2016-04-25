@@ -5,7 +5,7 @@
 
     <elementDef name="ChannelInfo">
         <objectInline>
-            <stringInline value="util.Rowset" />
+            <stringInline value="eve.common.script.sys.rowset.Rowset" />
             <dictInline>
                 <dictInlineEntry key="header">
                     <listInline>
@@ -98,7 +98,7 @@
 
     <elementDef name="ChannelJoinChannelMods">
         <objectInline>
-            <stringInline value="util.Rowset" />
+            <stringInline value="eve.common.script.sys.rowset.Rowset" />
             <dictInline>
                 <dictInlineEntry key="header">
                     <listInline>
@@ -133,7 +133,7 @@
 
     <elementDef name="ChannelJoinChannelChars">
         <objectInline>
-            <stringInline value="util.Rowset" />
+            <stringInline value="eve.common.script.sys.rowset.Rowset" />
             <dictInline>
                 <dictInlineEntry key="header">
                     <listInline>
@@ -432,7 +432,7 @@
                     </dictInlineEntry>
                 </dictInline>
             </objectInline>
-            <!-- then any attachments. this is a util.Rowset -->
+            <!-- then any attachments. this is a eve.common.script.sys.rowset.Rowset -->
             <!-- this might not work due to a type1 string issue in rowclass here,
             if that is the case, then change this over to a <list> temporarily -->
             <element name="attachments" type="util_Rowset" />

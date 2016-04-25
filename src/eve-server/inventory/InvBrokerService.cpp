@@ -87,8 +87,8 @@ PyResult InvBrokerService::Handle_GetItemDescriptor(PyCallArgs &call)
     // from Inventory::List
 
     PyList *keywords = new PyList();
-    keywords->AddItem(new_tuple(new PyString("stacksize"), new PyToken("util.StackSize")));
-    keywords->AddItem(new_tuple(new PyString("singleton"), new PyToken("util.Singleton")));
+    keywords->AddItem(new_tuple(new PyString("stacksize"), new PyToken("eve.common.script.sys.eveCfg.StackSize")));
+    keywords->AddItem(new_tuple(new PyString("singleton"), new PyToken("eve.common.script.sys.eveCfg.Singleton")));
 
     DBRowDescriptor* header = new DBRowDescriptor(keywords);
     header->AddColumn( "itemID",     DBTYPE_I8 );
