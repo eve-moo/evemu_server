@@ -107,6 +107,44 @@ and open the template in the editor.
             [PyRep] = Handle_CallReq return value
         </pre>
 
+        <h3>CRowset</h3>
+        Constructed as a PyObjectEx_Type2.
+        A PyTuple containing the PyToken is passed as the args and the PyDict is passed as the keywords parameter.
+        <pre class="brush: bash">
+[PyObjectEx Type2]
+    [PyTuple 2 items] = mHeader
+        [PyTuple 1 items] PyObjectEx_Type2::Constructor::args
+            [PyToken carbon.common.script.sys.crowset.CRowset]
+        [PyDict 1 kvp] PyObjectEx_Type2::Constructor::keywords
+            [PyString "header"]
+            [PyObjectEx Normal]
+                [PyTuple 2 items]
+                    [PyToken blue.DBRowDescriptor]
+                    [PyTuple 1 items]
+                        [PyTuple 5 items]
+                            [PyTuple 2 items]
+                                [PyString "userName"]
+                                [PyInt 130]
+                            [PyTuple 2 items]
+                                [PyString "characterSlots"]
+                                [PyInt 17]
+                            [PyTuple 2 items]
+                                [PyString "maxCharacterSlots"]
+                                [PyInt 130]
+                            [PyTuple 2 items]
+                                [PyString "subscriptionEndTime"]
+                                [PyInt 64]
+                            [PyTuple 2 items]
+                                [PyString "creationDate"]
+                                [PyInt 64]
+    from mList
+    [PyPackedRow 18 bytes]
+        ["userName" => <me> [WStr]]
+        ["characterSlots" => <3> [UI1]]
+        ["maxCharacterSlots" => <3> [WStr]]
+        ["subscriptionEndTime" => <131987654320000000> [FileTime]]
+        ["creationDate" => <131234567890000000> [FileTime]]
+        </pre>
         <!--
                 <pre class="brush: bash">
                 </pre>
