@@ -33,9 +33,7 @@ INSERT INTO blkOperand (operandID, operandKey, description, format, arg1category
 (14, 'CARGOSCAN', 'Scans the cargo of the targeted ship.', 'CargoScan', 0, 0, 4, 'CargoScan(env, None, None)'),
 (15, 'CHEATTELEDOCK', 'Instantly enter a station.', 'CheatTeleDock()', 0, 0, 4, 'CheatTeleDock(env, None, None)'),
 (16, 'CHEATTELEGATE', 'Automatically invoke a stargate destination from remote distances.', 'CheatTeleGate()', 0, 0, 4, 'dogma.CheatTeleGate(env, None, None)'),
-(17, 'COMBINE', 'executes two statements', '%(arg1)s);     (%(arg2)s', 4, 4, 4, '%(arg1)s\
-\
-%(arg2)s'),
+(17, 'COMBINE', 'executes two statements', '%(arg1)s);     (%(arg2)s', 4, 4, 4, '%(arg1)s\r %(arg2)s'),
 (18, 'DEC', 'decreases an item-attribute by the value of another attribute', '%(arg1)s-=self.%(arg2)s', 3, 2, 4, ' '),
 (19, 'DECLOAKWAVE', 'broadcasts a decloaking wave', 'DecloakWave', 0, 0, 4, 'DecloakWave(env, None, None)'),
 (20, 'DECN', 'decreases an item-attribute by number', '%(arg1)s-=%(arg2)s', 3, 4, 4, ' '),
@@ -59,9 +57,7 @@ INSERT INTO blkOperand (operandID, operandKey, description, format, arg1category
 (38, 'GT', 'checks whether expression 1  is greater than expression 2', '%(arg1)s> %(arg2)s', 4, 4, 4, '(%(arg1)s > %(arg2)s)'),
 (39, 'GTE', 'checks whether an expression is greater than or equal to another', '%(arg1)s>=%(arg2)s', 4, 4, 4, '(%(arg1)s >= %(arg2)s)'),
 (40, 'IA', 'generic attribute', '%(arg1)s', 2, 0, 3, '%(arg1)s'),
-(41, 'IF', 'if construct', 'If(%(arg1)s), Then (%(arg2)s)', 4, 4, 4, 'if %(arg1)s:\
-\
-    %(arg2)s'),
+(41, 'IF', 'if construct', 'If(%(arg1)s), Then (%(arg2)s)', 4, 4, 4, 'if %(arg1)s:    %(arg2)s'),
 (42, 'INC', 'increases an item-attribute by the value of another attribute', '%(arg1)s+=self.%(arg2)s', 3, 2, 4, '<handled in code>'),
 (43, 'INCN', 'increases an item-attribute by a number', '%(arg1)s+=%(arg2)s', 3, 4, 4, ' '),
 (44, 'LAUNCH', 'launches a missile', 'LaunchMissile()', 0, 0, 4, 'dogma.Launch(env, None, None)'),
@@ -73,7 +69,7 @@ INSERT INTO blkOperand (operandID, operandKey, description, format, arg1category
 (50, 'MINE', 'mines an asteroid', 'Mine', 0, 0, 4, 'Mine(env, None, None)'),
 (51, 'MUL', 'multiplies two numbers', '(%(arg1)s)*(%(arg2)s)', 4, 4, 4, '(%(arg1)s * %(arg2)s)'),
 (52, 'OR', 'logical or operation', '%(arg1)s OR %(arg2)s', 4, 4, 4, '(%(arg1)s or %(arg2)s)'),
-(53, 'POWERBOOST', '', 'PowerBoost', 0, 0, 4, 'dogma.PowerBoost(env, None, None)'),
+(53, 'POWERBOOST', 'empty string', 'PowerBoost', 0, 0, 4, 'dogma.PowerBoost(env, None, None)'),
 (54, 'RGGM', 'remove gang groupl modifier', '[%(arg1)s].RGGM(%(arg2)s)', 5, 2, 4, 'dogma.RemoveGangGroupModifier(env,%(arg1)s, %(arg2)s)'),
 (55, 'RGIM', 'remove gang shipl modifier', '[%(arg1)s].RGIM(%(arg2)s)', 5, 2, 4, 'dogma.RemoveGangShipModifier(env,%(arg1)s, %(arg2)s)'),
 (56, 'RGORSM', 'remove a gang owner required skill modifier', '[%(arg1)s].RGORSM(%(arg2)s)', 5, 2, 4, 'dogma.RemoveGangOwnerRequiredSkillModifier(env,%(arg1)s, %(arg2)s)'),
@@ -87,11 +83,11 @@ INSERT INTO blkOperand (operandID, operandKey, description, format, arg1category
 (64, 'RSA', 'attribute on modules that have required skill', '%(arg1)s.%(arg2)s', 9, 2, 3, '(%(arg1)s, %(arg2)s)'),
 (65, 'SET', 'sets an item attribute', '%(arg1)s := %(arg2)s', 3, 4, 4, '<handled in code>'),
 (66, 'SHIPSCAN', 'scans a ship', 'ShipScan()', 0, 0, 4, 'ShipScan(env, None, None)'),
-(67, 'SKILLCHECK', '', 'SkillCheck(%(arg1)s)', 4, 0, 4, 'dogma.SkillCheck(env, %(arg1)s, %(arg2)s)'),
+(67, 'SKILLCHECK', 'empty string', 'SkillCheck(%(arg1)s)', 4, 0, 4, 'dogma.SkillCheck(env, %(arg1)s, %(arg2)s)'),
 (68, 'SUB', 'subtracts a number from another one', '%(arg1)s-%(arg2)s', 4, 4, 4, ' '),
 (69, 'SURVEYSCAN', 'scans an asteroid for information', 'SurveyScan()', 0, 0, 4, 'SurveyScan(env, None, None)'),
 (70, 'TARGETHOSTILES', 'Targets any hostile ships within range (assuming electronics have capability).', 'TargetHostiles()', 0, 0, 4, 'dogma.TargetHostiles(env, None, None)'),
-(71, 'TARGETSILENTLY', '', 'TargetSilently()', 0, 0, 4, 'dogmaLM.AddTargetEx(shipID,targetID, silent=1, tasklet=1)'),
+(71, 'TARGETSILENTLY', 'empty string', 'TargetSilently()', 0, 0, 4, 'dogmaLM.AddTargetEx(shipID,targetID, silent=1, tasklet=1)'),
 (72, 'TOOLTARGETSKILLS', ' ', 'CheckToolTargetSkills', 0, 0, 4, 'dogma.CheckToolTargetSkills(env,None,None)'),
 (73, 'UE', 'raises an user error', 'UserError(%(arg1)s)', 4, 0, 4, 'raise UserError(%(arg1)s)'),
 (74, 'VERIFYTARGETGROUP', 'raises a user error if incorrect target group', 'VerifyTargetGroup()', 0, 0, 4, 'dogma.VerifyTargetGroup(env, None, None)');
