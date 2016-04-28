@@ -724,29 +724,43 @@ PyObject *CorporationDB::GetCorporation(uint32 corpID) {
     //return DBResultToRowset(res);
 }
 
-PyObject *CorporationDB::GetEveOwners() {
+PyObject *CorporationDB::GetEveOwners(uint32 corpID)
+{
+    // I believe this returns a list of shareholders.  Should test it in an player corporation.
+    // If it does maybe we should create a blk-CrpCharShares with the seed for SrvCrpCharShares
+    // and retrieve the owners from that list.
     DBQueryResult res;
+    // TO-DO: get the owners for all npc corporations.
+    std::map<uint32, std::vector<int32>> owners = {
+        {100045, //Science and Trade Institute
+            {3004185, 3012249, 3012250, 3012251, 3012252, 3012253, 3012254, 3012255, 3012256, 3012257, 3012258, 3013666, 3013667, 3013668, 3013669, 3017009, 3017159, 3018391, 3018399, 3018581, 3018611, 3018646, 3018675, 3018805, 3018806, 3018807, 3018808, 3018929, 3019354, 3019355, 3019450, 3019473, 3019493}},
+        {1000166, // Imperial Academy
+            {3003925, 3010801, 3010802, 3010803, 3010804, 3010805, 3010806, 3010807, 3010808, 3010809, 3010810, 3013857, 3013858, 3013859, 3013860, 3016056, 3017470, 3017698, 3017925, 3017926, 3017950, 3018063, 3018064, 3018088, 3018145, 3018153, 3018243, 3018244, 3018268, 3018329, 3018337, 3018627, 3018681, 3018821, 3018822, 3018823, 3018824, 3018921, 3019338, 3019339, 3019446, 3019469, 3019490}}
+    };
 
-    /*if (!DBcore::RunQuery(res,
-        " SELECT * FROM blkEveStaticOwners "))
+    std::vector<int32> ownerList;
+    auto itr = owners.find(corpID);
+    if(itr != owners.end())
     {
-        codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
-        return NULL;
-    }*/
+        ownerList = itr->second;
+    }
+    else
+    {
+        if(corpID < EVEMU_MINIMUM_ID)
+        {
+            SysLog::Debug("CorpOwners", "Unable to find owners for corpID=%u", corpID);
+        }
+        // At the very least list the CEO.
+        uint32 ceoID = GetCorporationCEO(corpID);
+        ownerList.push_back(ceoID);
+    }
+    std::string inList;
+    ListToINString(ownerList, inList, "0");
     if( !DBcore::RunQuery( res,
-        "(SELECT"
-        " itemID AS ownerID,"
-        " itemName AS ownerName,"
-    " 0 AS ownerNameID,"
-        " typeID"
-        " FROM srvEntity"
-        " WHERE itemID < %u"
-        " AND itemID NOT IN ( SELECT ownerID from blkEveStaticOwners ) )"
-        " UNION ALL "
-        "(SELECT"
-        " ownerID, ownerName, 0 AS ownerNameID, typeID"
-        " FROM blkEveStaticOwners)"
-        " ORDER BY ownerID", EVEMU_MINIMUM_ID ) )
+                          "SELECT characterID as ownerID, itemName as ownerName, typeID, gender FROM srvEntity "
+                          "LEFT JOIN srvCharacter ON srvEntity.itemID = srvCharacter.characterID "
+                          "where itemID in (%s) "
+                          "ORDER BY ownerID", inList.c_str()))
     {
         codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
         return NULL;

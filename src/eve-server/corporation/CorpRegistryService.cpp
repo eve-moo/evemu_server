@@ -38,10 +38,12 @@ class CorpRegistryBound
 : public PyBoundObject
 {
 public:
+    const uint32 corporationID;
     PyCallable_Make_Dispatcher(CorpRegistryBound)
 
-    CorpRegistryBound()
-    : PyBoundObject(new Dispatcher(this))
+    CorpRegistryBound(uint32 corpID)
+    : PyBoundObject(new Dispatcher(this)),
+    corporationID(corpID)
     {
         m_strBoundObjectName = "CorpRegistryBound";
 
@@ -161,18 +163,29 @@ CorpRegistryService::~CorpRegistryService() {
 
 
 
-PyBoundObject* CorpRegistryService::_CreateBoundObject( Client* c, const PyRep* bind_args )
+PyBoundObject* CorpRegistryService::_CreateBoundObject( Client* c, const PyRep* bind_args)
 {
-    _log( CLIENT__MESSAGE, "CorpRegistryService bind request for:" );
+    const PyTuple *tup = bind_args->AsTuple();
+    if(tup == nullptr)
+    {
+        return nullptr;
+    }
+    const PyInt *id = tup->GetItem(0)->AsInt();
+    if(id == nullptr)
+    {
+        return nullptr;
+    }
+    uint32 corpID = id->value();
+    _log(CLIENT__MESSAGE, "CorpRegistryService bind request for:");
     bind_args->Dump( CLIENT__MESSAGE, "    " );
 
-    return new CorpRegistryBound( );
+    return new CorpRegistryBound(corpID);
 }
 
 
 PyResult CorpRegistryBound::Handle_GetEveOwners(PyCallArgs &call)
 {
-    return (CorporationDB::GetEveOwners());
+    return (CorporationDB::GetEveOwners(corporationID));
 }
 
 PyResult CorpRegistryBound::Handle_GetInfoWindowDataForChar( PyCallArgs& call )
@@ -198,6 +211,7 @@ PyResult CorpRegistryBound::Handle_GetCorporation(PyCallArgs &call)
 {
     return (CorporationDB::GetCorporation(call.client->GetCorporationID()));
 }
+
 PyResult CorpRegistryBound::Handle_GetCorporations(PyCallArgs &call) {
     Call_SingleIntegerArg arg;
     if (!arg.Decode(&call.tuple)) {

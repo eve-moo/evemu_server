@@ -53,15 +53,15 @@ TRUNCATE TABLE srvStatus;
 INSERT INTO srvCharacter
  SELECT
   characterID, 
-  accountID, 
-  title, 
-  description, 
-  bounty, 
-  balance,
+  0 AS accountID, 
+  '' AS title, 
+  '' AS description, 
+  0 AS bounty, 
+  0 AS balance,
   0 AS aurBalance, 
-  securityRating, 
-  petitionMessage, 
-  logonMinutes, 
+  0 AS securityRating, 
+  '' AS petitionMessage, 
+  0 AS logonMinutes, 
   0 AS skillPoints, 
   0 AS skillQueueEndTime,
   corporationID, 
@@ -70,9 +70,9 @@ INSERT INTO srvCharacter
   0 AS rolesAtBase, 
   0 AS rolesAtHQ, 
   0 AS rolesAtOther,
-  corporationDateTime, 
-  startDateTime, 
-  createDateTime,
+  0 AS corporationDateTime, 
+  0 AS startDateTime, 
+  0 AS createDateTime,
   ancestryID, 
   careerID, 
   schoolID, 
@@ -88,7 +88,8 @@ INSERT INTO srvCharacter
   0 AS nextRespecDateTime, 
   0 AS deletePrepareDateTime, 
   0 AS shipID
- FROM blkCharacterStatic;
+ FROM blkCharacterStatic
+LEFT JOIN mapDenormalize ON mapDenormalize.itemID = blkCharacterStatic.stationID;
 
 /*
  * Copy over the static entities:
