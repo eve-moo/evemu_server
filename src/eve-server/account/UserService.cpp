@@ -54,7 +54,7 @@ PyResult UserService::Handle_GetCreateDate( PyCallArgs& call )
 {
     SysLog::Debug( "UserService", "Called GetCreateDate stub." );
 
-    return new PyLong((long)Win32TimeNow());
+    return new PyLong((long) call.client->GetChar()->createDateTime());
 }
 
 PyResult UserService::Handle_ReportISKSpammer( PyCallArgs& call )

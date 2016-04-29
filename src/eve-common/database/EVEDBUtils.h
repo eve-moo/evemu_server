@@ -28,6 +28,7 @@
 
 #include "database/dbcore.h"
 #include "network/packet_types.h"
+#include "python/classes/PyDatabase.h"
 
 #include <map>
 
@@ -78,6 +79,7 @@ PyTuple *DBResultToTupleKeyVal(DBQueryResult &result);
 
 // 
 void FillPackedRow(const DBResultRow& row, PyPackedRow* into);
+PyPackedRow* CreatePackedRow(const DBResultRow& row, DBRowDescriptor* header);
 
 
 #endif

@@ -94,7 +94,7 @@ PyResult FactionWarMgrService::Handle_GetFacWarSystems(PyCallArgs& call)
         PyServiceMgr::cache_service->GiveCache(method_id, &res);
     }
 
-    return PyServiceMgr::cache_service->MakeObjectCachedMethodCallResult(method_id);
+    return PyServiceMgr::cache_service->MakeObjectCachedMethodCallResult(method_id, "never");
 }
 
 PyResult FactionWarMgrService::Handle_GetMyCharacterRankOverview(PyCallArgs& call)

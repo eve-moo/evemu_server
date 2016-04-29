@@ -145,6 +145,33 @@ and open the template in the editor.
         ["subscriptionEndTime" => <131987654320000000> [FileTime]]
         ["creationDate" => <131234567890000000> [FileTime]]
         </pre>
+        <h3>CachedMethodCallResult</h3>
+        Packet of type objectCaching_CachedMethodCallResult_object constructed with PyServiceMgr::cache_service->MakeObjectCachedMethodCallResult.
+        <pre class="brush: bash">
+[PyObjectData Name: carbon.common.script.net.objectCaching.CachedMethodCallResult]
+    [PyTuple 3 items]
+        [PyDict 1 kvp]
+            [PyString "versionCheck"]
+            [PyString "never"] = objectCaching_CachedMethodCallResult_object.versionCheck
+        [PyObjectData Name: carbon.common.script.net.cachedObject.CachedObject] = objectCaching_CachedMethodCallResult_object.object
+        [PyNone]
+        </pre>
+        The property objectCaching_CachedMethodCallResult_object.object is a objectCaching_CachedObject_spec object as follows.
+        <pre class="brush: bash">
+[PyObjectData Name: carbon.common.script.net.cachedObject.CachedObject]
+    [PyTuple 3 items]
+        [PyTuple 3 items] = objectID
+            [PyString "Method Call"]
+            [PyString "server"]
+            [PyTuple 2 items]
+                [PyString "facWarMgr"]
+                [PyString "GetFacWarSystems"]
+        [PyInt 1223793] = nodeID
+        [PyTuple 2 items]
+            [PyIntegerVar 131234567890123456] = timestamp
+            [PyInt 43389] = version
+        </pre>
+        ObjectID is a ObjectCachedMethodID object that contains the call information that generated or fetches the cache.
         <!--
                 <pre class="brush: bash">
                 </pre>

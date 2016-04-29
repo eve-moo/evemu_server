@@ -29,6 +29,7 @@
 #include "inventory/InvBrokerService.h"
 #include "inventory/InventoryBound.h"
 #include "PyServiceMgr.h"
+#include "database/EVEDBUtils.h"
 
 class InvBrokerBound
 : public PyBoundObject
@@ -48,6 +49,7 @@ public:
         PyCallable_REG_CALL(InvBrokerBound, GetInventory)
         PyCallable_REG_CALL(InvBrokerBound, SetLabel)
         PyCallable_REG_CALL(InvBrokerBound, TrashItems)
+        PyCallable_REG_CALL(InvBrokerBound, GetSelfInvItem)
     }
     virtual ~InvBrokerBound()
     {
@@ -63,6 +65,7 @@ public:
     PyCallable_DECL_CALL(GetInventory)
     PyCallable_DECL_CALL(SetLabel)
     PyCallable_DECL_CALL(TrashItems)
+    PyCallable_DECL_CALL(GetSelfInvItem)
 
 
 protected:
@@ -264,7 +267,8 @@ PyResult InvBrokerBound::Handle_SetLabel(PyCallArgs &call) {
     return NULL;
 }
 
-PyResult InvBrokerBound::Handle_TrashItems(PyCallArgs &call) {
+PyResult InvBrokerBound::Handle_TrashItems(PyCallArgs &call)
+{
     Call_TrashItems args;
     if(!args.Decode(&call.tuple)) {
         codelog(SERVICE__ERROR, "Unable to decode arguments");
@@ -295,4 +299,32 @@ PyResult InvBrokerBound::Handle_TrashItems(PyCallArgs &call) {
     ItemFactory::UnsetUsingClient();
 
     return(new PyList());
+}
+
+PyResult InvBrokerBound::Handle_GetSelfInvItem(PyCallArgs &call)
+{
+    DBQueryResult result;
+    if(!DBcore::RunQuery(result,
+                         "SELECT"
+                         " itemID, typeID, ownerID, locationID, flag as flagID,"
+                         " quantity, groupID, categoryID, customInfo"
+                         " FROM srvEntity"
+                         " LEFT JOIN invTypes USING(typeID)"
+                         " LEFT JOIN invGroups USING(groupID)"
+                         " WHERE itemID = %u",
+                         call.client->GetShip()->itemID()))
+    {
+        _log(DATABASE__ERROR, "Failed to query ship item for %u: %s.", call.client->GetCharacterID(), result.error.c_str());
+        return false;
+    }
+
+    DBRowDescriptor *header = new DBRowDescriptor(result);
+    DBResultRow row;
+    while(result.GetRow(row))
+    {
+        return CreatePackedRow(row, header);
+    }
+
+    return nullptr;
+
 }

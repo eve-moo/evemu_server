@@ -49,6 +49,7 @@ protected:
    
 
     PyCallable_DECL_CALL(UpdateBulk)
+    PyCallable_DECL_CALL(GetAllBulkIDs)
 
 };
 
