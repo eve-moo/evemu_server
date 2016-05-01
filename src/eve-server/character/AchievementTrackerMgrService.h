@@ -20,28 +20,28 @@
     Place - Suite 330, Boston, MA 02111-1307, USA, or go to
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
-    Author:        Zhur
-*/
+    Author:        eve-moo
+ */
 
-#ifndef _SKILLMGR_SERVICE_H
-#define _SKILLMGR_SERVICE_H
+#ifndef ACHIEVEMENTTRACKERMGR_H
+#define	ACHIEVEMENTTRACKERMGR_H
 
-#include "PyBoundObject.h"
 #include "PyService.h"
 
-class SkillMgr2Service : public PyService
+class AchievementTrackerMgrService
+: public PyService
 {
 public:
-    SkillMgr2Service();
-    virtual ~SkillMgr2Service();
+    AchievementTrackerMgrService();
+    ~AchievementTrackerMgrService();
 
 protected:
     class Dispatcher;
 
-    PyCallable_DECL_CALL(GetMySkillHandler)
+    PyCallable_DECL_CALL(GetCompletedAchievementsAndClientEventCount)
+    PyCallable_DECL_CALL(UpdateClientAchievmentsAndCounters)
 
-    //overloaded in order to support bound objects:
-    virtual PyBoundObject *_CreateBoundObject(Client *c, const PyRep *bind_args);
 };
 
-#endif
+#endif	/* ACHIEVEMENTTRACKERMGR_H */
+

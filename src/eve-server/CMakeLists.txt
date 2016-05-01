@@ -96,6 +96,7 @@ SET( cache_SOURCE
      "${TARGET_SOURCE_DIR}/cache/ObjCacheService.cpp" )
 
 SET( character_INCLUDE
+     "${TARGET_INCLUDE_DIR}/character/AchievementTrackerMgrService.h"
      "${TARGET_INCLUDE_DIR}/character/AggressionMgrService.h"
      "${TARGET_INCLUDE_DIR}/character/CertificateMgrDB.h"
      "${TARGET_INCLUDE_DIR}/character/CertificateMgrService.h"
@@ -111,6 +112,7 @@ SET( character_INCLUDE
      "${TARGET_INCLUDE_DIR}/character/Skill.h"
      "${TARGET_INCLUDE_DIR}/character/SkillMgrService.h" )
 SET( character_SOURCE
+     "${TARGET_SOURCE_DIR}/character/AchievementTrackerMgrService.cpp"
      "${TARGET_SOURCE_DIR}/character/AggressionMgrService.cpp"
      "${TARGET_SOURCE_DIR}/character/CertificateMgrDB.cpp"
      "${TARGET_SOURCE_DIR}/character/CertificateMgrService.cpp"

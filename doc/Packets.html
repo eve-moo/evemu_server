@@ -86,6 +86,10 @@ and open the template in the editor.
         </pre>
         When received the PyService is looked up based on either the PyService::dest::service value or PyCallStream::remoteObjectStr if calling a bound object.<br>
         A PyCallArgs is then created from the PyCallStream with PyCallArgs::tuple = PyCallStream::arg_tuple and PyCallArgs::byname = PyCallStream::arg_dict.<br>
+        If the method is MachoResolveObject, then the node ID is returned.
+        <pre class="brush: bash">
+            [PyInt] = nodeID
+        </pre>
         If the method is MachoBindObject, then the PyService::_CreateBoundObject function is called to create a bound object.  If a call is also provided the call is executed.  The bound object and optionally the call results are returned as follows.<br>
         <pre class="brush: bash">
             [PyTuple 2 items]
@@ -94,10 +98,6 @@ and open the template in the editor.
                         [PyString] = PyBoundObject::GetBindStr()
                         [PyInt] = expiration time
                 [PyNone/PyObjectData Name: utillib.KeyVal] = optional call results.
-        </pre>
-        If the method is MachoResolveObject, then the node ID is returned.
-        <pre class="brush: bash">
-            [PyInt] = nodeID
         </pre>
         If any other method is called then the service dispatcher calls the appropriate Handle_XXX function of the service.
         <h3>Packet Type: 7 - Call Response</h3>

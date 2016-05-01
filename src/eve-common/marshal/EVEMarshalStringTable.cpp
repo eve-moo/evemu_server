@@ -108,7 +108,7 @@ const char* const s_mStringTable[] =
     "userID",
     "util.CachedObject",
     "util.IndexRowset",
-    "util.Moniker",
+    "carbon.common.script.net.moniker.Moniker",
     "util.Row",
     "eve.common.script.sys.rowset.Rowset",
     "*multicastID",

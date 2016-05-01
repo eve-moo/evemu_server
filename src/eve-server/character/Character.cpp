@@ -1127,31 +1127,39 @@ PyObject *Character::GetDescription() const
     return row.Encode();
 }
 
-PyTuple *Character::GetSkillQueue() {
+PyList *Character::GetSkillQueue()
+{
     // return skills from skill queue
     PyList *list = new PyList;
 
-    SkillQueue::iterator cur, end;
-    cur = m_skillQueue.begin();
-    end = m_skillQueue.end();
-    for(; cur != end; cur++)
+    int position = 1;
+    uint64 startTime = Win32TimeNow();
+    for(auto cur : m_skillQueue)
     {
+        uint32 typeID = cur.typeID;
+        int32 level = cur.level;
+        SkillRef skill = GetSkill(typeID);
+        if(skill.get() == nullptr)
+        {
+            continue;
+        }
         SkillQueue_Element el;
 
-        el.typeID = cur->typeID;
-        el.level = cur->level;
+        uint64 endTime = skill->getAttribute(AttrExpiryTime).get_int();
+        el.trainingTypeID = typeID;
+        el.trainingToLevel = level;
+        el.trainingStartSP = skill->GetSkillPoints();
+        el.trainingDestinationSP = skill->GetSPForLevel(level);
+        el.trainingStartTime = startTime;
+        el.trainingEndTime = endTime;
+        el.queuePosition = position;
+        position++;
+        startTime = endTime;
 
         list->AddItem( el.Encode() );
     }
 
-    // now encapsulate it in a tuple with the free points
-    PyTuple *tuple = new PyTuple(2);
-    tuple->SetItem(0, list);
-    // sending 0, as done on retail, doesn't fuck up calculation for some reason
-    // so we can take the same shortcut here
-    tuple->SetItem(1, new PyInt(0));
-
-    return tuple;
+    return list;
 }
 
 SkillRef Character::GetSkillInQueue(uint32 index)

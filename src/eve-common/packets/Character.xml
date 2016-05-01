@@ -181,17 +181,34 @@
     </elementDef>
 
     <elementDef name="SkillQueue_Element">
-        <tupleInline>
-            <int name="typeID" />
-            <int name="level" />
-        </tupleInline>
-    </elementDef>
-
-    <elementDef name="Call_SaveSkillQueue">
-        <tupleInline>
-            <!-- 0: List of SkillQueue_Element -->
-            <list name="queue" />
-        </tupleInline>
+        <objectInline>
+            <stringInline value="utillib.KeyVal" />
+            <dictInline>
+                <dictInlineEntry key="trainingStartSP">
+                    <int name="trainingStartSP"/>
+                </dictInlineEntry>
+                <dictInlineEntry key="queuePosition">
+                    <int name="queuePosition"/>
+                </dictInlineEntry>
+                <dictInlineEntry key="trainingTypeID">
+                    <int name="trainingTypeID"/>
+                </dictInlineEntry>
+                <dictInlineEntry key="trainingDestinationSP">
+                    <int name="trainingDestinationSP"/>
+                </dictInlineEntry>
+                <dictInlineEntry key="trainingEndTime">
+                    <long name="trainingEndTime"/>
+                </dictInlineEntry>
+                <dictInlineEntry key="trainingStartTime">
+                    <long name="trainingStartTime"/>
+                </dictInlineEntry>
+                <dictInlineEntry key="trainingToLevel">
+                    <int name="trainingToLevel"/>
+                </dictInlineEntry>
+                <!--            <int name="typeID" />
+                <int name="level" />-->
+            </dictInline>
+        </objectInline>
     </elementDef>
 
     <elementDef name="Call_RespecCharacter">

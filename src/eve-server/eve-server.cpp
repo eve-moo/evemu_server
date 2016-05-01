@@ -67,6 +67,7 @@ trapfpe()
 #include "cache/BulkMgrService.h"
 #include "cache/ObjCacheService.h"
 // character services
+#include "character/AchievementTrackerMgrService.h"
 #include "character/AggressionMgrService.h"
 #include "character/CertificateMgrService.h"
 #include "character/CharFittingMgrService.h"
@@ -299,6 +300,7 @@ int main( int argc, char* argv[] )
     // Please keep the services list clean so it's easier to find something
 
     PyServiceMgr::RegisterService(new AccountService());
+    PyServiceMgr::RegisterService(new AchievementTrackerMgrService());
     PyServiceMgr::RegisterService(new AgentMgrService());
     PyServiceMgr::RegisterService(new AggressionMgrService());
     PyServiceMgr::RegisterService(new AlertService());
@@ -363,7 +365,8 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new ReprocessingService());
     PyServiceMgr::RegisterService(new SearchMgrService());
     PyServiceMgr::RegisterService(new ShipService());
-    PyServiceMgr::RegisterService(new SkillMgrService());
+    //PyServiceMgr::RegisterService(new SkillMgrService());
+    PyServiceMgr::RegisterService(new SkillMgr2Service());
     PyServiceMgr::RegisterService(new SlashService(&command_dispatcher));
     PyServiceMgr::RegisterService(new SovereigntyMgrService());
     PyServiceMgr::RegisterService(new Standing2Service());
