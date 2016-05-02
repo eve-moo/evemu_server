@@ -1,28 +1,5 @@
 <elements>
 
-    <elementDef name="OnSkillStartTraining">
-        <tupleInline>
-            <stringInline value="OnSkillStartTraining" />
-            <int name="itemID" />
-            <real name="endOfTraining" />
-        </tupleInline>
-    </elementDef>
-
-    <elementDef name="OnSkillTrainingStopped">
-        <tupleInline>
-            <stringInline value="OnSkillTrainingStopped" />
-            <int name="itemID" />
-            <long name="endOfTraining" />
-        </tupleInline>
-    </elementDef>
-
-    <elementDef name="OnSkillTrained">
-        <tupleInline>
-            <stringInline value="OnSkillTrained" />
-            <int name="itemID" />
-        </tupleInline>
-    </elementDef>
-
     <elementDef name="CallSetLabel">
         <tupleInline>
             <int name="itemID" />

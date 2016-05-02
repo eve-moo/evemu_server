@@ -48,6 +48,8 @@ public:
     PyCallable_DECL_CALL(GetImplants)
     PyCallable_DECL_CALL(GetAttributes)
     PyCallable_DECL_CALL(SaveNewQueue)
+    PyCallable_DECL_CALL(GetRespecInfo)
+    PyCallable_DECL_CALL(RespecCharacter)
 
     //    /**
     //     * InjectSkillIntoBrain
@@ -83,8 +85,6 @@ public:
     //     */
     //    PyCallable_DECL_CALL(AddToEndOfSkillQueue)
     //
-    //    PyCallable_DECL_CALL(RespecCharacter)
-    //    PyCallable_DECL_CALL(GetRespecInfo)
     //    PyCallable_DECL_CALL(GetCharacterAttributeModifiers)
 
 protected:
@@ -136,6 +136,8 @@ SkillMgr2Bound::SkillMgr2Bound()
     PyCallable_REG_CALL(SkillMgr2Bound, GetImplants)
     PyCallable_REG_CALL(SkillMgr2Bound, GetAttributes)
     PyCallable_REG_CALL(SkillMgr2Bound, SaveNewQueue)
+    PyCallable_REG_CALL(SkillMgr2Bound, GetRespecInfo)
+    PyCallable_REG_CALL(SkillMgr2Bound, RespecCharacter)
             
     //    PyCallable_REG_CALL(SkillMgr2Bound, InjectSkillIntoBrain)
     //    PyCallable_REG_CALL(SkillMgr2Bound, CharStartTrainingSkillByTypeID)
@@ -146,8 +148,6 @@ SkillMgr2Bound::SkillMgr2Bound()
     //    PyCallable_REG_CALL(SkillMgr2Bound, SaveSkillQueue)
     //    PyCallable_REG_CALL(SkillMgr2Bound, AddToEndOfSkillQueue)
     //
-    //    PyCallable_REG_CALL(SkillMgr2Bound, GetRespecInfo)
-    //    PyCallable_REG_CALL(SkillMgr2Bound, RespecCharacter)
     //    PyCallable_REG_CALL(SkillMgr2Bound, GetCharacterAttributeModifiers)
 }
 
@@ -172,11 +172,7 @@ PyResult SkillMgr2Bound::Handle_GetSkills(PyCallArgs &call)
         SkillRef skill = chr->GetSkill(skillItem->typeID());
         if(skill.get() != nullptr)
         {
-            PyDict *skillDict = new PyDict();
-            skillDict->SetItem(new PyString("skillPoints"), new PyInt((int) (skill->GetSkillPoints() + 0.99)));
-            skillDict->SetItem(new PyString("skillRank"), new PyFloat(skill->getAttribute(AttrSkillTimeConstant).get_float()));
-            skillDict->SetItem(new PyString("skillLevel"), new PyInt(skill->GetSkillLevel()));
-            skills->SetItem(new PyInt(skill->typeID()), new PyObject("utillib.KeyVal", skillDict));
+            skills->SetItem(new PyInt(skill->typeID()), skill->getKeyValDict());
         }
     }
     return skills;
@@ -198,15 +194,6 @@ PyResult SkillMgr2Bound::Handle_GetSkillHistory(PyCallArgs& call)
         codelog(CLIENT__ERROR, "%s: failed to decode arguments", call.client->GetName());
         return NULL;
     }
-
-    // eventTypeIDs:
-    // 34 - SkillClonePenalty
-    // 36 - SkillTrainingStarted
-    // 37 - SkillTrainingComplete
-    // 38 - SkillTrainingCanceled
-    // 39 - GMGiveSkill
-    // 53 - SkillTrainingComplete
-    // 307 - SkillPointsApplied
 
     CharacterRef chr = call.client->GetChar();
     DBQueryResult result;
@@ -338,6 +325,83 @@ PyResult SkillMgr2Bound::Handle_SaveNewQueue(PyCallArgs &call)
 
     return NULL;
 }
+
+PyResult SkillMgr2Bound::Handle_GetRespecInfo(PyCallArgs& call)
+{
+    uint32 freeRespecs = 0;
+    uint64 lastRespec = 0;
+    uint64 nextRespec = 0;
+    PyDict* result = new PyDict;
+    if(!CharacterDB::GetRespecInfo(call.client->GetCharacterID(), freeRespecs, lastRespec, nextRespec))
+    {
+        result->SetItemString("lastRespecDate", new PyNone());
+        result->SetItemString("freeRespecs", new PyInt(freeRespecs));
+        result->SetItemString("nextTimedRespec", new PyNone());
+    }
+    else
+    {
+        result->SetItemString("lastRespecDate", new PyInt(lastRespec));
+        result->SetItemString("freeRespecs", new PyInt(freeRespecs));
+        result->SetItemString("nextTimedRespec", new PyLong(nextRespec));
+    }
+
+    return result;
+}
+
+PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
+{
+    if(call.tuple->size() != 1)
+    {
+        codelog(CLIENT__ERROR, "%s: Respec character tuple wrong size.", call.client->GetName());
+        return NULL;
+    }
+    if(!call.tuple->GetItem(0)->IsDict())
+    {
+        codelog(CLIENT__ERROR, "%s: Respec character not a dict.", call.client->GetName());
+        return NULL;
+    }
+
+    CharacterRef chr = call.client->GetChar();
+    // Do we have any respecs left? And reduce by one if yes.
+    if(!CharacterDB::ReportRespec(chr->itemID()))
+    {
+        return NULL;
+    }
+    // Get skill in training.
+    SkillRef training = chr->GetSkillInTraining();
+    // Stop the training for the respec.
+    chr->StopTraining(false);
+    // Do the respec.
+    PyDict *attribs = call.tuple->GetItem(0)->AsDict();
+    // TODO: validate these values (and their sum)
+    for(auto attrib : attribs->items)
+    {
+        uint32 attribID = 0;
+        if(attrib.first->IsInt())
+        {
+            attribID = attrib.first->AsInt()->value();
+            if(attrib.second->IsInt())
+            {
+                uint32 value = attrib.second->AsInt()->value();
+                chr->setAttribute(attribID, value);
+            }
+        }
+    }
+    chr->SaveAttributes();
+    // Were we training a skill?
+    if(training.get() != nullptr)
+    {
+        // Yes, restart it.
+        chr->StartTraining(training->typeID());
+    }
+
+    chr->SendSkillQueueChangedNotice(call.client);
+
+    PyTuple *tuple = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), new_tuple(new PyTuple(0)))));
+    call.client->SendNotification("OnRespecInfoChanged", "charid", &tuple, false);
+    return nullptr;
+}
+
 //PyResult SkillMgr2Bound::Handle_GetCharacterAttributeModifiers(PyCallArgs &call)
 //{
 //    // Called for Attribute re-mapping.
@@ -469,56 +533,6 @@ PyResult SkillMgr2Bound::Handle_SaveNewQueue(PyCallArgs &call)
 //    ch->UpdateSkillQueue();
 //
 //    return NULL;
-//}
-//
-//PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
-//{
-//    Call_RespecCharacter spec;
-//    if (!spec.Decode(call.tuple))
-//    {
-//        codelog(CLIENT__ERROR, "Failed to decode RespecCharacter arguments");
-//        return NULL;
-//    }
-//
-//	CharacterRef cref = call.client->GetChar();
-//	if( cref->GetSkillInTraining() )
-//		throw(PyException(MakeUserError("RespecSkillInTraining")));
-//
-//    // return early if this is an illegal call
-//    if (!CharacterDB::ReportRespec(call.client->GetCharacterID()))
-//        return NULL;
-//
-//    // TODO: validate these values (and their sum)
-//    cref->setAttribute(AttrCharisma, spec.charisma);
-//    cref->setAttribute(AttrIntelligence, spec.intelligence);
-//    cref->setAttribute(AttrMemory, spec.memory);
-//    cref->setAttribute(AttrPerception, spec.perception);
-//    cref->setAttribute(AttrWillpower, spec.willpower);
-//    cref->SaveAttributes();
-//
-//    // no return value
-//    return NULL;
-//}
-//
-//PyResult SkillMgr2Bound::Handle_GetRespecInfo( PyCallArgs& call )
-//{
-//    uint32 freeRespecs;
-//    uint64 lastRespec = 0;
-//    uint64 nextRespec;
-//    if (!CharacterDB::GetRespecInfo(call.client->GetCharacterID(), freeRespecs, lastRespec, nextRespec))
-//    {
-//        // insert dummy values
-//        freeRespecs = 0;
-//        lastRespec = 0;
-//        nextRespec = 0;
-//    }
-//
-//    PyDict* result = new PyDict;
-//    result->SetItemString( "lastRespecDate", new PyInt( lastRespec ) );
-//    result->SetItemString( "freeRespecs", new PyInt( freeRespecs ) );
-//    result->SetItemString( "nextTimedRespec", new PyLong( nextRespec ) );
-//
-//    return result;
 //}
 //
 //PyResult SkillMgr2Bound::Handle_CharStartTrainingSkillByTypeID( PyCallArgs& call )

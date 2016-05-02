@@ -91,6 +91,12 @@ public:
      */
     bool SetSkillPoints(double points);
 
+    /**
+     * Get a utillib.KeyVal with a dict containing skillPoints, SkillRank, and skillLevel.
+     * @return The object.
+     */
+    PyObject *getKeyValDict();
+    void SendSkillChangeNotice(Client *client);
 protected:
     Skill(
         uint32 _skillID,

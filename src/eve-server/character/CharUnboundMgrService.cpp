@@ -34,6 +34,7 @@
 #include "character/PhotoUploadService.h"
 
 #include "chr/ChrBloodline.h"
+#include "SkillMgrService.h"
 
 PyCallable_Make_InnerDispatcher(CharUnboundMgrService)
 
@@ -332,23 +333,49 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     CharacterDB::add_name_validation_set(char_item->itemName().c_str(), char_item->itemID());
 
     //spawn all the skills
+    uint32 charID = char_item->itemID();
+    uint64 time = Win32TimeNow();
     uint32 skillLevel;
+    std::string values;
+    uint32 method = skillEventCharCreation;
     for(auto cur : startingSkills)
     {
-        ItemData skillItem(cur.first, char_item->itemID(), char_item->itemID(), flagSkill);
-        SkillRef i = ItemFactory::SpawnSkill(skillItem);
-        if( !i )
+        uint32 skillType = cur.first;
+        ItemData skillItem(skillType, charID, charID, flagSkill);
+        SkillRef skill = ItemFactory::SpawnSkill(skillItem);
+        if(!skill)
         {
-            _log(CLIENT__ERROR, "Failed to add skill %u to char %s (%u) during char create.", cur.first, char_item->itemName().c_str(), char_item->itemID());
+            _log(CLIENT__ERROR, "Failed to add skill %u to char %s (%u) during char create.", cur.first, char_item->itemName().c_str(), charID);
             continue;
         }
 
         skillLevel = cur.second;
-        i->setAttribute(AttrSkillLevel, skillLevel );
-        i->setAttribute(AttrSkillPoints, i->GetSPForLevel(cur.second));
-        i->SaveAttributes();
+        double skillPoints = skill->GetSPForLevel(cur.second);
+        skill->setAttribute(AttrSkillLevel, skillLevel);
+        skill->setAttribute(AttrSkillPoints, skillPoints);
+        skill->SaveAttributes();
+        // Construct insert group.
+        if(values.length() > 0)
+        {
+            values += ", ";
+        }
+        char buf[1024];
+        std::sprintf(buf, "(%u, %u, %u, %f, %u, %" PRId64 ")",
+                     charID, skillType, skillLevel, skillPoints, method, time);
+        values += buf;
     }
-
+    if(!values.empty())
+    {
+        // Skill to history
+        DBerror err;
+        if(!DBcore::RunQuery(err,
+                             "INSERT INTO srvChrSkillHistory "
+                             "(characterID, typeID, level, points, eventID, eventTime)"
+                             " VALUES %s", values.c_str()))
+        {
+            _log(DATABASE__ERROR, "Failed to save skill creation history for character %u: %s", charID, err.c_str());
+        }
+    }
     //now set up some initial inventory:
     InventoryItemRef initInvItem;
 

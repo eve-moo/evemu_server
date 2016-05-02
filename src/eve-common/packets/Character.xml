@@ -211,16 +211,6 @@
         </objectInline>
     </elementDef>
 
-    <elementDef name="Call_RespecCharacter">
-        <tupleInline>
-            <int name="charisma" />
-            <int name="intelligence" />
-            <int name="memory" />
-            <int name="perception" />
-            <int name="willpower" />
-        </tupleInline>
-    </elementDef>
-
     <elementDef name="Call_InjectSkillIntoBrain">
         <tupleInline>
             <listInt name="skills" />

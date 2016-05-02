@@ -1138,15 +1138,9 @@ PyResult Command_giveskill( Client* who, const Seperator& args )
         }
 
 		// Either way, this character now has this skill trained to the specified level, so inform client:
-        if( who != NULL )
+        if( who != NULL)
         {
-            OnSkillTrained ost;
-            ost.itemID = skill->itemID();
-
-            PyTuple* tmp = ost.Encode();
-            who->QueueDestinyEvent( &tmp );
-            PySafeDecRef( tmp );
-
+            skill->SendSkillChangeNotice(who);
             who->UpdateSkillTraining();
         }
     }

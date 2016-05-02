@@ -293,24 +293,29 @@ public:
     void ClearSkillQueue();
     /**
      * Stop the current skill training.
+     * @param notify Should the client receive a notification?
      */
-    void StopTraining();
+    void StopTraining(bool notify = true);
     /**
      * Start the specified skill training.
      * @param skillID The skillID of the still to start training.
      * @param nextStartTime The start time to use or 0 for now.
+     * @param notify Should the client receive a notification?
      * @return The currently training.
      */
-    SkillRef StartTraining(uint32 skillID, uint64 nextStartTime = 0);
+    SkillRef StartTraining(uint32 skillID, uint64 nextStartTime = 0, bool notify = true);
     /**
      * Updates skill queue.
      */
     void UpdateSkillQueue();
     /**
      * Update skill training end time on char select screen.
-     * @author allan
      */
-    void UpdateSkillQueueEndTime( const SkillQueue &queue);
+    void UpdateSkillQueueTimes();
+    /**
+     * Send a OnNewSkillQUeueSaved message to the client.
+     */
+    void SendSkillQueueChangedNotice(Client *client);
 
     /* GrantCertificate( uint32 certificateID )
      *
@@ -570,6 +575,7 @@ protected:
     // Skill queue:
     SkillQueue m_skillQueue;
     EvilNumber m_totalSPtrained;
+    uint64 m_trainingStartTime;
 
     Certificates m_certificates;
 

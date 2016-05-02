@@ -29,6 +29,25 @@
 #include "PyBoundObject.h"
 #include "PyService.h"
 
+enum skillEventID
+{
+    skillEventCharCreation = 33,
+    skillEventClonePenalty = 34,
+    skillEventGMGive = 39,
+    skillEventHaltedAccountLapsed = 260,
+    skillEventTaskMaster = 35,
+    skillEventTrainingCancelled = 38,
+    skillEventTrainingComplete = 37,
+    skillEventTrainingStarted = 36,
+    skillEventQueueTrainingCompleted = 53,
+    skillEventSkillInjected = 56,
+    skillEventFreeSkillPointsUsed = 307,
+    skillEventGMReverseFreeSkillPointsUsed = 309,
+    skillEventSkillRemoved = 177,
+    skillEventSkillExtracted = 431,
+    skillEventSkillExtractionReverted = 432
+};
+
 class SkillMgr2Service : public PyService
 {
 public:
