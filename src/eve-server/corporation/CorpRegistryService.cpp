@@ -33,6 +33,7 @@
 #include "corporation/CorpRegistryService.h"
 #include "corporation/CorporationDB.h"
 #include "PyServiceMgr.h"
+#include "Corporation.h"
 
 class CorpRegistryBound
 : public PyBoundObject

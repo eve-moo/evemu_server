@@ -157,6 +157,7 @@ SET( config_SOURCE
      "${TARGET_SOURCE_DIR}/config/LocalizationServerService.cpp" )
 
 SET( corporation_INCLUDE
+     "${TARGET_INCLUDE_DIR}/corporation/Corporation.h"
      "${TARGET_INCLUDE_DIR}/corporation/CorpBookmarkMgrService.h"
      "${TARGET_INCLUDE_DIR}/corporation/CorpMgrService.h"
      "${TARGET_INCLUDE_DIR}/corporation/CorporationCarrier.h"

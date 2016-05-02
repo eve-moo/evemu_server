@@ -28,6 +28,12 @@
 
 #include "PyService.h"
 
+/*
+crimewatchOutcomeNone = 0
+crimewatchOutcomeSuspect = 1
+crimewatchOutcomeCriminal = 2
+crimewatchOutcomeEngagement = 3
+ */
 class CrimeWatchService
 : public PyService
 {
