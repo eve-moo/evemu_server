@@ -131,7 +131,7 @@
             <int name="env_itemID" />
             <int name="env_charID" />
             <int name="env_shipID" />
-            <int name="env_target" none_marker="0" default="0" />
+            <raw name="env_target" />
             <raw name="env_other" />
             <raw name="env_area" />
             <int name="env_effectID" />

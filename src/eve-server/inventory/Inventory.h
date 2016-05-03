@@ -102,7 +102,7 @@ public:
     /*
      * Primary packet builders:
      */
-    virtual PyRep* GetItem() const = 0;
+    virtual PyRep* GetItem() = 0;
 
     CRowSet* List( EVEItemFlags flag, uint32 forOwner = 0 ) const;
     void List( CRowSet* into, EVEItemFlags flag, uint32 forOwner = 0 ) const;

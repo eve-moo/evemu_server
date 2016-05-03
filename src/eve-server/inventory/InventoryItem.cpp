@@ -715,14 +715,11 @@ void InventoryItem::Delete()
     }
     //first, get out of client's sight.
     uint32 ownerID = m_ownerID;
-    std::map<int32, PyRep *> changes;
-    changes[ixLocationID] = new PyInt(m_locationID);
-    changes[ixOwnerID] = new PyInt(m_ownerID);
     // Set new owner and location.
     m_ownerID = 2;
     m_locationID = 6;
     // Issue changes notice to client.
-    SendItemChange(ownerID, changes); //changes is consumed
+    sendItemChangeNotice(EntityList::FindCharacter(ownerID));
 
     //take ourself out of the DB
     DBerror err;
@@ -769,56 +766,14 @@ void InventoryItem::GetItemStatusRow( PyPackedRow* into ) const
     into->SetField("incapacitated", new PyBool((m_AttributeMap.fetchAttribute(AttrIsIncapacitated, value) ? value.get_int() != 0 : false)));
 }
 
-PyPackedRow* InventoryItem::GetItemRow() const
-{
-    PyList *keywords = new PyList();
-    keywords->AddItem(new_tuple(new PyString("stacksize"), new PyToken("util.StackSize")));
-    keywords->AddItem(new_tuple(new PyString("singleton"), new PyToken("util.Singleton")));
-
-    DBRowDescriptor* header = new DBRowDescriptor(keywords);
-    header->AddColumn( "itemID",     DBTYPE_I8 );
-    header->AddColumn( "typeID",     DBTYPE_I4 );
-    header->AddColumn( "ownerID",    DBTYPE_I4 );
-    header->AddColumn( "locationID", DBTYPE_I8 );
-    header->AddColumn( "flagID",     DBTYPE_I2 );
-    header->AddColumn( "quantity",   DBTYPE_I4 );
-    header->AddColumn( "groupID",    DBTYPE_I2 );
-    header->AddColumn( "categoryID", DBTYPE_I4 );
-    header->AddColumn( "customInfo", DBTYPE_STR );
-
-    //header->AddColumn( "singleton",  DBTYPE_BOOL );
-    //header->AddColumn( "stacksize" , DBTYPE_I4 );
-
-    PyPackedRow* row = new PyPackedRow( header );
-    GetItemRow( row );
-
-    return row;
-}
-
-void InventoryItem::GetItemRow( PyPackedRow* into ) const
-{
-    into->SetField( "itemID",     new PyLong( itemID() ) );
-    into->SetField( "typeID",     new PyInt( typeID() ) );
-    into->SetField( "ownerID",    new PyInt( ownerID() ) );
-    into->SetField( "locationID", new PyLong( locationID() ) );
-    into->SetField( "flagID",     new PyInt( flag() ) );
-    into->SetField( "quantity",   new PyInt( singleton() ? -1 : quantity()) );
-    into->SetField( "groupID",    new PyInt( groupID() ) );
-    into->SetField( "categoryID", new PyInt( categoryID() ) );
-    into->SetField( "customInfo", new PyString( customInfo() ) );
-
-    //into->SetField( "singleton",  new PyBool( singleton() ) );
-    //into->SetField( "stacksize",  new PyInt (quantity()) );
-}
-
-bool InventoryItem::Populate( Rsp_CommonGetInfo_Entry& result )
+bool InventoryItem::Populate(Rsp_CommonGetInfo_Entry& result)
 {
     //itemID:
     result.itemID = itemID();
 
     //invItem:
     PySafeDecRef( result.invItem );
-    result.invItem = GetItemRow();
+    result.invItem = getPackedRow();
 
     //hacky, but it doesn't really hurt anything.
     if (getAttribute(AttrIsOnline).get_int() != 0)
@@ -830,16 +785,17 @@ bool InventoryItem::Populate( Rsp_CommonGetInfo_Entry& result )
         es.env_itemID = itemID();
         es.env_charID = ownerID();  //may not be quite right...
         es.env_shipID = locationID();
-        es.env_target = locationID();   //this is what they do.
-        es.env_other = new PyNone;
-		es.env_area = new PyNone;
+        es.env_target = new PyNone(); //this is what they do.
+        es.env_other = new PyNone();
+        es.env_area = new PyList();
         es.env_effectID = effectOnline;
-        es.startTime = Win32TimeNow() - Win32Time_Hour; //act like it happened an hour ago
-        es.duration = INT_MAX;
+        es.startTime = Win32TimeNow() - Win32Time_Second;
+        es.duration = -1;
         es.repeat = 0;
 
         result.activeEffects[es.env_effectID] = es.Encode();
     }
+    // TO-DO: add other effects.
 
     //activeEffects:
     //result..activeEffects[id] = List[11];
@@ -933,14 +889,7 @@ void InventoryItem::Move(uint32 new_location, EVEItemFlags new_flag, bool notify
     //notify about the changes.
     if( notify )
     {
-        std::map<int32, PyRep *> changes;
-
-        if( new_location != old_location )
-            changes[ixLocationID] = new PyInt(old_location);
-        if( new_flag != old_flag )
-            changes[ixFlag] = new PyInt(old_flag);
-
-        SendItemChange( ownerID(), changes );   //changes is consumed
+        sendItemChangeNotice(EntityList::FindCharacter(m_ownerID));
     }
 }
 
@@ -988,12 +937,9 @@ bool InventoryItem::SetQuantity(uint32 qty_new, bool notify)
     }
 
     //notify about the changes.
-    if(notify) {
-        std::map<int32, PyRep *> changes;
-
-        //send the notify to the new owner.
-        changes[ixQuantity] = new PyInt(old_qty);
-        SendItemChange(m_ownerID, changes); //changes is consumed
+    if(notify)
+    {
+        sendItemChangeNotice(EntityList::FindCharacter(m_ownerID));
     }
 
     return true;
@@ -1018,12 +964,9 @@ bool InventoryItem::SetFlag(EVEItemFlags new_flag, bool notify)
         return false;
     }
 
-    if(notify) {
-        std::map<int32, PyRep *> changes;
-
-        //send the notify to the new owner.
-        changes[ixFlag] = new PyInt(new_flag);
-        SendItemChange(m_ownerID, changes); //changes is consumed
+    if(notify)
+    {
+        sendItemChangeNotice(EntityList::FindCharacter(m_ownerID));
     }
     return true;
 }
@@ -1108,10 +1051,9 @@ bool InventoryItem::ChangeSingleton(bool new_singleton, bool notify)
     }
 
     //notify about the changes.
-    if(notify) {
-        std::map<int32, PyRep *> changes;
-        changes[ixSingleton] = new PyInt(old_singleton);
-        SendItemChange(m_ownerID, changes); //changes is consumed
+    if(notify)
+    {
+        sendItemChangeNotice(EntityList::FindCharacter(m_ownerID));
     }
 
     return true;
@@ -1142,16 +1084,9 @@ void InventoryItem::ChangeOwner(uint32 new_owner, bool notify)
     }
 
     //notify about the changes.
-    if(notify) {
-        std::map<int32, PyRep *> changes;
-
-        //send the notify to the new owner.
-        changes[ixOwnerID] = new PyInt(old_owner);
-        SendItemChange(new_owner, changes); //changes is consumed
-
-        //also send the notify to the old owner.
-        changes[ixOwnerID] = new PyInt(old_owner);
-        SendItemChange(old_owner, changes); //changes is consumed
+    if(notify)
+    {
+        sendItemChangeNotice(EntityList::FindCharacter(m_ownerID));
     }
 }
 
@@ -1169,18 +1104,22 @@ PyPackedRow *InventoryItem::getPackedRow()
     header->AddColumn("customInfo", DBTYPE_STR);
 
     PyPackedRow* row = new PyPackedRow(header);
-    GetItemStatusRow(row);
+    getPackedRow(row);
 
-    row->SetField("itemID", new PyLong(itemID()));
-    row->SetField("typeID", new PyInt(m_type->typeID));
-    row->SetField("ownerID", new PyInt(m_ownerID));
-    row->SetField("locationID", new PyLong(m_locationID));
-    row->SetField("flagID", new PyInt(m_flag));
-    row->SetField("quantity", new PyInt(m_quantity));
-    row->SetField("groupID", new PyInt(m_type->groupID));
-    row->SetField("categoryID", new PyInt(m_type->getCategoryID()));
-    row->SetField("customInfo", new PyString(m_customInfo));
     return row;
+}
+
+void InventoryItem::getPackedRow(PyPackedRow* into) const
+{
+    into->SetField("itemID", new PyLong(itemID()));
+    into->SetField("typeID", new PyInt(m_type->typeID));
+    into->SetField("ownerID", new PyInt(m_ownerID));
+    into->SetField("locationID", new PyLong(m_locationID));
+    into->SetField("flagID", new PyInt(m_flag));
+    into->SetField("quantity", new PyInt(m_quantity));
+    into->SetField("groupID", new PyInt(m_type->groupID));
+    into->SetField("categoryID", new PyInt(m_type->getCategoryID()));
+    into->SetField("customInfo", new PyString(m_customInfo));
 }
 
 void InventoryItem::sendItemChangeNotice(Client *client)
@@ -1219,24 +1158,6 @@ void InventoryItem::SaveItem()
         )
     );
 }
-
-//contents of changes are consumed and cleared
-void InventoryItem::SendItemChange(uint32 toID, std::map<int32, PyRep *> &changes) const {
-    //TODO: figure out the appropriate list of interested people...
-    Client *c = EntityList::FindCharacter(toID);
-    if(c == NULL)
-        return; //not found or not online...
-
-    NotifyOnItemChange change;
-    change.itemRow = GetItemRow();
-
-    change.changes = changes;
-    changes.clear();    //consume them.
-
-    PyTuple *tmp = change.Encode();  //this is consumed below
-    c->SendNotification("OnItemChange", "charid", &tmp, false); //unsequenced.
-}
-
 
 /*typedef enum {
     dgmEffPassive = 0,

@@ -26,6 +26,7 @@
 #include "eve-server.h"
 
 #include "Client.h"
+#include "EntityList.h"
 #include "PyCallable.h"
 #include "character/Character.h"
 #include "inventory/Inventory.h"
@@ -265,7 +266,7 @@ void Inventory::List( CRowSet* into, EVEItemFlags _flag, uint32 forOwner ) const
             && ( i->ownerID() == forOwner || forOwner == 0 ) )
         {
             PyPackedRow* row = into->NewRow();
-            i->GetItemRow( row );
+            i->getPackedRow(row);
         }
     }
 }
@@ -493,9 +494,11 @@ void Inventory::StackAll(EVEItemFlags locFlag, uint32 forOwner)
         }
         if (!toMerge.empty())
         {
+            Client *client = EntityList::FindCharacter(forOwner);
             // We found other instances of this type.
             std::string itemIDs;
             std::string nItem = " itemID=";
+            PyList *items = new PyList();
             uint32 stackAmount = 0;
             for (auto merge : toMerge)
             {
@@ -516,9 +519,15 @@ void Inventory::StackAll(EVEItemFlags locFlag, uint32 forOwner)
                 // Set new owner and location.
                 merge->m_ownerID = 2;
                 merge->m_locationID = 6;
-                merge->SendItemChange(ownerID, changes); //changes is consumed
+                items->AddItem(merge->getPackedRow());
             }
-            // Alter amount.
+            // Send notice of deleted items.
+            PyDict *dict = new PyDict();
+            dict->SetItem(new PyInt(9), new PyInt(1));
+            PyTuple *tuple = new_tuple(items, dict);
+            PyTuple *newQueue = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), tuple)));
+            client->SendNotification("OnItemsChanged", "charid", &newQueue, false);
+            // Alter amount.  This sends the item change notice.
             item->AlterQuantity(stackAmount);
             // Remove all entries from database.
             DBerror err;

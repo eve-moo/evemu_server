@@ -130,8 +130,13 @@ protected:
         ItemData &data
     );
 
-    uint32 inventoryID() const { return itemID(); }
-    PyRep *GetItem() const { return GetItemRow(); }
+    uint32 inventoryID() const { return itemID();
+    }
+
+    PyRep *GetItem() 
+    {
+        return getPackedRow();
+    }
 
     void AddItem(InventoryItemRef item);
     void RemoveItem(InventoryItemRef item);

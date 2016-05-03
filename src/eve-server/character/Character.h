@@ -512,9 +512,9 @@ protected:
     uint32 inventoryID() const { return itemID();
     }
 
-    PyRep *GetItem() const
+    PyRep *GetItem()
     {
-        return GetItemRow();
+        return getPackedRow();
     }
 
     void AddItem(InventoryItemRef item);

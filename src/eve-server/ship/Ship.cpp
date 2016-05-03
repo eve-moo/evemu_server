@@ -469,8 +469,10 @@ PyDict *Ship::ShipGetState()
 	std::vector<InventoryItemRef> moduleList;
 	m_ModuleManager->GetModuleListOfRefs( &moduleList );
 
-	for(int i=0; i<moduleList.size(); i++)
-		result->SetItem(new PyInt(moduleList.at(i)->itemID()), moduleList.at(i)->GetItemStatusRow());
+    for(auto module : moduleList)
+    {
+        result->SetItem(new PyInt(module->itemID()), module->GetItemStatusRow());
+    }
 
 	return result;
 }

@@ -133,10 +133,6 @@ public:
      */
     bool Populate(Rsp_CommonGetInfo_Entry &into);
 
-    //PyTuple* GetItemRow() const;
-    PyPackedRow* GetItemRow() const;
-    void GetItemRow( PyPackedRow* into ) const;
-
     PyPackedRow* GetItemStatusRow() const;
     void GetItemStatusRow( PyPackedRow* into ) const;
 
@@ -205,6 +201,7 @@ public:
      * @return The packed row.
      */
     PyPackedRow *getPackedRow();
+    void getPackedRow(PyPackedRow* into) const;
     /**
      * Send a notice to the client about the item changing.
      * @param client The client to notify.
@@ -384,7 +381,6 @@ protected:
 		ItemData &data
 	);
 
-    void SendItemChange(uint32 toID, std::map<int32, PyRep *> &changes) const;
     void SetOnline(bool online);
 
     /*

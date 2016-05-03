@@ -131,7 +131,7 @@ protected:
 
     // Solar System Inventory Functions:
     uint32 inventoryID() const { return itemID(); }
-    PyRep *GetItem() const { return new PyNone(); }
+    PyRep *GetItem() { return new PyNone(); }
     void AddItem(InventoryItemRef item);
     void RemoveItem(InventoryItemRef item);
 
