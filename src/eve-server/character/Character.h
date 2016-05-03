@@ -279,8 +279,9 @@ public:
      * Perform injection of passed skill into the character.
      * @author xanarox
      * @param InventoryItem
+     * @param client The client to notify.
      */
-    bool InjectSkillIntoBrain(SkillRef skill);
+    bool injectSkillIntoBrain(SkillRef skill, Client *client);
     /* AddSkillToSkillQueue()
      *
      * This will add a skill into the skill queue.

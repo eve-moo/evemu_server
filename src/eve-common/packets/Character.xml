@@ -211,13 +211,6 @@
         </objectInline>
     </elementDef>
 
-    <elementDef name="Call_InjectSkillIntoBrain">
-        <tupleInline>
-            <listInt name="skills" />
-            <int name="stationID" />
-        </tupleInline>
-    </elementDef>
-
     <elementDef name="Call_ValidateNameEx">
         <tupleInline>
             <wstring name="name" />

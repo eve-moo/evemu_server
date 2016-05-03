@@ -1140,7 +1140,7 @@ PyResult Command_giveskill( Client* who, const Seperator& args )
 		// Either way, this character now has this skill trained to the specified level, so inform client:
         if( who != NULL)
         {
-            skill->SendSkillChangeNotice(who);
+            skill->sendSkillChangeNotice(who);
             who->UpdateSkillTraining();
         }
     }

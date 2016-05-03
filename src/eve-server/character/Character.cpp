@@ -595,31 +595,27 @@ EvilNumber Character::GetEndOfTraining() const
     return skill->getAttribute(AttrExpiryTime);
 }
 
-bool Character::InjectSkillIntoBrain(SkillRef skill)
+bool Character::injectSkillIntoBrain(SkillRef skill, Client *client)
 {
-    Client *c = EntityList::FindCharacter( itemID() );
-
     SkillRef oldSkill = GetSkill( skill->typeID() );
     if( oldSkill )
     {
         //TODO: build and send proper UserError for CharacterAlreadyKnowsSkill.
-        if (c != NULL)
+        if(client != NULL)
         {
-            c->SendNotifyMsg("You already know this skill.");
+            client->SendNotifyMsg("You already know this skill.");
         }
         return false;
     }
 
-    // TODO: based on config options later, check to see if another character, owned by this characters account,
-    // is training a skill.  If so, return. (flagID=61).
     if (!canUse(skill))
     {
         // TODO: need to send back a response to the client.  need packet specs.
         _log( ITEM__TRACE, "%s (%u): Requested to train skill %u item %u but prereq not complete.", itemName().c_str(), itemID(), skill->typeID(), skill->itemID() );
 
-        if (c != NULL)
+        if(client != NULL)
         {
-            c->SendNotifyMsg("Injection failed!  Skill prerequisites incomplete.");
+            client->SendNotifyMsg("Injection failed!  Skill prerequisites incomplete.");
         }
         return false;
     }
@@ -644,9 +640,11 @@ bool Character::InjectSkillIntoBrain(SkillRef skill)
     skill->MoveInto(*this, flagSkill);
     skill->SaveItem();
 
-    if (c != NULL)
+    if(client != NULL)
     {
-        c->SendNotifyMsg("Injection of skill complete.");
+        skill->sendItemChangeNotice(client);
+        skill->sendSkillChangeNotice(client);
+        client->SendNotifyMsg("Injection of skill complete.");
     }
     return true;
 }
@@ -785,7 +783,7 @@ void Character::StopTraining(bool notify)
     Client *client = EntityList::FindCharacter(itemID());
     if(notify)
     {
-        stopTraining->SendSkillChangeNotice(client);
+        stopTraining->sendSkillChangeNotice(client);
     }
     if(client != NULL)
     {
@@ -895,7 +893,7 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime, bool not
     if(notify)
     {
         Client *client = EntityList::FindCharacter(itemID());
-        startTraining->SendSkillChangeNotice(client);
+        startTraining->sendSkillChangeNotice(client);
     }
 
     return startTraining;
@@ -979,7 +977,7 @@ void Character::UpdateSkillQueue()
 
         if(client != NULL)
         {
-            currentTraining->SendSkillChangeNotice(client);
+            currentTraining->sendSkillChangeNotice(client);
             client->UpdateSkillTraining();
         }
         // We are now not training anything.

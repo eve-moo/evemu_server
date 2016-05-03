@@ -52,13 +52,6 @@ public:
     PyCallable_DECL_CALL(RespecCharacter)
 
     //    /**
-    //     * InjectSkillIntoBrain
-    //     *
-    //     * Injects a list of skills into a characters brain.
-    //     */
-    //    PyCallable_DECL_CALL(InjectSkillIntoBrain)
-    //
-    //    /**
     //     * CharStartTrainingSkillByTypeID
     //     *
     //     * Starts training a characters skill based on typeID
@@ -139,7 +132,6 @@ SkillMgr2Bound::SkillMgr2Bound()
     PyCallable_REG_CALL(SkillMgr2Bound, GetRespecInfo)
     PyCallable_REG_CALL(SkillMgr2Bound, RespecCharacter)
             
-    //    PyCallable_REG_CALL(SkillMgr2Bound, InjectSkillIntoBrain)
     //    PyCallable_REG_CALL(SkillMgr2Bound, CharStartTrainingSkillByTypeID)
     //    PyCallable_REG_CALL(SkillMgr2Bound, CharStopTrainingSkill)
     //    PyCallable_REG_CALL(SkillMgr2Bound, GetEndOfTraining)
@@ -365,6 +357,8 @@ PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
     // Do we have any respecs left? And reduce by one if yes.
     if(!CharacterDB::ReportRespec(chr->itemID()))
     {
+        // No, were done here.
+        // TO-DO: propper response for failed respec.
         return NULL;
     }
     // Get skill in training.
@@ -395,8 +389,10 @@ PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
         chr->StartTraining(training->typeID());
     }
 
+    // Send a notice to the client that the queue changed.
     chr->SendSkillQueueChangedNotice(call.client);
 
+    // Send a notice to the client that the respec was completed.
     PyTuple *tuple = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), new_tuple(new PyTuple(0)))));
     call.client->SendNotification("OnRespecInfoChanged", "charid", &tuple, false);
     return nullptr;
@@ -549,38 +545,5 @@ PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
 //    //Log::Error("SkillMgr2Bound::Handle_CharStartTrainingSkillByTypeID()", "TODO: This is used on resuming skill queue, so should be implemented");
 //    //Log::Debug( "SkillMgr2Bound", "Called CharStartTrainingSkillByTypeID stub." );
 //
-//    return NULL;
-//}
-//
-//PyResult SkillMgr2Bound::Handle_InjectSkillIntoBrain(PyCallArgs &call)
-//{
-//    Call_InjectSkillIntoBrain args;
-//    if( !args.Decode( &call.tuple ) ) {
-//        codelog( CLIENT__ERROR, "%s: failed to decode arguments", call.client->GetName() );
-//        return NULL;
-//    }
-//
-//    CharacterRef ch = call.client->GetChar();
-//
-//    std::vector<int32>::iterator cur, end;
-//    cur = args.skills.begin();
-//    end = args.skills.end();
-//    for(; cur != end; cur++)
-//    {
-//        SkillRef skill = ItemFactory::GetSkill(*cur);
-//        if( !skill )
-//        {
-//            codelog( ITEM__ERROR, "%s: failed to load skill item %u for injection.", call.client->GetName(), *cur );
-//            continue;
-//        }
-//
-//        if( !ch->InjectSkillIntoBrain( (SkillRef)skill ) )
-//        {
-//            //TODO: build and send UserError about injection failure.
-//            codelog(ITEM__ERROR, "%s: Injection of skill %u failed", call.client->GetName(), skill->itemID() );
-//        }
-//    }
-//
-//    // TODO: send notification that the skill(s) injection was successful.
 //    return NULL;
 //}

@@ -96,7 +96,12 @@ public:
      * @return The object.
      */
     PyObject *getKeyValDict();
-    void SendSkillChangeNotice(Client *client);
+    /**
+     * Send a notice to the client that the skill changed.
+     * @param client The client to notify.
+     */
+    void sendSkillChangeNotice(Client *client);
+
 protected:
     Skill(
         uint32 _skillID,

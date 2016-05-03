@@ -137,11 +137,10 @@ PyObject *Skill::getKeyValDict()
     return new PyObject("utillib.KeyVal", skillDict);
 }
 
-void Skill::SendSkillChangeNotice(Client *client)
+void Skill::sendSkillChangeNotice(Client *client)
 {
     if(client != NULL)
     {
-        uint32 level = GetSkillLevel();
         PyDict *skillInfos = new PyDict();
         skillInfos->SetItem(new PyInt(typeID()), getKeyValDict());
         PyRep *event = new PyNone();

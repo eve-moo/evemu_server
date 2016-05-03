@@ -200,9 +200,17 @@ public:
 
     void SaveItem();  //save the item to the DB.
 
-    /************************************************************************/
-    /* start experimental new attribute system ( semi-operational )         */
-    /************************************************************************/
+    /**
+     * Get a packed row for the item change notice.
+     * @return The packed row.
+     */
+    PyPackedRow *getPackedRow();
+    /**
+     * Send a notice to the client about the item changing.
+     * @param client The client to notify.
+     */
+    void sendItemChangeNotice(Client *client);
+
 protected:
     AttributeMap m_AttributeMap;
     AttributeMap m_DefaultAttributeMap;
@@ -308,10 +316,6 @@ public:
      * @param modifier The modifier.
      */
     void RemoveAttributeModifier(AttributeModifierSourceRef modifier);
-
-    /************************************************************************/
-    /* end experimental new attribute system                                */
-    /************************************************************************/
 
 protected:
     InventoryItem(

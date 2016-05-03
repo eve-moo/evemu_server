@@ -1155,6 +1155,48 @@ void InventoryItem::ChangeOwner(uint32 new_owner, bool notify)
     }
 }
 
+PyPackedRow *InventoryItem::getPackedRow()
+{
+    DBRowDescriptor* header = new DBRowDescriptor;
+    header->AddColumn("itemID", DBTYPE_I8);
+    header->AddColumn("typeID", DBTYPE_I4);
+    header->AddColumn("ownerID", DBTYPE_I4);
+    header->AddColumn("locationID", DBTYPE_I8);
+    header->AddColumn("flagID", DBTYPE_I2);
+    header->AddColumn("quantity", DBTYPE_I4);
+    header->AddColumn("groupID", DBTYPE_I4);
+    header->AddColumn("categoryID", DBTYPE_I4);
+    header->AddColumn("customInfo", DBTYPE_STR);
+
+    PyPackedRow* row = new PyPackedRow(header);
+    GetItemStatusRow(row);
+
+    row->SetField("itemID", new PyLong(itemID()));
+    row->SetField("typeID", new PyInt(m_type->typeID));
+    row->SetField("ownerID", new PyInt(m_ownerID));
+    row->SetField("locationID", new PyLong(m_locationID));
+    row->SetField("flagID", new PyInt(m_flag));
+    row->SetField("quantity", new PyInt(m_quantity));
+    row->SetField("groupID", new PyInt(m_type->groupID));
+    row->SetField("categoryID", new PyInt(m_type->getCategoryID()));
+    row->SetField("customInfo", new PyString(m_customInfo));
+    return row;
+}
+
+void InventoryItem::sendItemChangeNotice(Client *client)
+{
+    if(client != NULL)
+    {
+        PyList *items = new PyList();
+        items->AddItem(getPackedRow());
+        PyDict *dict = new PyDict();
+        dict->SetItem(new PyInt(9), new PyInt(1));
+        PyTuple *tuple = new_tuple(items, dict);
+        PyTuple *newQueue = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), tuple)));
+        client->SendNotification("OnItemsChanged", "charid", &newQueue, false);
+    }
+}
+
 void InventoryItem::SaveItem()
 {
     //_log( ITEM__TRACE, "Saving item %u.", itemID() );

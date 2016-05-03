@@ -64,6 +64,7 @@ public:
         PyCallable_REG_CALL(DogmaIMBound, AddTarget)
         PyCallable_REG_CALL(DogmaIMBound, RemoveTarget)
         PyCallable_REG_CALL(DogmaIMBound, ClearTargets)
+        PyCallable_REG_CALL(DogmaIMBound, InjectSkillIntoBrain)
     }
     virtual ~DogmaIMBound() {}
     virtual void Release() {
@@ -91,6 +92,7 @@ public:
     PyCallable_DECL_CALL(AddTarget)
     PyCallable_DECL_CALL(RemoveTarget)
     PyCallable_DECL_CALL(ClearTargets)
+    PyCallable_DECL_CALL(InjectSkillIntoBrain)
 
 
 
@@ -598,4 +600,51 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
 
 
 	return new PyObject( "utillib.KeyVal", rsp );
+}
+
+PyResult DogmaIMBound::Handle_InjectSkillIntoBrain(PyCallArgs& call)
+{
+    // Get list of itemIDs.
+    Call_SingleIntList args;
+    if(!args.Decode(&call.tuple))
+    {
+        codelog(SERVICE__ERROR, "Unable to decode arguments from '%s'", call.client->GetName());
+        return NULL;
+    }
+
+    PyDict *skillInfos = new PyDict();
+    CharacterRef chr = call.client->GetChar();
+    // Loop through the items.
+    for(int32 itemID : args.ints)
+    {
+        // Get the skill.
+        SkillRef skill = ItemFactory::GetSkill(itemID);
+        if(!skill)
+        {
+            // Could not find the skill.
+            codelog(ITEM__ERROR, "%s: failed to load skill item %u for injection.", call.client->GetName(), itemID);
+            continue;
+        }
+
+        // Inject the skill into the characters brain.
+        if(!chr->injectSkillIntoBrain(skill, call.client))
+        {
+            //TODO: build and send UserError about injection failure.
+            codelog(ITEM__ERROR, "%s: Injection of skill %u failed", call.client->GetName(), skill->itemID());
+            continue;
+        }
+        // Send the item change notice.
+        skill->sendItemChangeNotice(call.client);
+        // Add the skill change notice to the list of changed skills.
+        skillInfos->SetItem(new PyInt(skill->typeID()), skill->getKeyValDict());
+    }
+    PyRep *event = new PyNone();
+    // TO-DO: find out if the can be false.
+    // i.e. if skill is level 5 or char injects skill with another char already training.
+    PyBool *canTrain = new PyBool(true);
+    PyTuple *tuple = new_tuple(skillInfos, event, canTrain);
+    PyTuple *newQueue = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), tuple)));
+    call.client->SendNotification("OnServerSkillsChanged", "charid", &newQueue, false);
+
+    return NULL;
 }
