@@ -1039,7 +1039,7 @@ void Character::UpdateSkillQueueTimes()
 void Character::SendSkillQueueChangedNotice(Client *client)
 {
     PyList *queue = GetSkillQueue();
-    PyTuple *newQueue = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), new_tuple(queue))));
+    PyTuple *newQueue = new_tuple001(queue);
     client->SendNotification("OnNewSkillQUeueSaved", "charid", &newQueue, false);
 }
 

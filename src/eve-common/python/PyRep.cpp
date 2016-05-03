@@ -1200,3 +1200,8 @@ PyTuple * new_tuple(PyRep* arg1)
     res->SetItem(0, arg1);
     return res;
 }
+
+PyTuple *new_tuple001(PyRep *arg1)
+{
+    return new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), new_tuple(arg1))));
+}

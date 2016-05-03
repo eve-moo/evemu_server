@@ -122,36 +122,6 @@
         </tupleInline>
     </elementDef>
 
-    <elementDef name="NotifyOnCharNowInStation">
-        <tupleInline>
-            <tupleInline>
-                <!-- 0 -->
-                <int name="charID" />
-                <!-- 1 -->
-                <int name="corpID" />
-                <!-- 2 -->
-                <int name="allianceID" default="0" none_marker="0" />
-                <!-- 3 -->
-                <int name="unknown" default="0" none_marker="0" />
-            </tupleInline>
-        </tupleInline>
-    </elementDef>
-
-    <elementDef name="NotifyOnCharNoLongerInStation">
-        <tupleInline>
-            <tupleInline>
-                <!-- 0 -->
-                <int name="charID" />
-                <!-- 1 -->
-                <int name="corpID" />
-                <!-- 2 -->
-                <int name="allianceID" default="0" none_marker="0" />
-                <!-- 3 -->
-                <int name="unknown" default="0" none_marker="0" />
-            </tupleInline>
-        </tupleInline>
-    </elementDef>
-
     <elementDef name="Call_SetNote">
         <tupleInline>
             <int name="itemID" />

@@ -393,7 +393,7 @@ PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
     chr->SendSkillQueueChangedNotice(call.client);
 
     // Send a notice to the client that the respec was completed.
-    PyTuple *tuple = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), new_tuple(new PyTuple(0)))));
+    PyTuple *tuple = new_tuple001(new PyTuple(0));
     call.client->SendNotification("OnRespecInfoChanged", "charid", &tuple, false);
     return nullptr;
 }

@@ -1481,26 +1481,35 @@ void Client::JoinCorporationUpdate(uint32 corp_id) {
 /************************************************************************/
 void Client::OnCharNoLongerInStation()
 {
-    NotifyOnCharNoLongerInStation n;
-    n.charID = GetCharacterID();
-    n.corpID = GetCorporationID();
-    n.allianceID = GetAllianceID();
+    PyList *list = new PyList();
+    list->AddItem(new PyInt(GetCharacterID()));
+    uint32 corpID = GetCorporationID();
+    list->AddItem(corpID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(corpID));
+    uint32 allianceID = GetAllianceID();
+    list->AddItem(allianceID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(allianceID));
+    uint32 warID = GetWarFactionID();
+    list->AddItem(warID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(warID));
 
-    PyTuple* tmp = n.Encode();
-    // this entire line should be something like this Broadcast("OnCharNoLongerInStation", "stationid", &tmp);
-    EntityList::Broadcast( "OnCharNoLongerInStation", "stationid", &tmp );
+    PyTuple *tuple = new_tuple001(list);
+            // To-DO: Limit broadcast to only characters in station.
+    EntityList::Broadcast("OnCharNoLongerInStation", "stationid", &tuple);
 }
 
 /* besides broadcasting the message this function should handle everything for this event */
 void Client::OnCharNowInStation()
 {
-    NotifyOnCharNowInStation n;
-    n.charID = GetCharacterID();
-    n.corpID = GetCorporationID();
-    n.allianceID = GetAllianceID();
+    PyList *list = new PyList();
+    list->AddItem(new PyInt(GetCharacterID()));
+    uint32 corpID = GetCorporationID();
+    list->AddItem(corpID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(corpID));
+    uint32 allianceID = GetAllianceID();
+    list->AddItem(allianceID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(allianceID));
+    uint32 warID = GetWarFactionID();
+    list->AddItem(warID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(warID));
 
-    PyTuple* tmp = n.Encode();
-    EntityList::Broadcast( "OnCharNowInStation", "stationid", &tmp );
+    PyTuple *tuple = new_tuple001(list);
+    // To-DO: Limit broadcast to only characters in station.
+    EntityList::Broadcast("OnCharNowInStation", "stationid", &tuple);
 }
 
 /************************************************************************/
