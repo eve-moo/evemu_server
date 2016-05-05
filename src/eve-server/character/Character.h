@@ -296,7 +296,7 @@ public:
      * Stop the current skill training.
      * @param notify Should the client receive a notification?
      */
-    void StopTraining(bool notify = true);
+    void stopTraining(bool notify = true);
     /**
      * Start the specified skill training.
      * @param skillID The skillID of the still to start training.
@@ -304,19 +304,19 @@ public:
      * @param notify Should the client receive a notification?
      * @return The currently training.
      */
-    SkillRef StartTraining(uint32 skillID, uint64 nextStartTime = 0, bool notify = true);
+    SkillRef startTraining(uint32 skillID, uint64 nextStartTime = 0, bool notify = true);
     /**
      * Updates skill queue.
      */
-    void UpdateSkillQueue();
+    void updateSkillQueue();
     /**
      * Update skill training end time on char select screen.
      */
-    void UpdateSkillQueueTimes();
+    void updateSkillQueueTimes();
     /**
      * Send a OnNewSkillQUeueSaved message to the client.
      */
-    void SendSkillQueueChangedNotice(Client *client);
+    void sendSkillQueueChangedNotice(Client *client);
 
     /* GrantCertificate( uint32 certificateID )
      *
@@ -361,7 +361,7 @@ public:
      * This will get the skills from the skill queue for a character.
      * @author xanarox
      */
-    PyList *GetSkillQueue();
+    PyList *getSkillQueue();
     /**
      * Get skill at queue index.
      * @param index The index.

@@ -100,7 +100,7 @@ public:
      * Send a notice to the client that the skill changed.
      * @param client The client to notify.
      */
-    void sendSkillChangeNotice(Client *client);
+    void sendSkillChangeNotice(Client *client, std::string eventName = "");
 
 protected:
     Skill(

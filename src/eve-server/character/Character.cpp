@@ -387,13 +387,13 @@ bool Character::_Load()
             m_trainingStartTime = row.GetInt64(0);
         }
     }
-    UpdateSkillQueueTimes();
+    updateSkillQueueTimes();
 
     bLoadSuccessful = Owner::_Load();
 
 	// Update Skill Queue and Total Skill Points Trained:
-	if( bLoadSuccessful )
-		UpdateSkillQueue();
+	if( bLoadSuccessful)
+        updateSkillQueue();
     // OLD //// Calculate total SP trained and store in internal variable:
     // OLD //_CalculateTotalSPTrained();
 
@@ -692,7 +692,7 @@ void Character::ClearSkillQueue()
     m_skillQueue.clear();
 }
 
-void Character::StopTraining(bool notify)
+void Character::stopTraining(bool notify)
 {
     SkillRef stopTraining = GetSkillInTraining();
     if (stopTraining.get() == nullptr)
@@ -783,7 +783,7 @@ void Character::StopTraining(bool notify)
     Client *client = EntityList::FindCharacter(itemID());
     if(notify)
     {
-        stopTraining->sendSkillChangeNotice(client);
+        stopTraining->sendSkillChangeNotice(client, "OnSkillQueuePaused");
     }
     if(client != NULL)
     {
@@ -800,10 +800,10 @@ void Character::StopTraining(bool notify)
     SaveSkillQueue();
 
     // update queue end time:
-    UpdateSkillQueueTimes();
+    updateSkillQueueTimes();
 }
 
-SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime, bool notify)
+SkillRef Character::startTraining(uint32 skillID, uint64 nextStartTime, bool notify)
 {
     // Get start time.
     if (nextStartTime == 0)
@@ -820,7 +820,7 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime, bool not
     if (startTraining)
     {
         // A different skill is training, stop it!
-        StopTraining();
+        stopTraining();
     }
     // Look for skill in queue.
     if (m_skillQueue.empty())
@@ -845,7 +845,7 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime, bool not
         // Save skill queue:
         SaveSkillQueue();
         // update queue end time:
-        UpdateSkillQueueTimes();
+        updateSkillQueueTimes();
         // Skill not available or skill fully trained, were done here!
         return SkillRef();
     }
@@ -888,7 +888,7 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime, bool not
     }
 
     // Update queue end time:
-    UpdateSkillQueueTimes();
+    updateSkillQueueTimes();
 
     if(notify)
     {
@@ -899,7 +899,7 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime, bool not
     return startTraining;
 }
 
-void Character::UpdateSkillQueue()
+void Character::updateSkillQueue()
 {
     SkillRef currentTraining = GetSkillInTraining();
     if (currentTraining)
@@ -907,13 +907,13 @@ void Character::UpdateSkillQueue()
         if (m_skillQueue.empty() || currentTraining->typeID() != m_skillQueue.front().typeID)
         {
             // Either queue is empty or skill with different typeID is in training ...
-            StopTraining();
+            stopTraining();
             return;
         }
         if (currentTraining->getAttribute(AttrExpiryTime).get_float() == 0)
         {
             // Start training next skill.
-            StartTraining(currentTraining->typeID());
+            startTraining(currentTraining->typeID());
             return;
         }
     }
@@ -931,7 +931,7 @@ void Character::UpdateSkillQueue()
         if (expiry == 0)
         {
             // Skill was flagged for training but not started, start it.
-            currentTraining = StartTraining(currentTraining->typeID());
+            currentTraining = startTraining(currentTraining->typeID());
             if (currentTraining.get() == nullptr)
             {
                 break;
@@ -987,10 +987,10 @@ void Character::UpdateSkillQueue()
         {
             // No, start next skill.
             QueuedSkill skill = *m_skillQueue.begin();
-            currentTraining = StartTraining(skill.typeID, nextStartTime);
+            currentTraining = startTraining(skill.typeID, nextStartTime);
         }
         // update queue end time:
-        UpdateSkillQueueTimes();
+        updateSkillQueueTimes();
         if(currentTraining.get() == nullptr)
         {
             break;
@@ -1007,7 +1007,7 @@ void Character::UpdateSkillQueue()
 //  this still needs work...have to check for multiple levels of same skill.
 //  right now, check is current level to trained level...so, l2, l3, l4 checks for l1->l2, l1->l3, l1->l4 then combines them.
 //  it wont check for previous level to level in queue....need to make check for that so it will only check l1->l4.
-void Character::UpdateSkillQueueTimes()
+void Character::updateSkillQueueTimes()
 {
     double time = m_trainingStartTime; // explicit init to 0
 
@@ -1036,9 +1036,9 @@ void Character::UpdateSkillQueueTimes()
     return;
 }
 
-void Character::SendSkillQueueChangedNotice(Client *client)
+void Character::sendSkillQueueChangedNotice(Client *client)
 {
-    PyList *queue = GetSkillQueue();
+    PyList *queue = getSkillQueue();
     PyTuple *newQueue = new_tuple001(queue);
     client->SendNotification("OnNewSkillQUeueSaved", "charid", &newQueue, false);
 }
@@ -1132,18 +1132,12 @@ PyObject *Character::GetDescription() const
     return row.Encode();
 }
 
-PyList *Character::GetSkillQueue()
+PyList *Character::getSkillQueue()
 {
     // return skills from skill queue
     PyList *list = new PyList;
 
     int position = 0;
-    // TO-DO: Not 100% sure on this but position zero is for skill in training.
-    SkillRef train = GetSkillInTraining();
-    if(train.get() == nullptr)
-    {
-        position++;
-    }
     uint64 startTime = m_trainingStartTime;
     for(auto cur : m_skillQueue)
     {
@@ -1282,7 +1276,7 @@ void Character::AddItem(InventoryItemRef item)
             else
             {
                 // This should be training, make sure it's started.
-                StartTraining(skill->typeID());
+                startTraining(skill->typeID());
             }
         }
     }

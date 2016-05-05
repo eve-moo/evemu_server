@@ -137,7 +137,7 @@ PyObject *Skill::getKeyValDict()
     return new PyObject("utillib.KeyVal", skillDict);
 }
 
-void Skill::sendSkillChangeNotice(Client *client)
+void Skill::sendSkillChangeNotice(Client *client, std::string eventName)
 {
     if(client != NULL)
     {
@@ -146,7 +146,11 @@ void Skill::sendSkillChangeNotice(Client *client)
         PyRep *event = new PyNone();
         // TO-DO: find out if the can be false.
         // i.e. if skill is level 5 or char injects skill with another char already training.
-        PyBool *canTrain = new PyBool(true);
+        PyRep *canTrain = new PyBool(true);
+        if(!eventName.empty())
+        {
+            event = new PyString(eventName);
+        }
         PyTuple *tuple = new_tuple(skillInfos, event, canTrain);
         PyTuple *newQueue = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), tuple)));
         client->SendNotification("OnServerSkillsChanged", "charid", &newQueue, false);

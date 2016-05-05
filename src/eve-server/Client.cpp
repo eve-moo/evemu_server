@@ -144,7 +144,7 @@ bool Client::ProcessNet()
     CharacterRef charRef = GetChar();
     if (charRef.get() != nullptr)
     {
-        GetChar()->UpdateSkillQueue();
+        GetChar()->updateSkillQueue();
     }
 
     // send queued updates
@@ -1180,7 +1180,7 @@ bool Client::SelectCharacter( uint32 char_id )
     UpdateLocation();
 
     // update skill queue
-    GetChar()->UpdateSkillQueue();
+    GetChar()->updateSkillQueue();
 
     //johnsus - characterOnline mod
     ServiceDB::SetCharacterOnlineStatus(GetCharacterID(), true);

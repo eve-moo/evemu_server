@@ -980,7 +980,7 @@ PyResult Command_giveallskills( Client* who, const Seperator& args )
         return new PyString("Skill gifting target character not found");
     }
     // Stop any training.
-    character->StopTraining();
+    character->stopTraining();
     // Clear the skill queue.
     character->ClearSkillQueue();
     // Query Database to get list of ALL skills, then LOOP through each one, checking character for skill, setting level to 5:

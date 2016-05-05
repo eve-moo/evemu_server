@@ -50,6 +50,7 @@ public:
     PyCallable_DECL_CALL(SaveNewQueue)
     PyCallable_DECL_CALL(GetRespecInfo)
     PyCallable_DECL_CALL(RespecCharacter)
+    PyCallable_DECL_CALL(AbortTraining)
 
     //    /**
     //     * CharStartTrainingSkillByTypeID
@@ -131,6 +132,7 @@ SkillMgr2Bound::SkillMgr2Bound()
     PyCallable_REG_CALL(SkillMgr2Bound, SaveNewQueue)
     PyCallable_REG_CALL(SkillMgr2Bound, GetRespecInfo)
     PyCallable_REG_CALL(SkillMgr2Bound, RespecCharacter)
+    PyCallable_REG_CALL(SkillMgr2Bound, AbortTraining)
             
     //    PyCallable_REG_CALL(SkillMgr2Bound, CharStartTrainingSkillByTypeID)
     //    PyCallable_REG_CALL(SkillMgr2Bound, CharStopTrainingSkill)
@@ -173,7 +175,7 @@ PyResult SkillMgr2Bound::Handle_GetSkills(PyCallArgs &call)
 PyResult SkillMgr2Bound::Handle_GetSkillQueueAndFreePoints(PyCallArgs &call)
 {
     CharacterRef chr = call.client->GetChar();
-    PyList *skillList = chr->GetSkillQueue();
+    PyList *skillList = chr->getSkillQueue();
     PyInt *freePts = new PyInt(0);
     return new_tuple(skillList, freePts);
 }
@@ -305,14 +307,14 @@ PyResult SkillMgr2Bound::Handle_SaveNewQueue(PyCallArgs &call)
         }
     }
 
-    chr->UpdateSkillQueue();
+    chr->updateSkillQueue();
 
     // TO-DO: find out if tuple->GetItem(1) = true means start training?
     SkillRef first = chr->GetSkillInQueue(0);
     if (first.get() != nullptr)
     {
         // Make sure first skill is training.
-        chr->StartTraining(first->typeID());
+        chr->startTraining(first->typeID());
     }
 
     return NULL;
@@ -364,7 +366,7 @@ PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
     // Get skill in training.
     SkillRef training = chr->GetSkillInTraining();
     // Stop the training for the respec.
-    chr->StopTraining(false);
+    chr->stopTraining(false);
     // Do the respec.
     PyDict *attribs = call.tuple->GetItem(0)->AsDict();
     // TODO: validate these values (and their sum)
@@ -386,15 +388,22 @@ PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
     if(training.get() != nullptr)
     {
         // Yes, restart it.
-        chr->StartTraining(training->typeID());
+        chr->startTraining(training->typeID());
     }
 
     // Send a notice to the client that the queue changed.
-    chr->SendSkillQueueChangedNotice(call.client);
+    chr->sendSkillQueueChangedNotice(call.client);
 
     // Send a notice to the client that the respec was completed.
     PyTuple *tuple = new_tuple001(new PyTuple(0));
     call.client->SendNotification("OnRespecInfoChanged", "charid", &tuple, false);
+    return nullptr;
+}
+
+PyResult SkillMgr2Bound::Handle_AbortTraining(PyCallArgs &call)
+{
+    CharacterRef chr = call.client->GetChar();
+    chr->stopTraining();
     return nullptr;
 }
 
