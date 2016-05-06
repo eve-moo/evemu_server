@@ -43,7 +43,6 @@
                     <!-- 1 -->
                     <int name="version" />
                 </tupleInline>
-                <bool name="test" value="false" />
             </tupleInline>
         </objectInline>
     </elementDef>
@@ -179,7 +178,7 @@
     <elementDef name="CallGetCachableObject">
         <tupleInline>
             <!-- 0 -->
-            <bool name="shared" />
+            <int name="shared" />
             <!-- 1 -->
             <!-- either a string or a tuple -->
             <raw name="objectID" />

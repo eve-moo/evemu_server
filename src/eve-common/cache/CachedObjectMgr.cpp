@@ -236,7 +236,7 @@ PyObject *CachedObjectMgr::GetCachedObject(const PyRep *objectID)
     co.timestamp = res->second->timestamp;
     co.version = res->second->version;
     co.nodeID = HackCacheNodeID;    //hack, doesn't matter until we have multi-node networks.
-    co.shared = true;
+    co.shared = 1;
     co.objectID = res->second->objectID->Clone();
     co.cache = res->second->cache;
 

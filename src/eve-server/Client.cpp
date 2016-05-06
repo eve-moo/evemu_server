@@ -1743,7 +1743,8 @@ bool Client::_VerifyFuncResult( CryptoHandshakeResult& result )
     CryptoHandshakeAck ack;
     ack.access_token = new PyNone;
     ack.client_hash = new PyNone;
-    ack.sessionID = 123456789;              // TODO: Generate random sessionID for every client.
+    ack.sessionID = 123456789; // TODO: Generate random sessionID for every client.
+    // TO-DO: This should be (incrementingOffset * 10000000000L + nodeID)
     ack.user_clientid = GetAccountID();
     ack.live_updates = new PyList(0);       // No, we will never update the client with this method.
     ack.languageID = GetLanguageID();
