@@ -50,17 +50,6 @@
         </tupleInline>
     </elementDef>
 
-    <elementDef name="Item_GetSuggestedTickerNames">
-        <objectInline>
-            <stringInline value="utillib.KeyVal" />
-            <dictInline>
-                <dictInlineEntry key="tickerName">
-                    <string name="tN" />
-                </dictInlineEntry>
-            </dictInline>
-        </objectInline>
-    </elementDef>
-
     <elementDef name="Notify_OnCorporaionChanged">
         <tupleInline>
             <int name="corpID" />
@@ -439,8 +428,9 @@
 
     <elementDef name="Notify_OnCorporationApplicationChanged">
         <tupleInline>
-            <int name="charID" />
             <int name="corpID" />
+            <int name="charID" />
+            <int name="applicationID" />
             <dictInline>
                 <dictInlineEntry key="status">
                     <tupleInline>
@@ -502,9 +492,12 @@
 
     <elementDef name="Call_UpdateApplicationOffer">
         <tupleInline>
-            <int name="charID" />
+            <int name="applicationID" />
+            <int name="characterID" />
+            <int name="corporationID" />
             <string name="appText" />
             <int name="newStatus" />
+            <string name="responseText" />
             <none />
         </tupleInline>
     </elementDef>

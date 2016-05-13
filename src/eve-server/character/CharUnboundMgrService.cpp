@@ -376,6 +376,12 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
             _log(DATABASE__ERROR, "Failed to save skill creation history for character %u: %s", charID, err.c_str());
         }
     }
+    // Start with 
+    // All - Civilian miner
+    // caldari - Ibis - Civilian Gatling Railgun
+    // Minmitar - Reaper - Civilian Gatling Autocannon
+    // Amarr - Ibis - Civilian Gatling Pulse Laser.
+    // Galentte - Velator - Civilian Light Electron Blaster
     //now set up some initial inventory:
     InventoryItemRef initInvItem;
 
