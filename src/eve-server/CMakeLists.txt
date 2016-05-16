@@ -474,6 +474,13 @@ SET(services_lscproxy_SOURCE
         "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
         )
 
+SET(services_eventlog_INCLUDE
+        "${TARGET_INCLUDE_DIR}/services/eventLog/EventLogService.h"
+        )
+SET(services_eventlog_SOURCE
+        "${TARGET_SOURCE_DIR}/services/eventLog/EventLogService.cpp"
+        )
+
 ########################
 # Setup the executable #
 ########################
@@ -504,6 +511,7 @@ SOURCE_GROUP( "src\\standing"      FILES ${standing_SOURCE} )
 SOURCE_GROUP( "src\\station"       FILES ${station_SOURCE} )
 SOURCE_GROUP( "src\\system"        FILES ${system_SOURCE} )
 SOURCE_GROUP( "src\\services\\lscProxy"        FILES ${services_lscproxy_SOURCE} )
+SOURCE_GROUP( "src\\services\\eventLog"        FILES ${services_eventlog_SOURCE} )
 
 ADD_EXECUTABLE( "${TARGET_NAME}"
         ${SOURCE}
@@ -533,6 +541,7 @@ ADD_EXECUTABLE( "${TARGET_NAME}"
         ${station_SOURCE}
         ${system_SOURCE}
         ${services_lscproxy_SOURCE}
+        ${services_eventlog_SOURCE}
         )
 
 TARGET_BUILD_PCH( "${TARGET_NAME}"
