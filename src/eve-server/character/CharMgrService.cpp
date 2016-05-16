@@ -330,7 +330,9 @@ PyResult CharMgrService::Handle_GetRecentShipKillsAndLosses( PyCallArgs& call )
 
 PyResult CharMgrService::Handle_GetCharacterSettings(PyCallArgs& call)
 {
-    return NULL;
+    // No args
+
+    return new PyObject("utillib.KeyVal", new_dict(new PyString("__doc__"), new PyString("Settings KeyVal/Dictionary")));
 }
 
 PyResult CharMgrService::Handle_GetLabels(PyCallArgs& call)
