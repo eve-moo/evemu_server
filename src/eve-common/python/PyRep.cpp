@@ -1205,3 +1205,19 @@ PyTuple *new_tuple001(PyRep *arg1)
 {
     return new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), new_tuple(arg1))));
 }
+
+
+PyDict *new_dict(PyRep *key1, PyRep *value1)
+{
+    PyDict *rtn = new PyDict();
+    rtn->SetItem(key1, value1);
+    return rtn;
+}
+
+PyDict *new_dict(PyRep *key1, PyRep *value1, PyRep *key2, PyRep *value2)
+{
+    PyDict *rtn = new PyDict();
+    rtn->SetItem(key1, value1);
+    rtn->SetItem(key2, value2);
+    return rtn;
+}

@@ -1035,4 +1035,7 @@ PyTuple * new_tuple(PyRep* arg1, PyRep* arg2);
 PyTuple * new_tuple(PyRep* arg1, PyRep* arg2, PyRep* arg3);
 PyTuple *new_tuple001(PyRep *arg1);
 
+PyDict *new_dict(PyRep *key1, PyRep *value1);
+PyDict *new_dict(PyRep *key1, PyRep *value1, PyRep *key2, PyRep *value2);
+
 #endif//EVE_PY_REP_H
