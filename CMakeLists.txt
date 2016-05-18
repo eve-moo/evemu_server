@@ -216,7 +216,12 @@ MARK_AS_ADVANCED(
 #################
 # EVEmu targets #
 #################
-INCLUDE( "TargetBuildPCH" )
+IF(PCH)
+  INCLUDE( "TargetBuildPCH" )
+  MESSAGE( "PCH Enabled" )
+ELSE()
+  MESSAGE( "PCH Disabled" )
+ENDIF()
 INCLUDE( "TargetIncludeDirectories" )
 
 # Advertise config.h

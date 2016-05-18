@@ -51,9 +51,11 @@ IF( NOT EVEMU_TARGETS_IMPORT )
   ADD_EXECUTABLE( "${TARGET_NAME}"
                    ${SOURCE} )
 
-  TARGET_BUILD_PCH( "${TARGET_NAME}"
-                    "${TARGET_INCLUDE_DIR}/eve-xmlpktgen.h"
-                    "${TARGET_SOURCE_DIR}/eve-xmlpktgen.cpp" )
+  IF(PCH)
+    TARGET_BUILD_PCH( "${TARGET_NAME}"
+                      "${TARGET_INCLUDE_DIR}/eve-xmlpktgen.h"
+                      "${TARGET_SOURCE_DIR}/eve-xmlpktgen.cpp" )
+  ENDIF()
   TARGET_INCLUDE_DIRECTORIES( "${TARGET_NAME}"
                               ${eve-core_INCLUDE_DIRS}
                             ${TINYXML_INCLUDE_DIRS}
