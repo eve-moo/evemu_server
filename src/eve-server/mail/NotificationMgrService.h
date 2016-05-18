@@ -45,6 +45,8 @@ private:
     PyCallable_DECL_CALL(DeleteGroupNotifications)
     PyCallable_DECL_CALL(DeleteAllNotifications)
     PyCallable_DECL_CALL(DeleteNotifications)
+    PyCallable_DECL_CALL(GetAllNotifications)
+
 };
 
 #endif

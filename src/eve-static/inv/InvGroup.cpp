@@ -37,11 +37,8 @@ std::map<uint32, InvGroupRef> InvGroup::s_AllGroups;
 InvGroup::InvGroup(uint32 _groupID,
                    uint32 _categoryID,
                    std::string &_groupName,
-                   std::string &_description,
                    uint32 _iconID,
                    bool _useBasePrice,
-                   bool _allowManufacture,
-                   bool _allowRecycler,
                    bool _anchored,
                    bool _anchorable,
                    bool _fittableNonSingleton,
@@ -51,11 +48,8 @@ InvGroup::InvGroup(uint32 _groupID,
 groupID(_groupID),
 categoryID(_categoryID),
 groupName(_groupName),
-description(_description),
 iconID(_iconID),
 useBasePrice(_useBasePrice),
-allowManufacture(_allowManufacture),
-allowRecycler(_allowRecycler),
 anchored(_anchored),
 anchorable(_anchorable),
 fittableNonSingleton(_fittableNonSingleton),
@@ -93,8 +87,8 @@ bool EVEStatic::loadInvGroups(std::map<uint32, std::vector<uint32>> &groupTypeLi
     DBRowDescriptor *header;
     CRowSet *rowset;
     DBResultRow row;
-    std::string columns = "groupID, categoryID, groupName, description, iconID,"
-            " 0 as graphicID, useBasePrice, allowManufacture, allowRecycler,"
+    std::string columns = "groupID, categoryID, groupName, iconID,"
+            " 0 as graphicID, useBasePrice,"
             " anchored, anchorable, fittableNonSingleton, published, 0 AS dataID";
     std::string qry = "SELECT " + columns + " FROM invGroups";
     if (!DBcore::RunQuery(result, qry.c_str()))
@@ -111,15 +105,12 @@ bool EVEStatic::loadInvGroups(std::map<uint32, std::vector<uint32>> &groupTypeLi
         uint32 groupID = row.GetInt(0);
         uint32 categoryID = row.GetInt(1);
         std::string groupName = row.GetText(2);
-        std::string description = row.GetText(3);
-        uint32 iconID = row.getIntNC(4);
-        bool useBasePrice = row.GetBool(6);
-        bool allowManufacture = row.GetBool(7);
-        bool allowRecycler = row.GetBool(8);
-        bool anchored = row.GetBool(9);
-        bool anchorable = row.GetBool(10);
-        bool fittableNonSingleton = row.GetBool(11);
-        bool published = row.GetBool(12);
+        uint32 iconID = row.getIntNC(3);
+        bool useBasePrice = row.GetBool(5);
+        bool anchored = row.GetBool(6);
+        bool anchorable = row.GetBool(7);
+        bool fittableNonSingleton = row.GetBool(8);
+        bool published = row.GetBool(9);
         std::vector<uint32> groupTypes;
         auto itr = groupTypeList.find(groupID);
         if (itr != groupTypeList.end())
@@ -127,8 +118,7 @@ bool EVEStatic::loadInvGroups(std::map<uint32, std::vector<uint32>> &groupTypeLi
             groupTypes = itr->second;
         }
         InvGroup *group = new InvGroup(groupID, categoryID, groupName,
-                                       description, iconID, useBasePrice,
-                                       allowManufacture, allowRecycler, anchored,
+                                       iconID, useBasePrice, anchored,
                                        anchorable, fittableNonSingleton,
                                        published, groupTypes);
         categoryGroupList[group->categoryID].push_back(group->groupID);

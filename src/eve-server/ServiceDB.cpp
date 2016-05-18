@@ -354,7 +354,7 @@ uint32 ServiceDB::GetDestinationStargateID(uint32 fromSystem, uint32 toSystem) {
         " LEFT JOIN mapDenormalize AS fromStargate"
         "    ON fromStargate.itemID = jump.stargateID"
         " LEFT JOIN mapDenormalize AS toStargate"
-        "    ON toStargate.itemID = jump.celestialID"
+                         "    ON toStargate.itemID = jump.destinationID"
         " WHERE fromStargate.solarSystemID = %u"
         "    AND toStargate.solarSystemID = %u",
         fromSystem, toSystem

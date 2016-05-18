@@ -31,6 +31,8 @@
 #include "character/CharacterDB.h"
 #include "inventory/AttributeEnum.h"
 #include "chr/ChrBloodline.h"
+#include "Skill.h"
+#include "SkillMgrService.h"
 
 /*
  * CharacterData
@@ -357,17 +359,41 @@ bool Character::_Load()
 {
 	bool bLoadSuccessful = false;
 
-    if( !LoadContents( ) )
+    if(!LoadContents())
+    {
         return false;
+    }
 
-    if( !InventoryDB::LoadSkillQueue( itemID(), m_skillQueue ) )
+    if(!InventoryDB::LoadSkillQueue(itemID(), m_skillQueue))
+    {
         return false;
+    }
+    m_trainingStartTime = 0;
+    SkillRef training = this->GetSkillInTraining();
+    if(training.get() != nullptr)
+    {
+        DBQueryResult result;
+        if(!DBcore::RunQuery(result,
+                             "SELECT eventTime"
+                             " FROM srvChrSkillHistory ORDER BY eventTime"
+                             " WHERE characterID=%u AND eventID = %u AND typeID= %u AND level=%u",
+                             itemID(), skillEventTrainingStarted, training->typeID(), training->GetSkillLevel()))
+        {
+            _log(DATABASE__ERROR, "Failed to get skill start time for character %u: %s", itemID(), result.error.c_str());
+        }
+        DBResultRow row;
+        while(result.GetRow(row))
+        {
+            m_trainingStartTime = row.GetInt64(0);
+        }
+    }
+    updateSkillQueueTimes();
 
     bLoadSuccessful = Owner::_Load();
 
 	// Update Skill Queue and Total Skill Points Trained:
-	if( bLoadSuccessful )
-		UpdateSkillQueue();
+	if( bLoadSuccessful)
+        updateSkillQueue();
     // OLD //// Calculate total SP trained and store in internal variable:
     // OLD //_CalculateTotalSPTrained();
 
@@ -569,31 +595,27 @@ EvilNumber Character::GetEndOfTraining() const
     return skill->getAttribute(AttrExpiryTime);
 }
 
-bool Character::InjectSkillIntoBrain(SkillRef skill)
+bool Character::injectSkillIntoBrain(SkillRef skill, Client *client)
 {
-    Client *c = EntityList::FindCharacter( itemID() );
-
     SkillRef oldSkill = GetSkill( skill->typeID() );
     if( oldSkill )
     {
         //TODO: build and send proper UserError for CharacterAlreadyKnowsSkill.
-        if (c != NULL)
+        if(client != NULL)
         {
-            c->SendNotifyMsg("You already know this skill.");
+            client->SendNotifyMsg("You already know this skill.");
         }
         return false;
     }
 
-    // TODO: based on config options later, check to see if another character, owned by this characters account,
-    // is training a skill.  If so, return. (flagID=61).
     if (!canUse(skill))
     {
         // TODO: need to send back a response to the client.  need packet specs.
         _log( ITEM__TRACE, "%s (%u): Requested to train skill %u item %u but prereq not complete.", itemName().c_str(), itemID(), skill->typeID(), skill->itemID() );
 
-        if (c != NULL)
+        if(client != NULL)
         {
-            c->SendNotifyMsg("Injection failed!  Skill prerequisites incomplete.");
+            client->SendNotifyMsg("Injection failed!  Skill prerequisites incomplete.");
         }
         return false;
     }
@@ -618,9 +640,11 @@ bool Character::InjectSkillIntoBrain(SkillRef skill)
     skill->MoveInto(*this, flagSkill);
     skill->SaveItem();
 
-    if (c != NULL)
+    if(client != NULL)
     {
-        c->SendNotifyMsg("Injection of skill complete.");
+        skill->sendItemChangeNotice(client);
+        skill->sendSkillChangeNotice(client);
+        client->SendNotifyMsg("Injection of skill complete.");
     }
     return true;
 }
@@ -668,7 +692,7 @@ void Character::ClearSkillQueue()
     m_skillQueue.clear();
 }
 
-void Character::StopTraining()
+void Character::stopTraining(bool notify)
 {
     SkillRef stopTraining = GetSkillInTraining();
     if (stopTraining.get() == nullptr)
@@ -724,9 +748,10 @@ void Character::StopTraining()
     stopTraining->SetFlag(flagSkill);
     // Set completion time to 0;
     stopTraining->setAttribute(AttrExpiryTime, 0);
+    m_trainingStartTime = 0;
 
     // Add event to database.
-    uint32 method = 38; // 38 - SkillTrainingCanceled
+    uint32 method = skillEventTrainingCancelled;
     DBerror err;
     if (!DBcore::RunQuery(err,
                           "INSERT INTO srvChrSkillHistory "
@@ -738,7 +763,7 @@ void Character::StopTraining()
         _log(DATABASE__ERROR, "Failed to save skill history for character %u: %s", itemID(), err.c_str());
     }
 
-    Client *c = EntityList::FindCharacter(itemID());
+    // Did we happenn to level up?
     if (levelUp)
     {
         // We completed a level...
@@ -754,33 +779,15 @@ void Character::StopTraining()
                 cur = m_skillQueue.erase(cur);
             }
         }
-        if (c != NULL)
-        {
-            // Send complete message to client.
-            OnSkillTrained ost;
-            ost.itemID = stopTraining->itemID();
-
-            PyTuple* tmp = ost.Encode();
-            c->QueueDestinyEvent(&tmp);
-            PySafeDecRef(tmp);
-        }
     }
-    else
+    Client *client = EntityList::FindCharacter(itemID());
+    if(notify)
     {
-        if (c != NULL)
-        {
-            OnSkillTrainingStopped osst;
-            osst.itemID = stopTraining->itemID();
-            osst.endOfTraining = 0;
-
-            PyTuple* tmp = osst.Encode();
-            c->QueueDestinyEvent(&tmp);
-            PySafeDecRef(tmp);
-        }
+        stopTraining->sendSkillChangeNotice(client, "OnSkillQueuePaused");
     }
-    if (c != NULL)
+    if(client != NULL)
     {
-        c->UpdateSkillTraining();
+        client->UpdateSkillTraining();
     }
 
     // Save changes to this skill before removing it from training:
@@ -793,10 +800,10 @@ void Character::StopTraining()
     SaveSkillQueue();
 
     // update queue end time:
-    UpdateSkillQueueEndTime(m_skillQueue);
+    updateSkillQueueTimes();
 }
 
-SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime)
+SkillRef Character::startTraining(uint32 skillID, uint64 nextStartTime, bool notify)
 {
     // Get start time.
     if (nextStartTime == 0)
@@ -813,7 +820,7 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime)
     if (startTraining)
     {
         // A different skill is training, stop it!
-        StopTraining();
+        stopTraining();
     }
     // Look for skill in queue.
     if (m_skillQueue.empty())
@@ -838,7 +845,7 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime)
         // Save skill queue:
         SaveSkillQueue();
         // update queue end time:
-        UpdateSkillQueueEndTime(m_skillQueue);
+        updateSkillQueueTimes();
         // Skill not available or skill fully trained, were done here!
         return SkillRef();
     }
@@ -858,6 +865,7 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime)
     timeTraining = std::max(timeTraining, Win32Time_Second * 10);
     // Set training time end.
     startTraining->setAttribute(AttrExpiryTime, (double) timeTraining);
+    m_trainingStartTime = nextStartTime;
     // Set training flag.
     startTraining->SetFlag(flagSkillInTraining);
     // Save changes to this skill before removing it from training:
@@ -867,7 +875,7 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime)
     SysLog::Debug("    ", "Calculated time to complete training = %s", Win32TimeToString((uint64) timeTraining).c_str());
 
     // Add event to database.
-    uint32 method = 36; // 36 - SkillTrainingStarted
+    uint32 method = skillEventTrainingStarted;
     DBerror err;
     if (!DBcore::RunQuery(err,
                           "INSERT INTO srvChrSkillHistory "
@@ -880,43 +888,32 @@ SkillRef Character::StartTraining(uint32 skillID, uint64 nextStartTime)
     }
 
     // Update queue end time:
-    UpdateSkillQueueEndTime(m_skillQueue);
+    updateSkillQueueTimes();
 
-    Client *c = EntityList::FindCharacter(itemID());
-    if (c != NULL)
+    if(notify)
     {
-        // Sent start training notice to client.
-        OnSkillStartTraining osst;
-        osst.itemID = startTraining->itemID();
-        osst.endOfTraining = timeTraining;
-
-        PyTuple* tmp = osst.Encode();
-        c->QueueDestinyEvent(&tmp);
-        PySafeDecRef(tmp);
-
-        c->UpdateSkillTraining();
+        Client *client = EntityList::FindCharacter(itemID());
+        startTraining->sendSkillChangeNotice(client);
     }
 
     return startTraining;
 }
 
-void Character::UpdateSkillQueue()
+void Character::updateSkillQueue()
 {
-    Client *c = EntityList::FindCharacter(itemID());
-
     SkillRef currentTraining = GetSkillInTraining();
     if (currentTraining)
     {
         if (m_skillQueue.empty() || currentTraining->typeID() != m_skillQueue.front().typeID)
         {
             // Either queue is empty or skill with different typeID is in training ...
-            StopTraining();
+            stopTraining();
             return;
         }
         if (currentTraining->getAttribute(AttrExpiryTime).get_float() == 0)
         {
             // Start training next skill.
-            StartTraining(currentTraining->typeID());
+            startTraining(currentTraining->typeID());
             return;
         }
     }
@@ -926,6 +923,7 @@ void Character::UpdateSkillQueue()
         return;
     }
 
+    Client *client = EntityList::FindCharacter(itemID());
     uint64 nextStartTime = Win32TimeNow();
     uint64 expiry;
     while ((expiry = currentTraining->getAttribute(AttrExpiryTime).get_float()) <= Win32TimeNow())
@@ -933,7 +931,7 @@ void Character::UpdateSkillQueue()
         if (expiry == 0)
         {
             // Skill was flagged for training but not started, start it.
-            currentTraining = StartTraining(currentTraining->typeID());
+            currentTraining = startTraining(currentTraining->typeID());
             if (currentTraining.get() == nullptr)
             {
                 break;
@@ -957,6 +955,7 @@ void Character::UpdateSkillQueue()
         nextStartTime = expiry;
         // Clear completion time.
         currentTraining->setAttribute(AttrExpiryTime, 0);
+        m_trainingStartTime = 0;
         // Set skill flag to not training.
         currentTraining->SetFlag(flagSkill);
         // Save changes to this skill now that it has finished training:
@@ -965,7 +964,7 @@ void Character::UpdateSkillQueue()
         m_skillQueue.erase(m_skillQueue.begin());
 
         // Add completion to database.
-        uint32 method = 37; // 37 - SkillTrainingComplete
+        uint32 method = skillEventQueueTrainingCompleted;
         DBerror err;
         if (!DBcore::RunQuery(err,
                               "INSERT INTO srvChrSkillHistory "
@@ -976,17 +975,10 @@ void Character::UpdateSkillQueue()
             _log(DATABASE__ERROR, "Failed to save skill history for character %u: %s", itemID(), err.c_str());
         }
 
-        if (c != NULL)
+        if(client != NULL)
         {
-            // Send complete message to client.
-            OnSkillTrained ost;
-            ost.itemID = currentTraining->itemID();
-
-            PyTuple* tmp = ost.Encode();
-            c->QueueDestinyEvent(&tmp);
-            PySafeDecRef( tmp );
-
-            c->UpdateSkillTraining();
+            currentTraining->sendSkillChangeNotice(client);
+            client->UpdateSkillTraining();
         }
         // We are now not training anything.
         currentTraining = SkillRef();
@@ -995,9 +987,11 @@ void Character::UpdateSkillQueue()
         {
             // No, start next skill.
             QueuedSkill skill = *m_skillQueue.begin();
-            currentTraining = StartTraining(skill.typeID, nextStartTime);
+            currentTraining = startTraining(skill.typeID, nextStartTime);
         }
-        if (currentTraining.get() == nullptr)
+        // update queue end time:
+        updateSkillQueueTimes();
+        if(currentTraining.get() == nullptr)
         {
             break;
         }
@@ -1008,29 +1002,33 @@ void Character::UpdateSkillQueue()
 
     // Save skill queue:
     SaveSkillQueue();
-
-    // update queue end time:
-    UpdateSkillQueueEndTime(m_skillQueue);
 }
 
 //  this still needs work...have to check for multiple levels of same skill.
 //  right now, check is current level to trained level...so, l2, l3, l4 checks for l1->l2, l1->l3, l1->l4 then combines them.
 //  it wont check for previous level to level in queue....need to make check for that so it will only check l1->l4.
-void Character::UpdateSkillQueueEndTime(const SkillQueue &queue)
+void Character::updateSkillQueueTimes()
 {
-    double chrMinRemaining = 0; // explicit init to 0
+    double time = m_trainingStartTime; // explicit init to 0
 
-    for(size_t i = 0; i < queue.size(); i++)    // loop thru skills currently in queue
+    for(size_t i = 0; i < m_skillQueue.size(); i++) // loop thru skills currently in queue
     {
-        const QueuedSkill &qs = queue[ i ];     // get skill id from queue
-        SkillRef skill = Character::GetSkill( qs.typeID );   //make ref for current skill
+        const QueuedSkill &qs = m_skillQueue[ i ];
+        // Get the skill.
+        SkillRef skill = GetSkill( qs.typeID );
 
-        chrMinRemaining += (skill->GetSPForLevel(qs.level) - skill->getAttribute(AttrSkillPoints).get_float()) / GetSPPerMin(skill);
+        // Get skill training time in minutes.
+        uint64 trainingTime = (skill->GetSPForLevel(qs.level) - skill->getAttribute(AttrSkillPoints).get_float()) / GetSPPerMin(skill);
+        // Adjust to Win32Time.
+        trainingTime *= Win32Time_Minute;
+        // Add it to the time.
+        time += trainingTime;
+        // Set the completion time.
+        skill->setAttribute(AttrExpiryTime, (double) time);
     }
-    chrMinRemaining = chrMinRemaining * Win32Time_Minute + Win32TimeNow();
 
     DBerror err;
-    if (!DBcore::RunQuery(err, "UPDATE srvCharacter SET skillQueueEndTime = %f WHERE characterID = %u ", chrMinRemaining, itemID()))
+    if(!DBcore::RunQuery(err, "UPDATE srvCharacter SET skillQueueEndTime = %f WHERE characterID = %u ", time, itemID()))
     {
         _log(DATABASE__ERROR, "Failed to set skillQueueEndTime for character %u: %s", itemID(), err.c_str());
         return;
@@ -1038,7 +1036,15 @@ void Character::UpdateSkillQueueEndTime(const SkillQueue &queue)
     return;
 }
 
-PyDict *Character::CharGetInfo() {
+void Character::sendSkillQueueChangedNotice(Client *client)
+{
+    PyList *queue = getSkillQueue();
+    PyTuple *newQueue = new_tuple001(queue);
+    client->SendNotification("OnNewSkillQUeueSaved", "charid", &newQueue, false);
+}
+
+PyTuple *Character::CharGetInfo()
+{
     //TODO: verify that we are a char?
 
     if( !LoadContents( ) ) {
@@ -1046,31 +1052,71 @@ PyDict *Character::CharGetInfo() {
         return NULL;
     }
 
-    PyDict *result = new PyDict;
+    PyDict *chrDict = new PyDict;
     Rsp_CommonGetInfo_Entry entry;
 
     if(!Populate(entry))
         return NULL;
-    result->SetItem(new PyInt(m_itemID), new PyObject("util.KeyVal", entry.Encode()));
+    chrDict->SetItem(new PyInt(m_itemID), new PyObject("utillib.KeyVal", entry.Encode()));
 
-    //now encode skills...
-    std::vector<InventoryItemRef> skills;
-    //find all the skills contained within ourself.
-    FindByFlag( flagSkill, skills );
-    FindByFlag( flagSkillInTraining, skills );
+    PyTuple *chrTup = new PyTuple(3);
+    PyList *chrMods = new PyList();
+    PyList *otherMods = new PyList();
+    chrTup->SetItem(0, new PyInt(1));
+    chrTup->SetItem(1, chrMods);
+    chrTup->SetItem(2, otherMods);
+    // TO-DO: add modifiers to lists.
+    // sample packet:
+    //[PyObjectEx Type2]
+    //[PyTuple 2 items]
+    //    [PyTuple 1 items]
+    //        [PyToken eve.common.script.dogma.effect.BrainEffect]
+    //    [PyDict 8 kvp]
+    //        [PyString "modifierType"]
+    //        [PyString "M"]        << defined in eve\common\script\dogma\effect.py
+    //        [PyString "operation"]
+    //        [PyInt 2]
+    //        [PyString "skills"]
+    //        [PyList 2 items]
+    //            [PyInt 13283]
+    //            [PyInt 13286]
+    //        [PyString "toItemID"]
+    //        [PyIntegerVar 123456] << characterID in characterMods unknown value in otherMods.
+    //        [PyString "value"]
+    //        [PyFloat 1]
+    //        [PyString "toAttribID"]
+    //        [PyInt 164]
+    //        [PyString "extras"]
+    //        [PyTuple 0 items]
+    //        [PyString "fromAttrib"]
+    //        [PyNone]
 
-    //encode an entry for each one.
-    std::vector<InventoryItemRef>::iterator cur, end;
-    cur = skills.begin();
-    end = skills.end();
-    for(; cur != end; cur++) {
-        if(!(*cur)->Populate(entry)) {
-            codelog(ITEM__ERROR, "%s (%u): Failed to load skill item %u for CharGetInfo", m_itemName.c_str(), itemID(), (*cur)->itemID());
-        } else {
-            result->SetItem(new PyInt((*cur)->itemID()), new PyObject("util.KeyVal", entry.Encode()));
-        }
-    }
+    //    PyObjectEx_Type2 *t2 = new PyObjectEx_Type2(
+    //                                                new_tuple(new PyToken("eve.common.script.dogma.effect.BrainEffect")),
+    //                                                new PyDict());
 
+    //    //now encode skills...
+    //    std::vector<InventoryItemRef> skills;
+    //    //find all the skills contained within ourself.
+    //    FindByFlag( flagSkill, skills );
+    //    FindByFlag( flagSkillInTraining, skills );
+    //
+    //    //encode an entry for each one.
+    //    std::vector<InventoryItemRef>::iterator cur, end;
+    //    cur = skills.begin();
+    //    end = skills.end();
+    //    for(; cur != end; cur++) {
+    //        if(!(*cur)->Populate(entry)) {
+    //            codelog(ITEM__ERROR, "%s (%u): Failed to load skill item %u for CharGetInfo", m_itemName.c_str(), itemID(), (*cur)->itemID());
+    //        } else
+    //        {
+    //            //chrDict->SetItem(new PyInt((*cur)->itemID()), new PyObject("utillib.KeyVal", entry.Encode()));
+    //        }
+    //    }
+
+    PyTuple *result = new PyTuple(2);
+    result->SetItem(0, chrDict);
+    result->SetItem(1, chrTup);
     return result;
 }
 
@@ -1086,31 +1132,39 @@ PyObject *Character::GetDescription() const
     return row.Encode();
 }
 
-PyTuple *Character::GetSkillQueue() {
+PyList *Character::getSkillQueue()
+{
     // return skills from skill queue
     PyList *list = new PyList;
 
-    SkillQueue::iterator cur, end;
-    cur = m_skillQueue.begin();
-    end = m_skillQueue.end();
-    for(; cur != end; cur++)
+    int position = 0;
+    uint64 startTime = m_trainingStartTime;
+    for(auto cur : m_skillQueue)
     {
+        uint32 typeID = cur.typeID;
+        int32 level = cur.level;
+        SkillRef skill = GetSkill(typeID);
+        if(skill.get() == nullptr)
+        {
+            continue;
+        }
         SkillQueue_Element el;
 
-        el.typeID = cur->typeID;
-        el.level = cur->level;
+        uint64 endTime = skill->getAttribute(AttrExpiryTime).get_int();
+        el.trainingTypeID = typeID;
+        el.trainingToLevel = level;
+        el.trainingStartSP = skill->GetSkillPoints();
+        el.trainingDestinationSP = skill->GetSPForLevel(level);
+        el.trainingStartTime = startTime;
+        el.trainingEndTime = endTime;
+        el.queuePosition = position;
+        position++;
+        startTime = endTime;
 
         list->AddItem( el.Encode() );
     }
 
-    // now encapsulate it in a tuple with the free points
-    PyTuple *tuple = new PyTuple(2);
-    tuple->SetItem(0, list);
-    // sending 0, as done on retail, doesn't fuck up calculation for some reason
-    // so we can take the same shortcut here
-    tuple->SetItem(1, new PyInt(0));
-
-    return tuple;
+    return list;
 }
 
 SkillRef Character::GetSkillInQueue(uint32 index)
@@ -1222,7 +1276,7 @@ void Character::AddItem(InventoryItemRef item)
             else
             {
                 // This should be training, make sure it's started.
-                StartTraining(skill->typeID());
+                startTraining(skill->typeID());
             }
         }
     }

@@ -60,7 +60,7 @@ PyResult HoloscreenMgrService::Handle_GetTwoHourCache(PyCallArgs& call)
     args->SetItemString("epicArcAgents", new PyDict);
     args->SetItemString("sovChangesReport", new PyList);
 
-    return new PyObject("util.KeyVal", args);
+    return new PyObject("utillib.KeyVal", args);
 }
 
 PyResult HoloscreenMgrService::Handle_GetRecentEpicArcCompletions(PyCallArgs& call)
@@ -86,5 +86,5 @@ PyResult HoloscreenMgrService::Handle_GetRuntimeCache(PyCallArgs& call)
     args->SetItemString("epicArcAgents", new PyDict);
     args->SetItemString("sovChangesReport", new PyList);
 
-    return new PyObject("util.KeyVal", args);
+    return new PyObject("utillib.KeyVal", args);
 }

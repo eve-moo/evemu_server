@@ -1,15 +1,18 @@
 <elements>
+
     <elementDef name="UUNCommandList">
         <tupleInline>
             <list name="commandList" />
         </tupleInline>
     </elementDef>
+
     <elementDef name="UUNCommand">
         <tupleInline>
             <int name="command" />
             <tuple name="command_data" />
         </tupleInline>
     </elementDef>
+
     <elementDef name="UUNCCommandCenter">
         <tupleInline>
             <int name="pinID" />
@@ -18,6 +21,7 @@
             <real name="longitude" />
         </tupleInline>
     </elementDef>
+
     <elementDef name="UUNCStandardPin">
         <tupleInline>
             <tupleInline>
@@ -29,6 +33,7 @@
             <real name="longitude" />
         </tupleInline>
     </elementDef>
+
     <elementDef name="UUNCLinkCommand">
         <tupleInline>
             <int name="src" />
@@ -39,6 +44,7 @@
             <int name="level" />
         </tupleInline>
     </elementDef>
+
     <elementDef name="UUNCLinkStandard">
         <tupleInline>
             <tupleInline>
@@ -52,4 +58,5 @@
             <int name="level" />
         </tupleInline>
     </elementDef>
+
 </elements>

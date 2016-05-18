@@ -96,6 +96,7 @@ SET( cache_SOURCE
      "${TARGET_SOURCE_DIR}/cache/ObjCacheService.cpp" )
 
 SET( character_INCLUDE
+     "${TARGET_INCLUDE_DIR}/character/AchievementTrackerMgrService.h"
      "${TARGET_INCLUDE_DIR}/character/AggressionMgrService.h"
      "${TARGET_INCLUDE_DIR}/character/CertificateMgrDB.h"
      "${TARGET_INCLUDE_DIR}/character/CertificateMgrService.h"
@@ -104,12 +105,14 @@ SET( character_INCLUDE
      "${TARGET_INCLUDE_DIR}/character/CharFittingMgrService.h"
      "${TARGET_INCLUDE_DIR}/character/CharMgrService.h"
      "${TARGET_INCLUDE_DIR}/character/CharUnboundMgrService.h"
+     "${TARGET_INCLUDE_DIR}/character/CrimeWatchService.h"
      "${TARGET_INCLUDE_DIR}/character/PaperDollDB.h"
      "${TARGET_INCLUDE_DIR}/character/PaperDollService.h"
      "${TARGET_INCLUDE_DIR}/character/PhotoUploadService.h"
      "${TARGET_INCLUDE_DIR}/character/Skill.h"
      "${TARGET_INCLUDE_DIR}/character/SkillMgrService.h" )
 SET( character_SOURCE
+     "${TARGET_SOURCE_DIR}/character/AchievementTrackerMgrService.cpp"
      "${TARGET_SOURCE_DIR}/character/AggressionMgrService.cpp"
      "${TARGET_SOURCE_DIR}/character/CertificateMgrDB.cpp"
      "${TARGET_SOURCE_DIR}/character/CertificateMgrService.cpp"
@@ -118,6 +121,7 @@ SET( character_SOURCE
      "${TARGET_SOURCE_DIR}/character/CharFittingMgrService.cpp"
      "${TARGET_SOURCE_DIR}/character/CharMgrService.cpp"
      "${TARGET_SOURCE_DIR}/character/CharUnboundMgrService.cpp"
+     "${TARGET_SOURCE_DIR}/character/CrimeWatchService.cpp"
      "${TARGET_SOURCE_DIR}/character/PaperDollDB.cpp"
      "${TARGET_SOURCE_DIR}/character/PaperDollService.cpp"
      "${TARGET_SOURCE_DIR}/character/PhotoUploadService.cpp"
@@ -153,6 +157,7 @@ SET( config_SOURCE
      "${TARGET_SOURCE_DIR}/config/LocalizationServerService.cpp" )
 
 SET( corporation_INCLUDE
+     "${TARGET_INCLUDE_DIR}/corporation/Corporation.h"
      "${TARGET_INCLUDE_DIR}/corporation/CorpBookmarkMgrService.h"
      "${TARGET_INCLUDE_DIR}/corporation/CorpMgrService.h"
      "${TARGET_INCLUDE_DIR}/corporation/CorporationCarrier.h"
@@ -462,6 +467,20 @@ SET( system_SOURCE
      "${TARGET_SOURCE_DIR}/system/SystemManager.cpp"
      "${TARGET_SOURCE_DIR}/system/WrecksAndLoot.cpp" )
 
+SET(services_lscproxy_INCLUDE
+        "${TARGET_INCLUDE_DIR}/services/lscProxy/LscProxyService.h"
+        )
+SET(services_lscproxy_SOURCE
+        "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
+        )
+
+SET(services_eventlog_INCLUDE
+        "${TARGET_INCLUDE_DIR}/services/eventLog/EventLogService.h"
+        )
+SET(services_eventlog_SOURCE
+        "${TARGET_SOURCE_DIR}/services/eventLog/EventLogService.cpp"
+        )
+
 ########################
 # Setup the executable #
 ########################
@@ -491,34 +510,39 @@ SOURCE_GROUP( "src\\ship\\modules" FILES ${ship_modules_SOURCE} )
 SOURCE_GROUP( "src\\standing"      FILES ${standing_SOURCE} )
 SOURCE_GROUP( "src\\station"       FILES ${station_SOURCE} )
 SOURCE_GROUP( "src\\system"        FILES ${system_SOURCE} )
+SOURCE_GROUP( "src\\services\\lscProxy"        FILES ${services_lscproxy_SOURCE} )
+SOURCE_GROUP( "src\\services\\eventLog"        FILES ${services_eventlog_SOURCE} )
 
 ADD_EXECUTABLE( "${TARGET_NAME}"
-${SOURCE}
-${account_SOURCE}
-${admin_SOURCE}
-${cache_SOURCE}
-${character_SOURCE}
-${chat_SOURCE}
-${config_SOURCE}
-${corporation_SOURCE}
-${dogmaim_SOURCE}
-${fleet_SOURCE}
-${imageserver_SOURCE}
-${inventory_SOURCE}
-${mail_SOURCE}
-${manufacturing_SOURCE}
-${map_SOURCE}
-${market_SOURCE}
-${mining_SOURCE}
-${missions_SOURCE}
-${npc_SOURCE}
-${pos_SOURCE}
-${search_SOURCE}
-${ship_SOURCE}
-${ship_modules_SOURCE}
-${standing_SOURCE}
-${station_SOURCE}
-${system_SOURCE} )
+        ${SOURCE}
+        ${account_SOURCE}
+        ${admin_SOURCE}
+        ${cache_SOURCE}
+        ${character_SOURCE}
+        ${chat_SOURCE}
+        ${config_SOURCE}
+        ${corporation_SOURCE}
+        ${dogmaim_SOURCE}
+        ${fleet_SOURCE}
+        ${imageserver_SOURCE}
+        ${inventory_SOURCE}
+        ${mail_SOURCE}
+        ${manufacturing_SOURCE}
+        ${map_SOURCE}
+        ${market_SOURCE}
+        ${mining_SOURCE}
+        ${missions_SOURCE}
+        ${npc_SOURCE}
+        ${pos_SOURCE}
+        ${search_SOURCE}
+        ${ship_SOURCE}
+        ${ship_modules_SOURCE}
+        ${standing_SOURCE}
+        ${station_SOURCE}
+        ${system_SOURCE}
+        ${services_lscproxy_SOURCE}
+        ${services_eventlog_SOURCE}
+        )
 
 IF(PCH)
 	TARGET_BUILD_PCH( "${TARGET_NAME}"

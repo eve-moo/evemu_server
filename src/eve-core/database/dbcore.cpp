@@ -468,7 +468,7 @@ const DBTYPE DBQueryResult::MYSQL_DBTYPE_TABLE_SIGNED[] =
     DBTYPE_ERROR,   //[14]MYSQL_TYPE_NEWDATE            /* ??? */
     DBTYPE_ERROR,   //[15]MYSQL_TYPE_VARCHAR            /* ??? */
     DBTYPE_BOOL,    //[16]MYSQL_TYPE_BIT                /* BIT field (MySQL 5.0.3 and up) */
-    DBTYPE_ERROR,   //[17]MYSQL_TYPE_NEWDECIMAL=246     /* Precision math DECIMAL or NUMERIC field (MySQL 5.0.3 and up) */
+    DBTYPE_R8, //[17]MYSQL_TYPE_NEWDECIMAL=246     /* Precision math DECIMAL or NUMERIC field (MySQL 5.0.3 and up) */
     DBTYPE_ERROR,   //[18]MYSQL_TYPE_ENUM=247           /* ENUM field */
     DBTYPE_ERROR,   //[19]MYSQL_TYPE_SET=248            /* SET field */
     DBTYPE_WSTR,    //[20]MYSQL_TYPE_TINY_BLOB=249      /* TINYBLOB or TINYTEXT field */
@@ -499,7 +499,7 @@ const DBTYPE DBQueryResult::MYSQL_DBTYPE_TABLE_UNSIGNED[] =
     DBTYPE_ERROR,   //[14]MYSQL_TYPE_NEWDATE            /* ??? */
     DBTYPE_ERROR,   //[15]MYSQL_TYPE_VARCHAR            /* ??? */
     DBTYPE_BOOL,    //[16]MYSQL_TYPE_BIT                /* BIT field (MySQL 5.0.3 and up) */
-    DBTYPE_ERROR,   //[17]MYSQL_TYPE_NEWDECIMAL=246     /* Precision math DECIMAL or NUMERIC field (MySQL 5.0.3 and up) */
+    DBTYPE_R8, //[17]MYSQL_TYPE_NEWDECIMAL=246     /* Precision math DECIMAL or NUMERIC field (MySQL 5.0.3 and up) */
     DBTYPE_ERROR,   //[18]MYSQL_TYPE_ENUM=247           /* ENUM field */
     DBTYPE_ERROR,   //[19]MYSQL_TYPE_SET=248            /* SET field */
     DBTYPE_WSTR,    //[20]MYSQL_TYPE_TINY_BLOB=249      /* TINYBLOB or TINYTEXT field */

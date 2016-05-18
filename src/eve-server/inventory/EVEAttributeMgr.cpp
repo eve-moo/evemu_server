@@ -101,6 +101,7 @@ EvilNumber AttributeMap::GetAttribute( const uint32 attributeId ) const
             case AttrWillpowerBonus:
             case AttrCapacity:
             case AttrQuantity:
+            case AttrRigSlots:
             case AttrRequiredSkill1:
             case AttrRequiredSkill2:
             case AttrRequiredSkill3:

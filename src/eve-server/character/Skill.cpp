@@ -25,6 +25,7 @@
 
 #include "eve-server.h"
 
+#include "../Client.h"
 #include "character/Character.h"
 #include "character/Skill.h"
 #include "inventory/AttributeEnum.h"
@@ -96,7 +97,7 @@ double Skill::GetSPForLevel(int level)
         return 0;
     }
     double timeConst = getAttribute(AttrSkillTimeConstant).get_float();
-    return (uint32) (SKILL_BASE_POINTS * timeConst * std::pow(2, (2.5 * (level - 1))));
+    return (SKILL_BASE_POINTS * timeConst * std::pow(2, (2.5 * (level - 1))));
 }
 
 uint8 Skill::GetSkillLevel()
@@ -125,4 +126,33 @@ bool Skill::SetSkillPoints(double points)
         return false;
     }
     return setAttribute(AttrSkillPoints, points);
+}
+
+PyObject *Skill::getKeyValDict()
+{
+    PyDict *skillDict = new PyDict();
+    skillDict->SetItem(new PyString("skillPoints"), new PyInt((int) GetSkillPoints()));
+    skillDict->SetItem(new PyString("skillRank"), new PyFloat(getAttribute(AttrSkillTimeConstant).get_float()));
+    skillDict->SetItem(new PyString("skillLevel"), new PyInt(GetSkillLevel()));
+    return new PyObject("utillib.KeyVal", skillDict);
+}
+
+void Skill::sendSkillChangeNotice(Client *client, std::string eventName)
+{
+    if(client != NULL)
+    {
+        PyDict *skillInfos = new PyDict();
+        skillInfos->SetItem(new PyInt(typeID()), getKeyValDict());
+        PyRep *event = new PyNone();
+        // TO-DO: find out if the can be false.
+        // i.e. if skill is level 5 or char injects skill with another char already training.
+        PyRep *canTrain = new PyBool(true);
+        if(!eventName.empty())
+        {
+            event = new PyString(eventName);
+        }
+        PyTuple *tuple = new_tuple(skillInfos, event, canTrain);
+        PyTuple *newQueue = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), tuple)));
+        client->SendNotification("OnServerSkillsChanged", "charid", &newQueue, false);
+    }
 }

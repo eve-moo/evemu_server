@@ -33,15 +33,34 @@
 #include "corporation/CorpRegistryService.h"
 #include "corporation/CorporationDB.h"
 #include "PyServiceMgr.h"
+#include "Corporation.h"
+
+// Corporation after leaving a player corp.  bloodline or initial corp based?
+std::map<int, int> bloodlineToNPCCorp = {
+    {1373, 1000066}, // Viziam
+    {1374, 1000072}, // Imperial Shipment
+    {1375, 1000009}, // Caldari Provisions
+    {1376, 1000006}, // Deep Core Mining Inc.
+    {1377, 1000107}, // The Scope
+    {1378, 1000111}, // Aliastra
+    {1379, 1000046}, // Sebiestor tribe
+    {1380, 1000049}, // Brutor tribe
+    {1383, 1000014}, // Perkone
+    {1384, 1000114}, // Garoun Investment Bank
+    {1385, 1000080}, // Ministry of War
+    {1386, 1000060} // Native Freshfood
+};
 
 class CorpRegistryBound
 : public PyBoundObject
 {
 public:
+    const uint32 corporationID;
     PyCallable_Make_Dispatcher(CorpRegistryBound)
 
-    CorpRegistryBound()
-    : PyBoundObject(new Dispatcher(this))
+    CorpRegistryBound(uint32 corpID)
+    : PyBoundObject(new Dispatcher(this)),
+    corporationID(corpID)
     {
         m_strBoundObjectName = "CorpRegistryBound";
 
@@ -65,6 +84,8 @@ public:
         PyCallable_REG_CALL(CorpRegistryBound, UpdateDivisionNames)
         PyCallable_REG_CALL(CorpRegistryBound, UpdateCorporation)
         PyCallable_REG_CALL(CorpRegistryBound, UpdateLogo)
+        PyCallable_REG_CALL(CorpRegistryBound, GetAggressionSettings)
+        PyCallable_REG_CALL(CorpRegistryBound, KickOutMember)
 
         // STUBBS
         PyCallable_REG_CALL(CorpRegistryBound, GetMember)
@@ -99,6 +120,8 @@ public:
     PyCallable_DECL_CALL(UpdateDivisionNames)
     PyCallable_DECL_CALL(UpdateCorporation)
     PyCallable_DECL_CALL(UpdateLogo)
+    PyCallable_DECL_CALL(GetAggressionSettings)
+    PyCallable_DECL_CALL(KickOutMember)
 
     // STUBBS
     PyCallable_DECL_CALL(GetMember)
@@ -159,18 +182,29 @@ CorpRegistryService::~CorpRegistryService() {
 
 
 
-PyBoundObject* CorpRegistryService::_CreateBoundObject( Client* c, const PyRep* bind_args )
+PyBoundObject* CorpRegistryService::_CreateBoundObject( Client* c, const PyRep* bind_args)
 {
-    _log( CLIENT__MESSAGE, "CorpRegistryService bind request for:" );
+    const PyTuple *tup = bind_args->AsTuple();
+    if(tup == nullptr)
+    {
+        return nullptr;
+    }
+    const PyInt *id = tup->GetItem(0)->AsInt();
+    if(id == nullptr)
+    {
+        return nullptr;
+    }
+    uint32 corpID = id->value();
+    _log(CLIENT__MESSAGE, "CorpRegistryService bind request for:");
     bind_args->Dump( CLIENT__MESSAGE, "    " );
 
-    return new CorpRegistryBound( );
+    return new CorpRegistryBound(corpID);
 }
 
 
 PyResult CorpRegistryBound::Handle_GetEveOwners(PyCallArgs &call)
 {
-    return (CorporationDB::GetEveOwners());
+    return (CorporationDB::GetEveOwners(corporationID));
 }
 
 PyResult CorpRegistryBound::Handle_GetInfoWindowDataForChar( PyCallArgs& call )
@@ -196,6 +230,7 @@ PyResult CorpRegistryBound::Handle_GetCorporation(PyCallArgs &call)
 {
     return (CorporationDB::GetCorporation(call.client->GetCorporationID()));
 }
+
 PyResult CorpRegistryBound::Handle_GetCorporations(PyCallArgs &call) {
     Call_SingleIntegerArg arg;
     if (!arg.Decode(&call.tuple)) {
@@ -314,18 +349,18 @@ PyResult CorpRegistryBound::Handle_GetMember(PyCallArgs &call) {
 
 /*
 PyClass
-  PyString:"macho.CallRsp"
+  PyString:"carbon.common.script.net.machoNetPacket.CallRsp"
   PyTuple:6
     itr[0]:0x7
     itr[1]:PyClass
-      PyString:"macho.MachoAddress"
+      PyString:"carbon.common.script.net.machoNetPacket.MachoAddress"
       PyTuple:4
         itr[0]:0x1
         itr[1]:0xACA03
         itr[2]:None
         itr[3]:None
     itr[2]:PyClass
-      PyString:"macho.MachoAddress"
+      PyString:"carbon.common.script.net.machoNetPacket.MachoAddress"
       PyTuple:4
         itr[0]:0x2
         itr[1]:0x18BD39F1529E
@@ -383,18 +418,25 @@ PyResult CorpRegistryBound::Handle_GetSuggestedTickerNames(PyCallArgs &call) {
     }
 
     PyList * result = new PyList;
-    Item_GetSuggestedTickerNames sTN;
-    sTN.tN = "";
+    std::string ticker;
     uint32 cnLen = arg.arg.length();
     // Easiest ticker-generation method: get the capital letters.
     for (uint32 i=0;i<cnLen;i++) {
-        if (arg.arg[i] >= 'A' && arg.arg[i] <= 'Z') {
-            sTN.tN += arg.arg[i];
+        if (arg.arg[i] >= 'A' && arg.arg[i] <= 'Z')
+        {
+            ticker += arg.arg[i];
         }
     }
-    result->AddItem( sTN.Encode() );
+    // Create CRowset header.
+    DBRowDescriptor *header = new DBRowDescriptor();
+    header->AddColumn("tickerName", DBTYPE_WSTR);
+    // Create CRowset.
+    CRowSet *rowset = new CRowSet(&header);
+    // Add row.
+    PyPackedRow* into = rowset->NewRow();
+    into->SetField("tickerName", new PyWString(ticker));
 
-    return result;
+    return rowset;
 }
 
 PyResult CorpRegistryBound::Handle_GetStations(PyCallArgs &call) {
@@ -611,9 +653,9 @@ PyResult CorpRegistryBound::Handle_UpdateApplicationOffer(PyCallArgs &call) {
 
     // OnCorporationApplicationChanged event, probably be good to make it two (or more) times, independently, depending on update type
 
+    // TO-DO: This needs to be updated, response is now in a packed row.
     Notify_OnCorporationApplicationChanged OCAC;
     PyTuple * answer;
-
 
     switch (args.newStatus) {
     case crpApplicationRejectedByCorporation:
@@ -621,7 +663,7 @@ PyResult CorpRegistryBound::Handle_UpdateApplicationOffer(PyCallArgs &call) {
         ApplicationInfo newInfo(true);
         ApplicationInfo oldInfo(true);
         ApplicationInfo invalidInfo(false);
-        OCAC.charID = args.charID;
+            OCAC.charID = args.characterID;
         OCAC.corpID = call.client->GetCorporationID();
             if (!CorporationDB::GetCurrentApplicationInfo(OCAC.charID, OCAC.corpID, oldInfo))
             {
@@ -661,7 +703,7 @@ PyResult CorpRegistryBound::Handle_UpdateApplicationOffer(PyCallArgs &call) {
         /// OnCorporationApplicationChanged
         ApplicationInfo newInfo(true);
         ApplicationInfo oldInfo(true);
-        OCAC.charID = args.charID;
+            OCAC.charID = args.characterID;
         OCAC.corpID = call.client->GetCorporationID();
             if (!CorporationDB::GetCurrentApplicationInfo(OCAC.charID, OCAC.corpID, oldInfo))
             {
@@ -698,9 +740,9 @@ PyResult CorpRegistryBound::Handle_UpdateApplicationOffer(PyCallArgs &call) {
 
         N_pau.realRowCount = 4;
         N_pau.bindID = GetBindStr();
-        N_pau.changePKIndexValue = args.charID;
+            N_pau.changePKIndexValue = args.characterID;
 
-            if (!CorporationDB::CreateMemberAttributeUpdate(change, oldInfo.corpID, args.charID))
+            if(!CorporationDB::CreateMemberAttributeUpdate(change, oldInfo.corpID, args.characterID))
             {
             codelog(SERVICE__ERROR, "Couldn't get data from the character. Sorry.");
             return NULL;
@@ -717,7 +759,7 @@ PyResult CorpRegistryBound::Handle_UpdateApplicationOffer(PyCallArgs &call) {
         // OnCorporationMemberChanged event
         Notify_OnCorpMemberChange ocmc;
 
-        ocmc.charID = args.charID;
+            ocmc.charID = args.characterID;
         ocmc.newCorpID = change.corporationIDNew->AsInt()->value();
         ocmc.oldCorpID = change.corporationIDOld->AsInt()->value();
         ocmc.newDate = OCAC.applicationDateTimeNew->AsInt()->value();
@@ -739,7 +781,7 @@ PyResult CorpRegistryBound::Handle_UpdateApplicationOffer(PyCallArgs &call) {
         // and goes twice
         // HAHA: just because they do it doesn't mean we need to...
         Notify_IntRaw notif;
-        notif.key = args.charID;
+            notif.key = args.characterID;
         notif.data = change.Encode();
 
         answer = notif.Encode();
@@ -753,7 +795,7 @@ PyResult CorpRegistryBound::Handle_UpdateApplicationOffer(PyCallArgs &call) {
             &answer, both_corps);
 
         //NOTE: this really should happen sooner, in case it fails.
-            if (!CorporationDB::JoinCorporation(args.charID, ocmc.newCorpID, ocmc.oldCorpID, CorpMemberInfo()))
+            if(!CorporationDB::JoinCorporation(args.characterID, ocmc.newCorpID, ocmc.oldCorpID, CorpMemberInfo()))
             {
             codelog(SERVICE__ERROR, "%s: Failed to record corp join for char %u corp %u", call.client->GetName(), OCAC.charID, OCAC.corpID);
             return NULL;
@@ -1006,7 +1048,53 @@ PyResult CorpRegistryBound::Handle_UpdateLogo(PyCallArgs &call) {
     return CorporationDB::GetCorporation(notif.key);
 }
 
-PyResult CorpRegistryBound::Handle_GetSharesByShareholder(PyCallArgs &call) {
+PyResult CorpRegistryBound::Handle_GetAggressionSettings(PyCallArgs &call)
+{
+    PyDict * dict = new PyDict();
+    // TO-DO: This sends a timestamp of when it enables/disables.
+    // This will be PyNone for NPC corps or PyNone if never enabled or timestamp for player corps that have enabled it at some point.
+    dict->SetItem(new PyString("_enableAfter"), new PyNone);
+    // This will be zero for NPC corps or the creation time or when last changed for Player corps.
+    dict->SetItem(new PyString("_disableAfter"), new PyInt(0));
+    return new PyObject("crimewatch.corp_aggression.settings.AggressionSettings", dict);
+}
+
+PyResult CorpRegistryBound::Handle_KickOutMember(PyCallArgs &call)
+{
+    Call_SingleIntegerArg arg;
+    if(!arg.Decode(&call.tuple))
+    {
+        codelog(SERVICE__ERROR, "Bad incoming params.");
+        return new PyBool(false);
+    }
+
+    // Get character.
+    CharacterRef chr = ItemFactory::GetCharacter(arg.arg);
+    if(chr.get() == nullptr)
+    {
+        return new PyBool(false);
+    }
+    uint32 oldCorpID = chr->corporationID();
+    uint32 oldCorpHQ = chr->corporationHQ();
+    // Use a default if none found.
+    uint32 corporationID = EVEServerConfig::character.startCorporation;
+    // Look up corporation from bloodline.
+    auto itr = bloodlineToNPCCorp.find(chr->bloodlineID());
+    if(itr == bloodlineToNPCCorp.end())
+    {
+        corporationID = itr->second;
+    }
+    chr->JoinCorporation(corporationID);
+    // TO-DO: Send OnCorporationMemberChanged Notification.
+    // There are several versions of OnCorporationMemberChanged that are sent.
+
+    call.client->UpdateCorpSession(chr);
+
+    return new PyBool(true);
+}
+
+PyResult CorpRegistryBound::Handle_GetSharesByShareholder(PyCallArgs &call)
+{
     SysLog::Log("CorpRegisrtyBound", "Called GetSharesByShareholder stub.");
 
     return NULL;

@@ -67,11 +67,13 @@ trapfpe()
 #include "cache/BulkMgrService.h"
 #include "cache/ObjCacheService.h"
 // character services
+#include "character/AchievementTrackerMgrService.h"
 #include "character/AggressionMgrService.h"
 #include "character/CertificateMgrService.h"
 #include "character/CharFittingMgrService.h"
 #include "character/CharMgrService.h"
 #include "character/CharUnboundMgrService.h"
+#include "character/CrimeWatchService.h"
 #include "character/PaperDollService.h"
 #include "character/PhotoUploadService.h"
 #include "character/SkillMgrService.h"
@@ -152,6 +154,9 @@ trapfpe()
 #include "system/KeeperService.h"
 #include "system/ScenarioService.h"
 #include "system/WrecksAndLoot.h"
+
+#include "services/lscProxy/LscProxyService.h"
+#include "services/eventLog/EventLogService.h"
 // service manager
 #include "PyServiceMgr.h"
 
@@ -298,6 +303,7 @@ int main( int argc, char* argv[] )
     // Please keep the services list clean so it's easier to find something
 
     PyServiceMgr::RegisterService(new AccountService());
+    PyServiceMgr::RegisterService(new AchievementTrackerMgrService());
     PyServiceMgr::RegisterService(new AgentMgrService());
     PyServiceMgr::RegisterService(new AggressionMgrService());
     PyServiceMgr::RegisterService(new AlertService());
@@ -321,6 +327,7 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new CorpStationMgrService());
     PyServiceMgr::RegisterService(new ContractMgrService());
     PyServiceMgr::RegisterService(new ContractProxyService());
+    PyServiceMgr::RegisterService(new CrimeWatchService());
     PyServiceMgr::RegisterService(new DevToolsProviderService());
     PyServiceMgr::RegisterService(new DogmaIMService());
     PyServiceMgr::RegisterService(new DogmaService());
@@ -361,7 +368,8 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new ReprocessingService());
     PyServiceMgr::RegisterService(new SearchMgrService());
     PyServiceMgr::RegisterService(new ShipService());
-    PyServiceMgr::RegisterService(new SkillMgrService());
+    //PyServiceMgr::RegisterService(new SkillMgrService());
+    PyServiceMgr::RegisterService(new SkillMgr2Service());
     PyServiceMgr::RegisterService(new SlashService(&command_dispatcher));
     PyServiceMgr::RegisterService(new SovereigntyMgrService());
     PyServiceMgr::RegisterService(new Standing2Service());
@@ -371,6 +379,9 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new UserService());
     PyServiceMgr::RegisterService(new VoiceMgrService());
     PyServiceMgr::RegisterService(new WarRegistryService());
+
+    PyServiceMgr::RegisterService(new LSCProxyService());
+    PyServiceMgr::RegisterService(new EventLogService());
 
     SysLog::Log("Server Init", "Priming cached objects.");
     PyServiceMgr::cache_service->PrimeCache();

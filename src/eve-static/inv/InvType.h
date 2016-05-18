@@ -46,7 +46,6 @@ public:
             std::string &_typeName,
             std::string &_description,
             uint32 _graphicID,
-            double _radius,
             double _mass,
             double _volume,
             double _capacity,
@@ -55,7 +54,6 @@ public:
             double _basePrice,
             bool _published,
             uint32 _marketGroupID,
-            double _chanceOfDuplicating,
             uint32 _iconID,
             std::map<uint32, EvilNumber> &_attributes,
             std::vector<uint32> _effects,
@@ -68,7 +66,6 @@ public:
     const std::string typeName;
     const std::string description;
     const uint32 graphicID;
-    const double radius;
     const double mass;
     const double volume;
     const double capacity;
@@ -77,7 +74,6 @@ public:
     const double basePrice;
     const bool published;
     const uint32 marketGroupID;
-    const double chanceOfDuplicating;
     const uint32 iconID;
 
     const std::map<uint32, EvilNumber> m_attributes;

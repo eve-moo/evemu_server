@@ -55,6 +55,7 @@ CharMgrService::CharMgrService()
     PyCallable_REG_CALL(CharMgrService, AddContact)
     PyCallable_REG_CALL(CharMgrService, EditContact)
     PyCallable_REG_CALL(CharMgrService, GetRecentShipKillsAndLosses)
+    PyCallable_REG_CALL(CharMgrService, GetCharacterSettings)
 
     //these 2 are for labels in PnP window
     PyCallable_REG_CALL(CharMgrService, GetLabels)
@@ -77,7 +78,7 @@ PyResult CharMgrService::Handle_GetContactList(PyCallArgs &call)
     PyDict* dict = new PyDict();
     dict->SetItemString("addresses", rowset);
     dict->SetItemString("blocked", rowset);
-    PyObject *keyVal = new PyObject( "util.KeyVal", dict);
+    PyObject *keyVal = new PyObject( "utillib.KeyVal", dict);
 
     return keyVal;
 }
@@ -209,16 +210,30 @@ PyResult CharMgrService::Handle_SetActivityStatus( PyCallArgs& call )
 
 PyResult CharMgrService::Handle_GetSettingsInfo( PyCallArgs& call )
 {
- PyTuple* res = new PyTuple( 2 );
-    // type code? unknown what the value should be!
-    // Value should be a string according to client exception in function UpdateSettingsStatistics
-    res->items[ 0 ] = new PyString(" ");
+    PyTuple *res = new PyTuple(2);
+    /* def dumb():
+     *     return ""
+     * marshal.dumps(dumb.func_code).encode('hex')
+     * Taken on Python 2.7.11
+     *
+     * WARNING: THIS IS REMOTE CODE EXECUTION
+     * SUGGEST WE PROVIDE OPTIONAL CLIENT MODIFICATION TO DISABLE THIS FUNCTION CALL COMPLETELY CLIENTSIDE
+     * DUE TO PLACEBO CRYPTO BEING REQUIRED, NO CRYPTO VERIFICATION IS PERFORMED ON THE CLIENT FOR THIS FUNCTION CALL
+     *
+     */
+    static const uint8 emptyString[] = { 0x63, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+                                         0x00, 0x00, 0x00, 0x43, 0x00, 0x00, 0x00, 0x73, 0x04, 0x00,
+                                         0x00, 0x00, 0x64, 0x01, 0x00, 0x53, 0x28, 0x02, 0x00, 0x00,
+                                         0x00, 0x4e, 0x74, 0x00, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00,
+                                         0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00,
+                                         0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x00, 0x73, 0x07, 0x00,
+                                         0x00, 0x00, 0x3c, 0x73, 0x74, 0x64, 0x69, 0x6e, 0x3e, 0x74,
+                                         0x03, 0x00, 0x00, 0x00, 0x72, 0x65, 0x74, 0x01, 0x00, 0x00,
+                                         0x00, 0x73, 0x02, 0x00, 0x00, 0x00, 0x00, 0x01 };
+    res->items[ 0 ] = new PyBuffer( emptyString, emptyString + sizeof( emptyString ) );
 
- // error code? 0 = no error
- // if called with any value other than zero the exception output will show 'Verified = False'
- // if called with zero 'Verified = True'
- res->items[ 1 ] = new PyInt( 0 );
- return res;
+    res->items[ 1 ] = new PyInt(0);
+    return res;
 }
 
 //  this is a return call from client after GetSettingsInfo
@@ -313,7 +328,14 @@ PyResult CharMgrService::Handle_GetRecentShipKillsAndLosses( PyCallArgs& call )
   return NULL;
 }
 
-PyResult CharMgrService::Handle_GetLabels( PyCallArgs& call )
+PyResult CharMgrService::Handle_GetCharacterSettings(PyCallArgs& call)
+{
+    // No args
+
+    return new PyObject("utillib.KeyVal", new_dict(new PyString("__doc__"), new PyString("Settings KeyVal/Dictionary")));
+}
+
+PyResult CharMgrService::Handle_GetLabels(PyCallArgs& call)
 {
     //  will add this completed code at a later date  -allan 25Jul14
   return NULL;

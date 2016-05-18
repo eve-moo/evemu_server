@@ -508,7 +508,7 @@ PyResult Command_spawnn( Client* who, const Seperator& args )
     Vector3D loc( who->GetPosition() );
     // Calculate a random coordinate on the sphere centered on the player's position with
     // a radius equal to the radius of the ship/celestial being spawned times 10 for really good measure of separation:
-    double radius = (type->radius * 5.0) * (double) (MakeRandomInt(1, 3)); // Scale the distance from player that the object will spawn to between 10x and 15x the object's radius
+    double radius = (type->getDoubleAttribute(AttrRadius) * 5.0) * (double) (MakeRandomInt(1, 3)); // Scale the distance from player that the object will spawn to between 10x and 15x the object's radius
     loc.MakeRandomPointOnSphere( radius );
 
     // Spawn the item:
@@ -642,7 +642,7 @@ PyResult Command_spawn( Client* who, const Seperator& args )
 		{
 			// Calculate a random coordinate on the sphere centered on the player's position with
 			// a radius equal to the radius of the ship/celestial being spawned times 10 for really good measure of separation:
-            radius = (type->radius * 5.0) * (double) (MakeRandomInt(1, 3)); // Scale the distance from player that the object will spawn to between 10x and 15x the object's radius
+            radius = (type->getDoubleAttribute(AttrRadius) * 5.0) * (double) (MakeRandomInt(1, 3)); // Scale the distance from player that the object will spawn to between 10x and 15x the object's radius
 			loc.MakeRandomPointOnSphere( radius );
 		}
 
@@ -980,7 +980,7 @@ PyResult Command_giveallskills( Client* who, const Seperator& args )
         return new PyString("Skill gifting target character not found");
     }
     // Stop any training.
-    character->StopTraining();
+    character->stopTraining();
     // Clear the skill queue.
     character->ClearSkillQueue();
     // Query Database to get list of ALL skills, then LOOP through each one, checking character for skill, setting level to 5:
@@ -1138,15 +1138,9 @@ PyResult Command_giveskill( Client* who, const Seperator& args )
         }
 
 		// Either way, this character now has this skill trained to the specified level, so inform client:
-        if( who != NULL )
+        if( who != NULL)
         {
-            OnSkillTrained ost;
-            ost.itemID = skill->itemID();
-
-            PyTuple* tmp = ost.Encode();
-            who->QueueDestinyEvent( &tmp );
-            PySafeDecRef( tmp );
-
+            skill->sendSkillChangeNotice(who);
             who->UpdateSkillTraining();
         }
     }

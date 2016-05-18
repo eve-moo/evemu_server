@@ -137,7 +137,7 @@ PyResult BrowserLockdownService::Handle_GetFlaggedSitesList(PyCallArgs &call) {
     arg_tuple->SetItem(1, GenerateLockdownCachedObject());
     arg_tuple->SetItem(2, new PyNone());
 
-    return new PyObject( "objectCaching.CachedMethodCallResult", arg_tuple );
+    return new PyObject("carbon.common.script.net.objectCaching.CachedMethodCallResult", arg_tuple);
 }
 
 

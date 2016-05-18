@@ -301,7 +301,7 @@ PyObject *ConfigDB::GetMap(uint32 solarSystemID) {
         "   d.typeID,"
         "   d.groupID,"
         "   d.orbitID AS orbitID,"
-        "   j.celestialID AS destinations"
+                         "   j.destinationID AS destinations"
         " FROM mapSolarSystems AS s"
         "  LEFT JOIN mapDenormalize AS d USING (solarSystemID)"
         "  LEFT JOIN mapJumps AS j ON j.stargateID = d.itemID"
@@ -497,4 +497,23 @@ PyRep *ConfigDB::GetTextsForGroup(const std::string & langID, uint32 textgroup) 
     }
 
     return DBResultToRowset(res);
+}
+
+PyRep *ConfigDB::getAveragePrices()
+{
+    DBQueryResult res;
+    // To-DO: get the actual prices.
+    if(!DBcore::RunQuery(res,
+                         "SELECT "
+                         " typeID,"
+                         " IFNULL(cast(basePrice * 10000 as unsigned integer), 0) averagePrice,"
+                         " IFNULL(cast(basePrice * 10000 as unsigned integer), 0) adjustedPrice"
+                         " FROM invTypes"
+                         ))
+    {
+        _log(DATABASE__ERROR, "Failed to query war factions: %s.", res.error.c_str());
+        return NULL;
+    }
+
+    return DBResultToCIndexedRowset(res, "typeID");
 }

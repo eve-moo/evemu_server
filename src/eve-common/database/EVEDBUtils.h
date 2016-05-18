@@ -28,6 +28,7 @@
 
 #include "database/dbcore.h"
 #include "network/packet_types.h"
+#include "python/classes/PyDatabase.h"
 
 #include <map>
 
@@ -74,9 +75,11 @@ PyObjectEx *DBResultToCIndexedRowset(DBQueryResult &result, uint32 key_index);
 PyObject *DBRowToKeyVal(DBResultRow &row);
 PyObject *DBRowToRow(DBResultRow &row, const char *type = "util.Row");
 PyPackedRow *DBRowToPackedRow(DBResultRow &row);
+PyTuple *DBResultToTupleKeyVal(DBQueryResult &result);
 
 // 
 void FillPackedRow(const DBResultRow& row, PyPackedRow* into);
+PyPackedRow* CreatePackedRow(const DBResultRow& row, DBRowDescriptor* header);
 
 
 #endif

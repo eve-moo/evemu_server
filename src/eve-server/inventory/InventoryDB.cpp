@@ -179,8 +179,9 @@ bool InventoryDB::GetItem(uint32 itemID, ItemData &into) {
         return false;
     }
 
-    into.name = row.GetText(0);
     into.typeID = row.GetUInt(1);
+    InvTypeRef type = InvType::getType(into.typeID);
+    into.name = row.IsNull(0) ? type->typeName : row.GetText(0);
     into.ownerID = (row.IsNull(2) ? 1 : row.GetUInt(2));
     into.locationID = (row.IsNull(3) ? 1 : row.GetUInt(3));
     into.flag = (EVEItemFlags)row.GetUInt(4);

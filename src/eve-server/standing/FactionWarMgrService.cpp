@@ -38,6 +38,7 @@ FactionWarMgrService::FactionWarMgrService()
 {
     PyCallable_REG_CALL(FactionWarMgrService, GetWarFactions)
     PyCallable_REG_CALL(FactionWarMgrService, GetFWSystems)
+    PyCallable_REG_CALL(FactionWarMgrService, GetFacWarSystems)
     PyCallable_REG_CALL(FactionWarMgrService, GetMyCharacterRankOverview)
     PyCallable_REG_CALL(FactionWarMgrService, GetFactionMilitiaCorporation)
     PyCallable_REG_CALL(FactionWarMgrService, GetCharacterRankInfo)
@@ -80,7 +81,23 @@ PyResult FactionWarMgrService::Handle_GetFWSystems( PyCallArgs& call )
     return PyServiceMgr::cache_service->MakeObjectCachedMethodCallResult(method_id);
 }
 
-PyResult FactionWarMgrService::Handle_GetMyCharacterRankOverview( PyCallArgs& call )
+PyResult FactionWarMgrService::Handle_GetFacWarSystems(PyCallArgs& call)
+{
+    ObjectCachedMethodID method_id(GetName(), "GetFacWarSystems");
+
+    if(!PyServiceMgr::cache_service->IsCacheLoaded(method_id))
+    {
+        PyRep* res = FactionWarMgrDB::GetWarFactions();
+        if(res == NULL)
+            return NULL;
+
+        PyServiceMgr::cache_service->GiveCache(method_id, &res);
+    }
+
+    return PyServiceMgr::cache_service->MakeObjectCachedMethodCallResult(method_id, "never");
+}
+
+PyResult FactionWarMgrService::Handle_GetMyCharacterRankOverview(PyCallArgs& call)
 {
     Call_SingleIntegerArg arg;
     if( !arg.Decode( &call.tuple ) )

@@ -34,6 +34,7 @@
 #include "character/PhotoUploadService.h"
 
 #include "chr/ChrBloodline.h"
+#include "SkillMgrService.h"
 
 PyCallable_Make_InnerDispatcher(CharUnboundMgrService)
 
@@ -54,6 +55,7 @@ CharUnboundMgrService::CharUnboundMgrService()
     PyCallable_REG_CALL(CharUnboundMgrService, GetCharCreationInfo)
     PyCallable_REG_CALL(CharUnboundMgrService, GetCharNewExtraCreationInfo)
     PyCallable_REG_CALL(CharUnboundMgrService, CreateCharacterWithDoll)
+    PyCallable_REG_CALL(CharUnboundMgrService, GetCharacterSelectionData)
 }
 
 CharUnboundMgrService::~CharUnboundMgrService() {
@@ -70,14 +72,14 @@ PyResult CharUnboundMgrService::Handle_IsUserReceivingCharacter(PyCallArgs &call
 
 PyResult CharUnboundMgrService::Handle_ValidateNameEx(PyCallArgs &call)
 {
-    Call_SingleWStringArg arg;
+    Call_ValidateNameEx arg;
     if (!arg.Decode(&call.tuple))
     {
         codelog(CLIENT__ERROR, "Failed to decode args for ValidateNameEx call");
         return NULL;
     }
 
-    return new PyBool(CharacterDB::ValidateCharName(arg.arg.c_str()));
+    return new PyBool(CharacterDB::ValidateCharName(arg.name.c_str()));
 }
 
 PyResult CharUnboundMgrService::Handle_SelectCharacterID(PyCallArgs &call) {
@@ -300,15 +302,11 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     cdata.createDateTime = cdata.startDateTime;
     cdata.corporationDateTime = cdata.startDateTime;
 
-    typedef std::map<uint32, uint32>        CharSkillMap;
-    typedef CharSkillMap::iterator          CharSkillMapItr;
-
     //load skills
-    CharSkillMap startingSkills;
-    if (!CharacterDB::GetSkillsByRace(char_type->raceID, startingSkills))
+    std::map<uint32, uint32> startingSkills;
+    if(!CharacterDB::GetSkillsByRace(char_type->raceID, startingSkills))
     {
-        codelog(CLIENT__ERROR, "Failed to load char create skills. Bloodline %u, Ancestry %u.",
-            char_type->bloodlineID, cdata.ancestryID);
+        codelog(CLIENT__ERROR, "Failed to load char create skills. RaceID=%u", char_type->raceID);
         return NULL;
     }
 
@@ -335,25 +333,55 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     CharacterDB::add_name_validation_set(char_item->itemName().c_str(), char_item->itemID());
 
     //spawn all the skills
+    uint32 charID = char_item->itemID();
+    uint64 time = Win32TimeNow();
     uint32 skillLevel;
-    CharSkillMapItr cur, end;
-    cur = startingSkills.begin();
-    end = startingSkills.end();
-    for(; cur != end; cur++)
+    std::string values;
+    uint32 method = skillEventCharCreation;
+    for(auto cur : startingSkills)
     {
-        ItemData skillItem( cur->first, char_item->itemID(), char_item->itemID(), flagSkill );
-        SkillRef i = ItemFactory::SpawnSkill(skillItem);
-        if( !i ) {
-            _log(CLIENT__ERROR, "Failed to add skill %u to char %s (%u) during char create.", cur->first, char_item->itemName().c_str(), char_item->itemID());
+        uint32 skillType = cur.first;
+        ItemData skillItem(skillType, charID, charID, flagSkill);
+        SkillRef skill = ItemFactory::SpawnSkill(skillItem);
+        if(!skill)
+        {
+            _log(CLIENT__ERROR, "Failed to add skill %u to char %s (%u) during char create.", cur.first, char_item->itemName().c_str(), charID);
             continue;
         }
 
-        skillLevel = cur->second;
-        i->setAttribute(AttrSkillLevel, skillLevel );
-        i->setAttribute(AttrSkillPoints, i->GetSPForLevel(cur->second));
-        i->SaveAttributes();
+        skillLevel = cur.second;
+        double skillPoints = skill->GetSPForLevel(cur.second);
+        skill->setAttribute(AttrSkillLevel, skillLevel);
+        skill->setAttribute(AttrSkillPoints, skillPoints);
+        skill->SaveAttributes();
+        // Construct insert group.
+        if(values.length() > 0)
+        {
+            values += ", ";
+        }
+        char buf[1024];
+        std::sprintf(buf, "(%u, %u, %u, %f, %u, %" PRId64 ")",
+                     charID, skillType, skillLevel, skillPoints, method, time);
+        values += buf;
     }
-
+    if(!values.empty())
+    {
+        // Skill to history
+        DBerror err;
+        if(!DBcore::RunQuery(err,
+                             "INSERT INTO srvChrSkillHistory "
+                             "(characterID, typeID, level, points, eventID, eventTime)"
+                             " VALUES %s", values.c_str()))
+        {
+            _log(DATABASE__ERROR, "Failed to save skill creation history for character %u: %s", charID, err.c_str());
+        }
+    }
+    // Start with 
+    // All - Civilian miner
+    // caldari - Ibis - Civilian Gatling Railgun
+    // Minmitar - Reaper - Civilian Gatling Autocannon
+    // Amarr - Ibis - Civilian Gatling Pulse Laser.
+    // Galentte - Velator - Civilian Light Electron Blaster
     //now set up some initial inventory:
     InventoryItemRef initInvItem;
 
@@ -403,3 +431,165 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
 
     return new PyInt( char_item->itemID() );
 }
+
+PyResult CharUnboundMgrService::Handle_GetCharacterSelectionData(PyCallArgs &call)
+{
+    uint32 accountID = call.client->GetAccountID();
+
+    PyTuple *rtn = new PyTuple(3);
+
+    // userDetails
+    DBQueryResult res;
+    if (!DBcore::RunQuery(res, "SELECT\n"
+            "    accountName AS userName,\n"
+            "    %lu AS creationDate,\n"
+            "    3 AS characterSlots,\n"
+            "    CAST(3 AS CHAR) AS maxCharacterSlots,\n"
+            "    %lu AS subscriptionEndTime\n"
+            "FROM `srvAccount`\n"
+            "WHERE accountID = %u", (Win32TimeNow() - Win32Time_Month), (Win32TimeNow() + Win32Time_Year), accountID))
+    {
+        codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
+        return NULL;
+    }
+    DBResultRow row;
+    if(!res.GetRow(row))
+    {
+        codelog(SERVICE__ERROR, "Failed to get row for userDetails");
+        return NULL;
+    }
+    rtn->SetItem(0, new_tuple(DBRowToKeyVal(row)));
+
+    // trainingEnds
+    rtn->SetItem(1, new PyList(0));
+
+    res.Reset();
+    if (!DBcore::RunQuery(res,"SELECT \n"
+            "    characterID,\n"
+            "    srvEntity.itemName AS characterName,\n"
+            "    srvCharacter.balance,\n"
+            "    skillPoints,\n"
+            "    srvEntity.typeID,\n"
+            "    gender,\n"
+            "    bloodlineID,\n"
+            "    corporationID,\n"
+            "    NULLIF(allianceID, 0) AS allianceID,\n"
+            "    ship.typeID AS shipTypeID,\n"
+            "    srvCharacter.stationID,\n"                                    // NULL if in space
+            "    solarSystemID,\n"
+            "    security AS locationSecurity,\n"
+            "    NULLIF(deletePrepareDateTime, 0) AS deletePrepareDateTime,\n"
+            "    NULLIF(skillQueueEndTime, 0) AS queueEndTime,\n"
+            "    0 AS logoffDate,\n"                                           // All of these values need to be pulled from the DB in the future
+            "    0 AS paperdollState,\n"
+            "    0 AS balanceChange,\n"            // 0.0 never NULL
+            "    0 AS unreadMailCount,\n"          // 0 never NULL
+            "    0 AS unprocessedNotifications,\n" // 0 never NULL
+            "    0 AS petitionMessage,\n"          // Bool never NULL
+            "    0 AS finishedSkills,\n"           // 0 never NULL
+            "    0 AS skillsInQueue,\n"            // 0 never NULL
+            "    NULL AS skillTypeID,\n"           // Can be NULL, Null if no skill in training
+            "    NULL AS toLevel,\n"               // Can be NULL, ^
+            "    NULL AS trainingStartTime,\n"     // Can be NULL, ^
+            "    NULL AS trainingEndTime,\n"       // Can be NULL, ^
+            "    NULL AS finishSP,\n"              // Can be NULL, ^
+            "    NULL AS trainedSP,\n"             // Can be NULL, ^
+            "    NULL AS fromSP\n"                 // Can be NULL, ^
+            "FROM `srvCharacter`\n"
+            "    LEFT JOIN srvEntity ON characterID = itemID\n"
+            "    LEFT JOIN chrAncestries USING(ancestryID)\n"
+            "    LEFT JOIN srvCorporation USING(corporationID)\n"
+            "    LEFT JOIN srvEntity AS ship ON ship.itemID = shipID\n"
+            "    LEFT JOIN mapSolarSystems USING(solarSystemID)\n"
+            "WHERE accountID = %u", accountID))
+    {
+        codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
+        return NULL;
+    }
+    rtn->SetItem(2, DBResultToTupleKeyVal(res));
+    //rtn->Dump(DEBUG__DEBUG, "GetCharacterSelectionData");
+    return rtn;
+}
+
+/*
+Tuple: 3 elements
+  [ 0] Tuple: 1 elements
+  [ 0]   [ 0] Object:
+  [ 0]   [ 0]   Type: String: 'utillib.KeyVal'
+  [ 0]   [ 0]   Args: Dictionary: 5 entries
+  [ 0]   [ 0]   Args:   [ 0] Key: String: 'maxCharacterSlots'
+  [ 0]   [ 0]   Args:   [ 0] Value: WString: '3'
+  [ 0]   [ 0]   Args:   [ 1] Key: String: 'subscriptionEndTime'
+  [ 0]   [ 0]   Args:   [ 1] Value: Integer field: 131370906800000000
+  [ 0]   [ 0]   Args:   [ 2] Key: String: 'characterSlots'
+  [ 0]   [ 0]   Args:   [ 2] Value: Integer field: 3
+  [ 0]   [ 0]   Args:   [ 3] Key: String: 'creationDate'
+  [ 0]   [ 0]   Args:   [ 3] Value: Integer field: 131033946800000000
+  [ 0]   [ 0]   Args:   [ 4] Key: String: 'userName'
+  [ 0]   [ 0]   Args:   [ 4] Value: WString: 'avianrr'
+  [ 1] List: Empty
+  [ 2] Tuple: 1 elements
+  [ 2]   [ 0] Object:
+  [ 2]   [ 0]   Type: String: 'utillib.KeyVal'
+  [ 2]   [ 0]   Args: Dictionary: 30 entries
+  [ 2]   [ 0]   Args:   [ 0] Key: String: 'fromSP'
+  [ 2]   [ 0]   Args:   [ 0] Value: (None)
+  [ 2]   [ 0]   Args:   [ 1] Key: String: 'finishSP'
+  [ 2]   [ 0]   Args:   [ 1] Value: (None)
+  [ 2]   [ 0]   Args:   [ 2] Key: String: 'trainingEndTime'
+  [ 2]   [ 0]   Args:   [ 2] Value: (None)
+  [ 2]   [ 0]   Args:   [ 3] Key: String: 'trainingStartTime'
+  [ 2]   [ 0]   Args:   [ 3] Value: (None)
+  [ 2]   [ 0]   Args:   [ 4] Key: String: 'skillsInQueue'
+  [ 2]   [ 0]   Args:   [ 4] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [ 5] Key: String: 'trainedSP'
+  [ 2]   [ 0]   Args:   [ 5] Value: (None)
+  [ 2]   [ 0]   Args:   [ 6] Key: String: 'shipTypeID'
+  [ 2]   [ 0]   Args:   [ 6] Value: Integer field: 596
+  [ 2]   [ 0]   Args:   [ 7] Key: String: 'allianceID'
+  [ 2]   [ 0]   Args:   [ 7] Value: (None)
+  [ 2]   [ 0]   Args:   [ 8] Key: String: 'corporationID'
+  [ 2]   [ 0]   Args:   [ 8] Value: Integer field: 1000166
+  [ 2]   [ 0]   Args:   [ 9] Key: String: 'gender'
+  [ 2]   [ 0]   Args:   [ 9] Value: Integer field: 1
+  [ 2]   [ 0]   Args:   [10] Key: String: 'typeID'
+  [ 2]   [ 0]   Args:   [10] Value: Integer field: 1385
+  [ 2]   [ 0]   Args:   [11] Key: String: 'queueEndTime'
+  [ 2]   [ 0]   Args:   [11] Value: (None)
+  [ 2]   [ 0]   Args:   [12] Key: String: 'skillPoints'
+  [ 2]   [ 0]   Args:   [12] Value: Real field: 56484.000000
+  [ 2]   [ 0]   Args:   [13] Key: String: 'characterID'
+  [ 2]   [ 0]   Args:   [13] Value: Integer field: 140000000
+  [ 2]   [ 0]   Args:   [14] Key: String: 'characterName'
+  [ 2]   [ 0]   Args:   [14] Value: WString: 'Keldren Kobain'
+  [ 2]   [ 0]   Args:   [15] Key: String: 'bloodlineID'
+  [ 2]   [ 0]   Args:   [15] Value: Integer field: 13
+  [ 2]   [ 0]   Args:   [16] Key: String: 'stationID'
+  [ 2]   [ 0]   Args:   [16] Value: Integer field: 60014629
+  [ 2]   [ 0]   Args:   [17] Key: String: 'toLevel'
+  [ 2]   [ 0]   Args:   [17] Value: (None)
+  [ 2]   [ 0]   Args:   [18] Key: String: 'solarSystemID'
+  [ 2]   [ 0]   Args:   [18] Value: Integer field: 30003489
+  [ 2]   [ 0]   Args:   [19] Key: String: 'balance'
+  [ 2]   [ 0]   Args:   [19] Value: Real field: 6665999872.000000
+  [ 2]   [ 0]   Args:   [20] Key: String: 'locationSecurity'
+  [ 2]   [ 0]   Args:   [20] Value: Real field: 1.000000
+  [ 2]   [ 0]   Args:   [21] Key: String: 'finishedSkills'
+  [ 2]   [ 0]   Args:   [21] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [22] Key: String: 'logoffDate'
+  [ 2]   [ 0]   Args:   [22] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [23] Key: String: 'deletePrepareDateTime'
+  [ 2]   [ 0]   Args:   [23] Value: (None)
+  [ 2]   [ 0]   Args:   [24] Key: String: 'balanceChange'
+  [ 2]   [ 0]   Args:   [24] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [25] Key: String: 'paperdollState'
+  [ 2]   [ 0]   Args:   [25] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [26] Key: String: 'unreadMailCount'
+  [ 2]   [ 0]   Args:   [26] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [27] Key: String: 'unprocessedNotifications'
+  [ 2]   [ 0]   Args:   [27] Value: Integer field: 0
+  [ 2]   [ 0]   Args:   [28] Key: String: 'skillTypeID'
+  [ 2]   [ 0]   Args:   [28] Value: (None)
+  [ 2]   [ 0]   Args:   [29] Key: String: 'petitionMessage'
+  [ 2]   [ 0]   Args:   [29] Value: Integer field: 0
+ */

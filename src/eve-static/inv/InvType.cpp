@@ -41,7 +41,6 @@ InvType::InvType(uint32 _typeID,
                  std::string &_typeName,
                  std::string &_description,
                  uint32 _graphicID,
-                 double _radius,
                  double _mass,
                  double _volume,
                  double _capacity,
@@ -50,7 +49,6 @@ InvType::InvType(uint32 _typeID,
                  double _basePrice,
                  bool _published,
                  uint32 _marketGroupID,
-                 double _chanceOfDuplicating,
                  uint32 _iconID,
                  std::map<uint32, EvilNumber> &_attributes,
                  std::vector<uint32> _effects,
@@ -61,7 +59,6 @@ groupID(_groupID),
 typeName(_typeName),
 description(_description),
 graphicID(_graphicID),
-radius(_radius),
 mass(_mass),
 volume(_volume),
 capacity(_capacity),
@@ -70,7 +67,6 @@ raceID(_raceID),
 basePrice(_basePrice),
 published(_published),
 marketGroupID(_marketGroupID),
-chanceOfDuplicating(_chanceOfDuplicating),
 iconID(_iconID),
 m_attributes(_attributes),
 m_effects(_effects),
@@ -148,9 +144,9 @@ bool EVEStatic::loadInvTypes(std::map<uint32, std::vector<uint32> >& groupTypeLi
     CRowSet *rowset;
     // switch order of iconID and soundID because that's the way it was in objCacheDB.
     columns = "typeID, groupID, typeName, description,"
-            " graphicID, radius, mass, volume, capacity, portionSize,"
-            " raceID, cast(basePrice * 10000 as unsigned integer) as basePrice, published, marketGroupID, chanceOfDuplicating,"
-            " soundID, iconID, dataID, typeNameID, descriptionID";
+            " graphicID, mass, volume, capacity, portionSize,"
+            " raceID, cast(basePrice * 10000 as unsigned integer) as basePrice,"
+            " published, marketGroupID, iconID, dataID, typeNameID, descriptionID";
     qry = "SELECT " + columns + " FROM invTypes LEFT JOIN extInvTypes USING(typeID)";
     if (!DBcore::RunQuery(result, qry.c_str()))
     {
@@ -169,17 +165,19 @@ bool EVEStatic::loadInvTypes(std::map<uint32, std::vector<uint32> >& groupTypeLi
         std::string typeName = row.GetText(2);
         std::string description = row.getTextNC(3);
         uint32 graphicID = row.getIntNC(4);
-        double radius = row.GetDouble(5);
-        double mass = row.GetDouble(6);
-        double volume = row.GetDouble(7);
-        double capacity = row.GetDouble(8);
-        uint32 portionSize = row.GetInt(9);
-        uint32 raceID = row.getIntNC(10);
-        double basePrice = row.GetUInt64(11) / 10000.0;
-        bool published = row.GetBool(12);
-        uint32 marketGroupID = row.getIntNC(13);
-        double chanceOfDuplicating = row.GetDouble(14);
-        uint32 iconID = row.getIntNC(16);
+        double mass = row.GetDouble(5);
+        double volume = row.GetDouble(6);
+        double capacity = row.GetDouble(7);
+        uint32 portionSize = row.GetInt(8);
+        uint32 raceID = row.getIntNC(9);
+        double basePrice = 0;
+        if(!row.IsNull(10))
+        {
+            basePrice = row.GetUInt64(10) / 10000.0;
+        }
+        bool published = row.GetBool(11);
+        uint32 marketGroupID = row.getIntNC(12);
+        uint32 iconID = row.getIntNC(13);
         uint32 defaultEffect = 0;
         auto itr = defaultEffects.find(typeID);
         if (itr != defaultEffects.end())
@@ -189,9 +187,9 @@ bool EVEStatic::loadInvTypes(std::map<uint32, std::vector<uint32> >& groupTypeLi
         // Create the type object.
         InvType *type = new InvType(
                                     typeID, groupID, typeName, description, graphicID,
-                                    radius, mass, volume, capacity, portionSize,
+                                    mass, volume, capacity, portionSize,
                                     raceID, basePrice, published, marketGroupID,
-                                    chanceOfDuplicating, iconID,
+                                    iconID,
                                     typeAttributes[typeID], typeEffects[typeID], defaultEffect);
         groupTypeList[type->groupID].push_back(type->typeID);
     }

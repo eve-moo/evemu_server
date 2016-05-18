@@ -78,7 +78,7 @@ PyResult ContractProxyService::Handle_GetLoginInfo(PyCallArgs &call)
     args->SetItemString( "inProgress",              inProgress_rowset );
     args->SetItemString( "assignedToMe",            assignedToMe_rowset );
 
-    PyObject* res = new PyObject( "util.KeyVal", args );
+    PyObject* res = new PyObject( "utillib.KeyVal", args );
 
     return res;
 }

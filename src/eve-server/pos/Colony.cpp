@@ -193,7 +193,7 @@ PyResult Colony::GetColony() {
             dict->SetItem("heads", i.heads ? new PyInt(i.heads) : (PyRep*)new PyNone());
         }
 
-        PyObject *obj = new PyObject("util.KeyVal", dict);
+        PyObject *obj = new PyObject("utillib.KeyVal", dict);
         pins->SetItem(index++, obj);
     }
     index = 0;
@@ -210,12 +210,12 @@ PyResult Colony::GetColony() {
         dict->SetItem("level", new PyInt(i.level));
         dict->SetItem("typeID", new PyInt(i.typeID));
 
-        PyObject *obj = new PyObject("util.KeyVal", dict);
+        PyObject *obj = new PyObject("utillib.KeyVal", dict);
         links->SetItem(index++, obj);
     }
 
     PyDict *args = new PyDict();
-    PyObject *rtn = new PyObject("util.KeyVal", args);
+    PyObject *rtn = new PyObject("utillib.KeyVal", args);
     args->SetItem("level", new PyInt(ccPin.level));
     args->SetItem("currentSimTime", new PyLong(ccPin.currentSimTime));
     args->SetItem("pins", pins);

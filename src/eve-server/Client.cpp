@@ -144,7 +144,7 @@ bool Client::ProcessNet()
     CharacterRef charRef = GetChar();
     if (charRef.get() != nullptr)
     {
-        GetChar()->UpdateSkillQueue();
+        GetChar()->updateSkillQueue();
     }
 
     // send queued updates
@@ -711,7 +711,7 @@ void Client::_SendCallReturn( const PyAddress& source, uint64 callID, PyRep** re
 {
     //build the packet:
     PyPacket* p = new PyPacket;
-    p->type_string = "macho.CallRsp";
+    p->type_string = "carbon.common.script.net.machoNetPacket.CallRsp";
     p->type = CALL_RSP;
 
     p->source = source;
@@ -739,7 +739,7 @@ void Client::_SendException( const PyAddress& source, uint64 callID, MACHONETMSG
 {
     //build the packet:
     PyPacket* p = new PyPacket;
-    p->type_string = "macho.ErrorResponse";
+    p->type_string = "carbon.common.script.net.machoNetPacket.ErrorResponse";
     p->type = ERRORRESPONSE;
 
     p->source = source;
@@ -767,6 +767,8 @@ void Client::_SendSessionChange()
 
     SessionChangeNotification scn;
     scn.changes = new PyDict;
+    // TO-DO: This should be a unique value for each login.
+    scn.sessionID = GetAccountID();
 
     mSession.EncodeChanges( scn.changes );
     if( scn.changes->empty() )
@@ -780,7 +782,7 @@ void Client::_SendSessionChange()
 
     //build the packet:
     PyPacket* p = new PyPacket;
-    p->type_string = "macho.SessionChangeNotification";
+    p->type_string = "carbon.common.script.net.machoNetPacket.SessionChangeNotification";
     p->type = SESSIONCHANGENOTIFICATION;
 
     p->source.type = PyAddress::Node;
@@ -799,13 +801,6 @@ void Client::_SendSessionChange()
     //p->named_payload = new PyDict();
     //p->named_payload->SetItemString( "channel", new PyString( "sessionchange" ) );
 
-
-    //_log(CLIENT__IN_ALL, "Sending Session packet:");
-    //PyLogDumpVisitor dumper(CLIENT__OUT_ALL, CLIENT__OUT_ALL);
-    //p->Dump(CLIENT__OUT_ALL, dumper);
-
-
-
     fastQueuePacket(&p);
 }
 
@@ -814,7 +809,7 @@ void Client::_SendPingRequest()
     PyPacket *ping_req = new PyPacket();
 
     ping_req->type = PING_REQ;
-    ping_req->type_string = "macho.PingReq";
+    ping_req->type_string = "carbon.common.script.net.machoNetPacket.PingReq";
 
     ping_req->source.type = PyAddress::Node;
     ping_req->source.typeID = PyServiceMgr::GetNodeID();
@@ -837,7 +832,7 @@ void Client::_SendPingResponse( const PyAddress& source, uint64 callID )
 {
     PyPacket* ret = new PyPacket;
     ret->type = PING_RSP;
-    ret->type_string = "macho.PingRsp";
+    ret->type_string = "carbon.common.script.net.machoNetPacket.PingRsp";
 
     ret->source = source;
 
@@ -853,6 +848,12 @@ void Client::_SendPingResponse( const PyAddress& source, uint64 callID )
     */
     PyList* pingList = new PyList;
     PyTuple* pingTuple;
+
+    pingTuple = new PyTuple(3);
+    pingTuple->SetItem(0, new PyLong(Win32TimeNow() - 20));
+    pingTuple->SetItem(1, new PyLong(Win32TimeNow()));
+    pingTuple->SetItem(2, new PyString("client::start"));
+    pingList->AddItem( pingTuple );
 
     pingTuple = new PyTuple(3);
     pingTuple->SetItem(0, new PyLong(Win32TimeNow() - 20));        // this should be the time the packet was received (we cheat here a bit)
@@ -979,7 +980,7 @@ void Client::SendNotification(const PyAddress &dest, EVENotificationStream &noti
 
     //build the packet:
     PyPacket *p = new PyPacket();
-    p->type_string = "macho.Notification";
+    p->type_string = "carbon.common.script.net.machoNetPacket.Notification";
     p->type = NOTIFICATION;
 
     p->source.type = PyAddress::Node;
@@ -997,11 +998,6 @@ void Client::SendNotification(const PyAddress &dest, EVENotificationStream &noti
     }
 
     SysLog::Log("Client","Sending notify of type %s with ID type %s", dest.service.c_str(), dest.bcast_idtype.c_str());
-    if(is_log_enabled(CLIENT__NOTIFY_REP))
-    {
-        PyLogDumpVisitor dumper(CLIENT__NOTIFY_REP, CLIENT__NOTIFY_REP, "", true, true);
-        p->Dump(CLIENT__NOTIFY_REP, dumper);
-    }
 
     fastQueuePacket(&p);
 }
@@ -1184,7 +1180,7 @@ bool Client::SelectCharacter( uint32 char_id )
     UpdateLocation();
 
     // update skill queue
-    GetChar()->UpdateSkillQueue();
+    GetChar()->updateSkillQueue();
 
     //johnsus - characterOnline mod
     ServiceDB::SetCharacterOnlineStatus(GetCharacterID(), true);
@@ -1485,26 +1481,35 @@ void Client::JoinCorporationUpdate(uint32 corp_id) {
 /************************************************************************/
 void Client::OnCharNoLongerInStation()
 {
-    NotifyOnCharNoLongerInStation n;
-    n.charID = GetCharacterID();
-    n.corpID = GetCorporationID();
-    n.allianceID = GetAllianceID();
+    PyList *list = new PyList();
+    list->AddItem(new PyInt(GetCharacterID()));
+    uint32 corpID = GetCorporationID();
+    list->AddItem(corpID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(corpID));
+    uint32 allianceID = GetAllianceID();
+    list->AddItem(allianceID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(allianceID));
+    uint32 warID = GetWarFactionID();
+    list->AddItem(warID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(warID));
 
-    PyTuple* tmp = n.Encode();
-    // this entire line should be something like this Broadcast("OnCharNoLongerInStation", "stationid", &tmp);
-    EntityList::Broadcast( "OnCharNoLongerInStation", "stationid", &tmp );
+    PyTuple *tuple = new_tuple001(list);
+            // To-DO: Limit broadcast to only characters in station.
+    EntityList::Broadcast("OnCharNoLongerInStation", "stationid", &tuple);
 }
 
 /* besides broadcasting the message this function should handle everything for this event */
 void Client::OnCharNowInStation()
 {
-    NotifyOnCharNowInStation n;
-    n.charID = GetCharacterID();
-    n.corpID = GetCorporationID();
-    n.allianceID = GetAllianceID();
+    PyList *list = new PyList();
+    list->AddItem(new PyInt(GetCharacterID()));
+    uint32 corpID = GetCorporationID();
+    list->AddItem(corpID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(corpID));
+    uint32 allianceID = GetAllianceID();
+    list->AddItem(allianceID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(allianceID));
+    uint32 warID = GetWarFactionID();
+    list->AddItem(warID == 0 ? (PyRep*)new PyNone() : (PyRep*)new PyInt(warID));
 
-    PyTuple* tmp = n.Encode();
-    EntityList::Broadcast( "OnCharNowInStation", "stationid", &tmp );
+    PyTuple *tuple = new_tuple001(list);
+    // To-DO: Limit broadcast to only characters in station.
+    EntityList::Broadcast("OnCharNowInStation", "stationid", &tuple);
 }
 
 /************************************************************************/
@@ -1688,8 +1693,17 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     // binascii.crc_hqx of marshaled single-element tuple containing 64 zero-bytes string
     server_shake.challenge_responsehash = "55087";
 
-    // the image server used by the client to download images
-            server_shake.imageserverurl = ImageServer::getURL(m_networkConfig);
+    // begin config_vals
+            server_shake.imageserverurl = ImageServer::getURL(m_networkConfig); // Image server used to download images
+    server_shake.publicCrestUrl = "";
+    server_shake.bugReporting_BugReportServer = "";
+    server_shake.sessionChangeDelay = "10";       // yea yea, the client has this as a default anyway, Live sends it therefor we do too
+    server_shake.experimental_scanners = "1";     // Hey they look nice.
+    server_shake.experimental_map_default = "1";  // OK, this is ugly as hell, but live has forced it so do we.
+    server_shake.experimental_newcam3 = "1";      // See above remark
+    server_shake.isProjectDiscoveryEnabled = "0"; // Why...
+    server_shake.bugReporting_ShowButton = "0";   // We do not have that service.
+
 
     server_shake.macho_version = MachoNetVersion;
     server_shake.boot_version = EVEVersionNumber;
@@ -1706,7 +1720,7 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     mSession.SetString( "languageID", ccp.user_languageid.c_str() );
 
     //user type 1 is normal user, type 23 is a trial account user.
-    mSession.SetInt( "userType", 1 );
+    mSession.SetInt( "userType", 20); // That was old, 1 is not defined by the client, 20 is userTypePBC //1 );
     mSession.SetInt( "userid", account_info.id );
     mSession.SetLong( "role", account_info.role );
 
@@ -1727,17 +1741,20 @@ bool Client::_VerifyFuncResult( CryptoHandshakeResult& result )
 
     //send this before session change
     CryptoHandshakeAck ack;
-    ack.jit = GetLanguageID();
+    ack.access_token = new PyNone;
+    ack.client_hash = new PyNone;
+    ack.sessionID = 123456789; // TODO: Generate random sessionID for every client.
+    // TO-DO: This should be (incrementingOffset * 10000000000L + nodeID)
+    ack.user_clientid = GetAccountID();
+    ack.live_updates = new PyList(0);       // No, we will never update the client with this method.
+    ack.languageID = GetLanguageID();
     ack.userid = GetAccountID();
     ack.maxSessionTime = new PyNone;
-    ack.userType = 1;
-    ack.role = GetAccountRole();
+    ack.userType = 20; // userTypePBC = 20
+    ack.role = 6917529027641081856;         // (ROLE_LOGIN & ROLE_PLAYER) Live player role.
     ack.address = GetAddress();
     ack.inDetention = new PyNone;
-    // no client update available
-    ack.client_hash = new PyNone;
-    ack.user_clientid = GetAccountID();
-    ack.live_updates = LiveUpdateDB::GetUpdates();
+
 
     PyRep* r = ack.Encode();
             m_tcpConnecton->QueueRep(r);

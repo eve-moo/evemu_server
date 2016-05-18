@@ -29,78 +29,38 @@
 #include "PyBoundObject.h"
 #include "PyService.h"
 
-class SkillMgrService : public PyService {
+enum skillEventID
+{
+    skillEventCharCreation = 33,
+    skillEventClonePenalty = 34,
+    skillEventGMGive = 39,
+    skillEventHaltedAccountLapsed = 260,
+    skillEventTaskMaster = 35,
+    skillEventTrainingCancelled = 38,
+    skillEventTrainingComplete = 37,
+    skillEventTrainingStarted = 36,
+    skillEventQueueTrainingCompleted = 53,
+    skillEventSkillInjected = 56,
+    skillEventFreeSkillPointsUsed = 307,
+    skillEventGMReverseFreeSkillPointsUsed = 309,
+    skillEventSkillRemoved = 177,
+    skillEventSkillExtracted = 431,
+    skillEventSkillExtractionReverted = 432
+};
+
+class SkillMgr2Service : public PyService
+{
 public:
-    SkillMgrService();
-    virtual ~SkillMgrService();
+    SkillMgr2Service();
+    virtual ~SkillMgr2Service();
 
 protected:
     class Dispatcher;
+
+    PyCallable_DECL_CALL(GetMySkillHandler)
 
     //overloaded in order to support bound objects:
     virtual PyBoundObject *_CreateBoundObject(Client *c, const PyRep *bind_args);
-};
-
-class SkillMgrBound
-: public PyBoundObject
-{
-public:
-    SkillMgrBound();
-    virtual ~SkillMgrBound();
-
-    virtual void Release();
-
-    /**
-     * InjectSkillIntoBrain
-     *
-     * Injects a list of skills into a characters brain.
-     */
-    PyCallable_DECL_CALL(InjectSkillIntoBrain)
-
-    /**
-     * CharStartTrainingSkillByTypeID
-     *
-     * Starts training a characters skill based on typeID
-     */
-    PyCallable_DECL_CALL(CharStartTrainingSkillByTypeID)
-    PyCallable_DECL_CALL(CharStopTrainingSkill)
-    PyCallable_DECL_CALL(GetEndOfTraining)
-    PyCallable_DECL_CALL(GetSkillHistory)
-    PyCallable_DECL_CALL(CharAddImplant)
-    PyCallable_DECL_CALL(RemoveImplantFromCharacter)
-
-    /**
-     * GetSkillQueueAndFreePoints
-     *
-     * Gets the list of skill currently in
-     * the skill queue for a character and the free points.
-     */
-    PyCallable_DECL_CALL(GetSkillQueueAndFreePoints)
-
-    /**
-     * SaveSkillQueue
-     *
-     * Saves a list of character skills received
-     * from the client.
-     */
-    PyCallable_DECL_CALL(SaveSkillQueue)
-
-    /**
-     * AddToEndOfSkillQueue
-     *
-     * Adds a skill to end of a characters skill
-     * queue.
-     */
-    PyCallable_DECL_CALL(AddToEndOfSkillQueue)
-
-    PyCallable_DECL_CALL(RespecCharacter)
-    PyCallable_DECL_CALL(GetRespecInfo)
-    PyCallable_DECL_CALL(GetCharacterAttributeModifiers)
-
-protected:
-    class Dispatcher;
-
-
 };
 
 #endif

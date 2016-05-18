@@ -26,6 +26,8 @@
 #include "eve-server.h"
 
 #include "PyServiceCD.h"
+#include "cache/ObjCacheService.h"
+#include "../PyServiceMgr.h"
 #include "config/ConfigService.h"
 #include "config/ConfigDB.h"
 
@@ -50,6 +52,7 @@ ConfigService::ConfigService()
     PyCallable_REG_CALL(ConfigService, GetDynamicCelestials)
     PyCallable_REG_CALL(ConfigService, GetMapLandmarks)
     PyCallable_REG_CALL(ConfigService, SetMapLandmarks)
+    PyCallable_REG_CALL(ConfigService, GetAverageMarketPrices)
 }
 
 ConfigService::~ConfigService() {
@@ -331,4 +334,22 @@ PyResult ConfigService::Handle_GetMapLandmarks(PyCallArgs &call) {
 
 PyResult ConfigService::Handle_SetMapLandmarks(PyCallArgs &call) {
         return NULL;
+}
+
+PyResult ConfigService::Handle_GetAverageMarketPrices(PyCallArgs &call)
+{
+    ObjectCachedMethodID method_id(GetName(), "GetAverageMarketPrices");
+
+    if(!PyServiceMgr::cache_service->IsCacheLoaded(method_id))
+    {
+        PyRep* res = ConfigDB::getAveragePrices();
+        if(res == nullptr)
+        {
+            return nullptr;
+        }
+
+        PyServiceMgr::cache_service->GiveCache(method_id, &res);
+    }
+
+    return PyServiceMgr::cache_service->MakeObjectCachedMethodCallResult(method_id);
 }

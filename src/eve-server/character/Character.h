@@ -279,8 +279,9 @@ public:
      * Perform injection of passed skill into the character.
      * @author xanarox
      * @param InventoryItem
+     * @param client The client to notify.
      */
-    bool InjectSkillIntoBrain(SkillRef skill);
+    bool injectSkillIntoBrain(SkillRef skill, Client *client);
     /* AddSkillToSkillQueue()
      *
      * This will add a skill into the skill queue.
@@ -293,24 +294,29 @@ public:
     void ClearSkillQueue();
     /**
      * Stop the current skill training.
+     * @param notify Should the client receive a notification?
      */
-    void StopTraining();
+    void stopTraining(bool notify = true);
     /**
      * Start the specified skill training.
      * @param skillID The skillID of the still to start training.
      * @param nextStartTime The start time to use or 0 for now.
+     * @param notify Should the client receive a notification?
      * @return The currently training.
      */
-    SkillRef StartTraining(uint32 skillID, uint64 nextStartTime = 0);
+    SkillRef startTraining(uint32 skillID, uint64 nextStartTime = 0, bool notify = true);
     /**
      * Updates skill queue.
      */
-    void UpdateSkillQueue();
+    void updateSkillQueue();
     /**
      * Update skill training end time on char select screen.
-     * @author allan
      */
-    void UpdateSkillQueueEndTime( const SkillQueue &queue);
+    void updateSkillQueueTimes();
+    /**
+     * Send a OnNewSkillQUeueSaved message to the client.
+     */
+    void sendSkillQueueChangedNotice(Client *client);
 
     /* GrantCertificate( uint32 certificateID )
      *
@@ -348,14 +354,14 @@ public:
     /*
      * Primary public packet builders:
      */
-    PyDict *CharGetInfo();
+    PyTuple *CharGetInfo();
     PyObject *GetDescription() const;
     /* GetSkillQueue()
      *
      * This will get the skills from the skill queue for a character.
      * @author xanarox
      */
-    PyTuple *GetSkillQueue();
+    PyList *getSkillQueue();
     /**
      * Get skill at queue index.
      * @param index The index.
@@ -506,9 +512,9 @@ protected:
     uint32 inventoryID() const { return itemID();
     }
 
-    PyRep *GetItem() const
+    PyRep *GetItem()
     {
-        return GetItemRow();
+        return getPackedRow();
     }
 
     void AddItem(InventoryItemRef item);
@@ -570,6 +576,7 @@ protected:
     // Skill queue:
     SkillQueue m_skillQueue;
     EvilNumber m_totalSPtrained;
+    uint64 m_trainingStartTime;
 
     Certificates m_certificates;
 

@@ -861,6 +861,17 @@ PyRep* PyObjectEx_Type1::FindKeyword( const char* keyword ) const
     return NULL;
 }
 
+PyRep *PyObjectEx_Type1::createBuiltinSetList(std::vector<int32> vals)
+{
+    PyList *list = new PyList();
+    for(int32 val : vals)
+    {
+        list->AddItem(new PyInt(val));
+    }
+    PyRep *set = new PyObjectEx_Type1(new PyToken("__builtin__.set"), new_tuple(list));
+    return set;
+}
+
 PyTuple* PyObjectEx_Type1::_CreateHeader( PyToken* type, PyTuple* args )
 {
     if( args == NULL )
@@ -1166,7 +1177,16 @@ PyTuple * new_tuple(const char* arg1, PyRep* arg2, PyRep* arg3)
 }
 
 /* @note we should increase ref here.... but don't make it to complicated to use... for now... */
-PyTuple * new_tuple( PyRep* arg1, PyRep* arg2 )
+PyTuple * new_tuple(PyRep* arg1, PyRep* arg2, PyRep* arg3)
+{
+    PyTuple * res = new PyTuple(3);
+    res->SetItem(0, arg1);
+    res->SetItem(1, arg2);
+    res->SetItem(2, arg3);
+    return res;
+}
+
+PyTuple * new_tuple(PyRep* arg1, PyRep* arg2)
 {
     PyTuple * res = new PyTuple(2);
     res->SetItem(0, arg1);
@@ -1174,9 +1194,14 @@ PyTuple * new_tuple( PyRep* arg1, PyRep* arg2 )
     return res;
 }
 
-PyTuple * new_tuple( PyRep* arg1 )
+PyTuple * new_tuple(PyRep* arg1)
 {
     PyTuple * res = new PyTuple(1);
     res->SetItem(0, arg1);
     return res;
+}
+
+PyTuple *new_tuple001(PyRep *arg1)
+{
+    return new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), new_tuple(arg1))));
 }

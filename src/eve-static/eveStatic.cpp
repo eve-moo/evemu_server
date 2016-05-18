@@ -71,10 +71,10 @@ bool EVEStatic::loadStaticData()
     //-------------------------------
     // Load the invBlueprintTypes table
     //-------------------------------
-    if (!loadInvBlueprintTypes())
-    {
-        return false;
-    }
+    //    if (!loadInvBlueprintTypes())
+    //    {
+    //        return false;
+    //    }
 
     //-------------------------------
     // Load the staStationTypes table

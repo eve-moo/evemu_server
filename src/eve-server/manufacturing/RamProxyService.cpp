@@ -31,6 +31,7 @@
 #include "manufacturing/RamProxyDB.h"
 #include "PyServiceMgr.h"
 #include "inv/InvType.h"
+#include "corporation/Corporation.h"
 
 PyCallable_Make_InnerDispatcher(RamProxyService)
 

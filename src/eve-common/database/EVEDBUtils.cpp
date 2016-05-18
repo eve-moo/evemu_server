@@ -112,7 +112,7 @@ PyObject *DBResultToRowset(DBQueryResult &result)
     uint32 cc = result.ColumnCount();
 
     PyDict *args = new PyDict();
-    PyObject *res = new PyObject( "util.Rowset" , args
+    PyObject *res = new PyObject("eve.common.script.sys.rowset.Rowset", args
     );
 
     /* check if we have a empty query result and return a empty RowSet */
@@ -238,7 +238,7 @@ PyObject *DBResultToIndexRowset(DBQueryResult &result, uint32 key_index) {
 PyObject *DBRowToKeyVal(DBResultRow &row) {
 
     PyDict *args = new PyDict();
-    PyObject *res = new PyObject( "util.KeyVal", args );
+    PyObject *res = new PyObject( "utillib.KeyVal", args );
 
     uint32 cc = row.ColumnCount();
     for( uint32 r = 0; r < cc; r++ )
@@ -575,4 +575,17 @@ PyPackedRow *DBRowToPackedRow( DBResultRow &row )
     DBRowDescriptor *header = new DBRowDescriptor( row );
 
     return CreatePackedRow( row, header );
+}
+
+PyTuple *DBResultToTupleKeyVal(DBQueryResult &result)
+{
+    PyTuple *rtn = new PyTuple(result.GetRowCount());
+    DBResultRow row;
+    uint32 index = 0;
+    while(result.GetRow(row))
+    {
+        rtn->SetItem(index, DBRowToKeyVal(row));
+        index++;
+    }
+    return rtn;
 }

@@ -55,6 +55,7 @@ protected:
     PyCallable_DECL_CALL(GetDynamicCelestials)
     PyCallable_DECL_CALL(GetMapLandmarks)
     PyCallable_DECL_CALL(SetMapLandmarks)
+    PyCallable_DECL_CALL(GetAverageMarketPrices)
 
 };
 

@@ -310,7 +310,7 @@ bool SetSQLDumper::VisitTuple( const PyTuple* rep )
 
 bool SetSQLDumper::VisitObject( const PyObject* rep )
 {
-    if( rep->type()->content() == "util.Rowset" )
+    if(rep->type()->content() == "eve.common.script.sys.rowset.Rowset")
     {
         //we found a friend, decode it
         util_Rowset rowset;

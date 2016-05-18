@@ -27,14 +27,19 @@
     <h3>Client Setup</h3>
     There are three files needed with the following md5 sums.<br>
     <pre class="brush: bash">
-      5e4d81024a1419d14c05a90b6c512ee6  EVE_Online_Installer_360229.exe
-      0a4797fce1d272b70c34aa3513c8c9fe  eveonline_360229_1of2.7z
-      cf4b110b2231cd4aa4790b960c73dc1c  eveonline_360229_2of2.7z
+37a5962c55c09a5155588cf20ca22c8f  EVE_Online_Installer_Full_1005138.msi
+9c5af3c9402c8291a1cf379db895bef4  eveonline_1005138_1.cab
+5055893a1c18e9f82f30796668d25f03  eveonline_1005138_2.cab
+1300de1059e2f7824c7b51e221e051e8  eveonline_1005138_3.cab
+a3e4211c8d7d23f8fbc9695c57709608  eveonline_1005138_4.cab
+76a1ac8dc0d618bf9b77f3e997ffb51c  mysql56-yc118-2-116998.tbz2
     </pre>
-    Install the crucible client with EVE_Online_Installer_360229.exe.<br>
-    Make sure to uncheck the run eve box before finishing the install, this may be difficult to see on some wine builds as the dialog is partially obscured.<br>
-    Then get a copy of the <a href="https://github.com/bluepatcher/blue_patcher">blue patcher</a> and follow the instructions in README.md.<br>
-    Your client is now ready to run.  To run the client use the /EVE/bin/ExeFile.exe or you will get the launcher and that will attempt to contact CCP and automatically update the client.  Now to set up a server.<br>
+    Install the crucible client with EVE_Online_Installer_Full_1005138.msi.<br>
+        Make sure to uncheck the run eve box before finishing the install, this may be difficult to see on some wine builds as the dialog is partially obscured.<br>
+        Then get a copy of the <a href="https://github.com/comet0/blue_patcher">blue patcher</a>.<br>
+            Compile the patcher and copy the executable to the CCP/EVE/bin directory you installed the client to.  Run the pathcer select the blue.dll file and patch.<br>
+                Open the file CCP/EVE/start.ini and change the values of cryptoPack to Placebo and the server to the IP address of the evemu serve.<br>
+                    Your client is now ready to run.  To run the client use the /EVE/bin/ExeFile.exe or you will get the launcher and that will attempt to contact CCP and automatically update the client.  Now to set up a server.<br>
 
     <h3>Server setup</h3>
 
@@ -48,13 +53,13 @@
     Run the script merge-ofic-updates.sh if your running Linux or merge-ofic-updates.bat on windows<br>
 
 <h3>setup mysql</h3>
-Get a copy of the crucible static data dump <a href="http://eve.alasiya.net/files/cruc/cru16-mysql5-v1.sql.bz2">cru16-mysql5-v1.sql.bz2</a>.<br>
-    Extract the file cru16-mysql5-v1.sql to %serverRoot%.
-Open a mysql client and execute the following commands in this order.<br>
+Get a copy of the static data dump from <a href="https://www.fuzzwork.co.uk/dump/mysql56-yc118-2-116998.tbz2">mysql56-yc118-2-116998.tbz2</a>.<br>
+    Extract the file mysql56-yc118-2-116998.sql to %serverRoot%.
+    Open a mysql client and execute the following commands in this order.<br>
 <pre class="brush: sql">
   create database evemu;
   use evemu;
-  source %serverRoot%/cru16-mysql5-v1.sql;
+  source %serverRoot%/mysql56-yc118-2-116998.sql;
   source %devRoot%/evemu_server/sql/evemu_dynamic-dump.sql;
   source %devRoot%/evemu_server/sql/evemu_static-dump.sql;
   source %devRoot%/evemu_server/sql/ofic-updates.sql;
@@ -131,21 +136,50 @@ a likely exception to this goal).
         <imageDir>../image_cache/</imageDir>
     </files>
 
+    <!-- The image server will listen on this port. -->
+    <imageServer>
+        <imageServerPort>26001</imageServerPort>
+    </imageServer>
+    <!-- Each network that a connection can connect from needs a separate binding so that the server can properly identify the imageserver. -->
+    <!-- If a router forwards connections from an outside network there has to be a separate binding that specifies the outside address for the image server. -->
     <net>
+        <!-- The will allow connections from ip addresses on the 192.168.1.xxx network. -->
+        <bind>192.168.1.10</bind>
+        <port>26000</port>
+        <imageServer>192.168.1.10</imageServer>
+        <imageServerPort>26001</imageServerPort>
+    </net>
+    <net>
+        <!-- The will allow connections from forwarded ip addresses form the internet. -->
+        <bind>192.168.1.11</bind>
+        <port>26000</port>
+        <imageServer>10.11.12.13</imageServer>
+        <imageServerPort>26001</imageServerPort>
+    </net>
+    <net>
+        <!-- The will allow connections from ip addresses on the 192.168.3.xxx network. -->
+        <bind>192.168.3.10</bind>
+        <port>26000</port>
+        <imageServer>192.168.3.10</imageServer>
+        <imageServerPort>26001</imageServerPort>
+    </net>
+    <net>
+        <!-- The will allow connections from the localhost. -->
+        <bind>localhost</bind>
         <port>26000</port>
         <imageServer>localhost</imageServer>
         <imageServerPort>26001</imageServerPort>
-        <apiServer>localhost</apiServer>
-        <apiServerPort>6400</apiServerPort>
     </net>
-
 </eve-server>
-    </pre>
+</pre>
 <h3>Compiling the server</h3>
+If your using linux you can install some of the libraries with the following commands.
+<pre class="brush: bash">
 sudo apt-get install build-essential g++ cmake git
 sudo apt-get install libtinyxml2.6.2-dbg libtinyxml2.6.2 libmysql
 sudo apt-get install zlib1g-dev zlib1g-dbg
 sudo apt-get install libboost1.54
 sudo apt-get install libmysqlclient-dev
+</pre>
 </body>
 </html>

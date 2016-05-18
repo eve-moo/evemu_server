@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Packets</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h3>General packet format</h3>
+        The general form of a PyPacket has the following format.
+        <pre class="brush: bash">
+[PyObjectData Name: ] = PyPacket::type_string
+    [PyTuple 9 items]
+        [PyInt] = PyPacket::type
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 3 or 4 items] = PyPacket::source as PyAddress
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 3 or 4 items] = PyPacket::dest as PyAddress
+        [PyInt] = PyPacket::userid
+        [PyTuple 1 items] = PyPacket::payload
+            [PyTuple 2 items]
+        [PyNone/PyDict] = PyPacket::named_payload
+        [PyNone]
+        [PyNone]
+        [PyNone]
+        </pre>
+        <h3>PyAddress</h3>
+        An address has the following basic format.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 3 or 4 items]
+                [PyInt] = PyAddress::type
+        </pre>
+        An address is one of 4 formats as follows.<br>
+        An address of type NODE (PyAddress::type = 1) address.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 4 items]
+                [PyInt 1]
+                [PyInt] = PyAddress::typeID
+                [PyString] = PyAddress::service
+                [PyNone/PyInt] = PyAddress::callID
+        </pre>
+        An address of type CLIENT (PyAddress::type = 2) address.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 4 items]
+                [PyInt 2]
+                [PyInt] = PyAddress::typeID
+                [PyInt] = PyAddress::callID
+                [PyNone/PyString] = PyAddress::service
+        </pre>
+        An address of type BROADCAST (PyAddress::type = 4) address.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 4 items]
+                [PyInt 4]
+                [PyNone/PyString] = PyAddress::service
+                [PyList/PyTuple]
+                [PyNone/PyString] = PyAddress::bcast_idtype
+        </pre>
+        An address of type ANY (PyAddress::type = 8) address.
+        <pre class="brush: bash">
+        [PyObjectData Name: carbon.common.script.net.machoNetAddress.MachoAddress]
+            [PyTuple 3 items]
+                [PyInt 8]
+                [PyNone/PyString] = PyAddress::service
+                [PyInt] = PyAddress::callID
+        </pre>
+        <h3>Packet Type: 6 - Call Request</h3>
+        Decodes PyPacket::payload into a PyCallStream.<br>
+        <pre class="brush: bash">
+        [PyTuple 1 items] from PyPacket::payload
+            [PyTuple 2 items]
+                [PyInt 0]
+                [PyTuple 4 items]
+                    [PyInt/PyString] = PyCallStream::remoteObject/remoteObjectStr
+                    [PyString] = PyCallStream::method
+                    [PyTuple 0 items] = PyCallStream::arg_tuple
+                    [PyDict 1 kvp] = PyCallStream::arg_dict
+        </pre>
+        When received the PyService is looked up based on either the PyService::dest::service value or PyCallStream::remoteObjectStr if calling a bound object.<br>
+        A PyCallArgs is then created from the PyCallStream with PyCallArgs::tuple = PyCallStream::arg_tuple and PyCallArgs::byname = PyCallStream::arg_dict.<br>
+        If the method is MachoResolveObject, then the node ID is returned.
+        <pre class="brush: bash">
+            [PyInt] = nodeID
+        </pre>
+        If the method is MachoBindObject, then the PyService::_CreateBoundObject function is called to create a bound object.  If a call is also provided the call is executed.  The bound object and optionally the call results are returned as follows.<br>
+        <pre class="brush: bash">
+            [PyTuple 2 items]
+                [PySubStruct]
+                    [PyTuple 2 items]
+                        [PyString] = PyBoundObject::GetBindStr()
+                        [PyInt] = expiration time
+                [PyNone/PyObjectData Name: utillib.KeyVal] = optional call results.
+        </pre>
+        If any other method is called then the service dispatcher calls the appropriate Handle_XXX function of the service.
+        <h3>Packet Type: 7 - Call Response</h3>
+        Decodes PyPacket::payload into a PyCallStream.<br>
+        <pre class="brush: bash">
+        [PyTuple 1 items]
+            [PyRep] = Handle_CallReq return value
+        </pre>
+
+        <h3>CRowset</h3>
+        Constructed as a PyObjectEx_Type2.
+        A PyTuple containing the PyToken is passed as the args and the PyDict is passed as the keywords parameter.
+        <pre class="brush: bash">
+[PyObjectEx Type2]
+    [PyTuple 2 items] = mHeader
+        [PyTuple 1 items] PyObjectEx_Type2::Constructor::args
+            [PyToken carbon.common.script.sys.crowset.CRowset]
+        [PyDict 1 kvp] PyObjectEx_Type2::Constructor::keywords
+            [PyString "header"]
+            [PyObjectEx Normal]
+                [PyTuple 2 items]
+                    [PyToken blue.DBRowDescriptor]
+                    [PyTuple 1 items]
+                        [PyTuple 5 items]
+                            [PyTuple 2 items]
+                                [PyString "userName"]
+                                [PyInt 130]
+                            [PyTuple 2 items]
+                                [PyString "characterSlots"]
+                                [PyInt 17]
+                            [PyTuple 2 items]
+                                [PyString "maxCharacterSlots"]
+                                [PyInt 130]
+                            [PyTuple 2 items]
+                                [PyString "subscriptionEndTime"]
+                                [PyInt 64]
+                            [PyTuple 2 items]
+                                [PyString "creationDate"]
+                                [PyInt 64]
+    from mList
+    [PyPackedRow 18 bytes]
+        ["userName" => <me> [WStr]]
+        ["characterSlots" => <3> [UI1]]
+        ["maxCharacterSlots" => <3> [WStr]]
+        ["subscriptionEndTime" => <131987654320000000> [FileTime]]
+        ["creationDate" => <131234567890000000> [FileTime]]
+        </pre>
+        <h3>CachedMethodCallResult</h3>
+        Packet of type objectCaching_CachedMethodCallResult_object constructed with PyServiceMgr::cache_service->MakeObjectCachedMethodCallResult.
+        <pre class="brush: bash">
+[PyObjectData Name: carbon.common.script.net.objectCaching.CachedMethodCallResult]
+    [PyTuple 3 items]
+        [PyDict 1 kvp]
+            [PyString "versionCheck"]
+            [PyString "never"] = objectCaching_CachedMethodCallResult_object.versionCheck
+        [PyObjectData Name: carbon.common.script.net.cachedObject.CachedObject] = objectCaching_CachedMethodCallResult_object.object
+        [PyNone]
+        </pre>
+        The property objectCaching_CachedMethodCallResult_object.object is a objectCaching_CachedObject_spec object as follows.
+        <pre class="brush: bash">
+[PyObjectData Name: carbon.common.script.net.cachedObject.CachedObject]
+    [PyTuple 3 items]
+        [PyTuple 3 items] = objectID
+            [PyString "Method Call"]
+            [PyString "server"]
+            [PyTuple 2 items]
+                [PyString "facWarMgr"]
+                [PyString "GetFacWarSystems"]
+        [PyInt 1223793] = nodeID
+        [PyTuple 2 items]
+            [PyIntegerVar 131234567890123456] = timestamp
+            [PyInt 43389] = version
+        </pre>
+        ObjectID is a ObjectCachedMethodID object that contains the call information that generated or fetches the cache.
+        <!--
+                <pre class="brush: bash">
+                </pre>
+        -->
+    </body>
+</html>

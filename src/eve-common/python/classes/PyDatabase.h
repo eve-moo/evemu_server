@@ -107,7 +107,7 @@ protected:
 };
 
 /**
- * @brief Python object "dbutil.CRowset".
+ * @brief Python object "carbon.common.script.sys.crowset.CRowset".
  *
  * This object contains DBRowDescriptor header
  * and bunch of PyPackedRows.
@@ -147,9 +147,6 @@ public:
 
 protected:
     DBRowDescriptor* _GetRowDesc() const;
-    //PyList* _GetColumnList() const;
-
-    static PyTuple* _CreateArgs();
     static PyDict* _CreateKeywords(DBRowDescriptor* rowDesc);
 };
 
@@ -194,9 +191,6 @@ public:
 
 protected:
     DBRowDescriptor* _GetRowDesc() const;
-    //PyList* _GetColumnList() const;
-
-    static PyTuple* _CreateArgs();
     static PyDict* _CreateKeywords(DBRowDescriptor* rowDesc);
 };
 
@@ -240,9 +234,6 @@ public:
 
 protected:
     DBRowDescriptor* _GetRowDesc() const;
-    //PyList* _GetColumnList() const;
-
-    static PyTuple* _CreateArgs();
     static PyDict* _CreateKeywords(DBRowDescriptor* rowDesc);
 };
 

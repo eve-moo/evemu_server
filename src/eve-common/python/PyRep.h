@@ -851,11 +851,17 @@ public:
     PyObjectEx_Type1( PyToken* type, PyTuple* args, PyDict* keywords );
     PyObjectEx_Type1( PyToken* type, PyTuple* args, PyList* keywords );
 
-    PyToken* GetType() const;
-    PyTuple* GetArgs() const;
-    PyDict* GetKeywords() const;
+    PyToken *GetType() const;
+    PyTuple *GetArgs() const;
+    PyDict *GetKeywords() const;
 
-    PyRep* FindKeyword( const char* keyword ) const;
+    PyRep *FindKeyword(const char* keyword) const;
+    /**
+     * Create a object with a token __builtin__.set and a tuple containing the list of ints.
+     * @param vals The ints to add.
+     * @return The completed object.
+     */
+    static PyRep *createBuiltinSetList(std::vector<int32> vals);
 
 protected:
     static PyTuple* _CreateHeader( PyToken* type, PyTuple* args );
@@ -1026,5 +1032,7 @@ PyTuple * new_tuple(const char* arg1, const char* arg2, PyTuple* arg3);
 PyTuple * new_tuple(const char* arg1, PyRep* arg2, PyRep* arg3);
 PyTuple * new_tuple(PyRep* arg1);
 PyTuple * new_tuple(PyRep* arg1, PyRep* arg2);
+PyTuple * new_tuple(PyRep* arg1, PyRep* arg2, PyRep* arg3);
+PyTuple *new_tuple001(PyRep *arg1);
 
 #endif//EVE_PY_REP_H

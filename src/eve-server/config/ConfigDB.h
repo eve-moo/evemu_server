@@ -54,6 +54,7 @@ public:
      */
     static PyRep *GetDynamicCelestials(uint32 solarSystemID);
     static PyRep *GetTextsForGroup(const std::string & langID, uint32 textgroup);
+    static PyRep *getAveragePrices();
 
 protected:
 };

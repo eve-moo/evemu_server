@@ -1,0 +1,37 @@
+<elements>
+
+    <elementDef name="OnAccountChange">
+        <tupleInline>
+            <string name="accountKey" />
+            <int name="ownerid" />
+            <real name="balance" />
+        </tupleInline>
+    </elementDef>
+
+    <elementDef name="Call_GiveCash">
+        <tupleInline>
+            <int  name="destination" />
+            <real name="amount" />
+            <string name="reason" />
+        </tupleInline>
+    </elementDef>
+
+    <elementDef name="CallGetCashBalance">
+        <tupleInline>
+            <!-- 0 -->
+            <bool name="isCorpWallet" />
+        </tupleInline>
+    </elementDef>
+
+    <elementDef name="RspGetCashBalance">
+        <tupleInline>
+            <!-- 0 -->
+            <substreamInline>
+                <real name="credits" />
+            </substreamInline>
+        </tupleInline>
+    </elementDef>
+
+</elements>
+
+

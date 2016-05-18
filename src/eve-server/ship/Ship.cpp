@@ -79,7 +79,7 @@ ShipRef Ship::Spawn(ItemData &data) {
     sShipRef->setAttribute(AttrShieldCharge, sShipRef->getAttribute(AttrShieldCapacity), true); // Shield Charge
     sShipRef->setAttribute(AttrArmorDamage, 0.0, true); // Armor Damage
     sShipRef->setAttribute(AttrMass, sShipRef->type()->mass, true); // Mass
-    sShipRef->setAttribute(AttrRadius, sShipRef->type()->radius, true); // Radius
+    sShipRef->setAttribute(AttrRadius, sShipRef->type()->getDoubleAttribute(AttrRadius), true); // Radius
     sShipRef->setAttribute(AttrVolume, sShipRef->type()->volume, true); // Volume
     sShipRef->setAttribute(AttrCapacity, sShipRef->type()->capacity, true); // Capacity
     sShipRef->setAttribute(AttrInertia, 1, true); // Inertia
@@ -424,7 +424,7 @@ PyDict *Ship::ShipGetInfo()
     if( !Populate( entry ) )
         return NULL;    //print already done.
 
-    result->SetItem(new PyInt( itemID()), new PyObject("util.KeyVal", entry.Encode()));
+    result->SetItem(new PyInt( itemID()), new PyObject("utillib.KeyVal", entry.Encode()));
 
     //now encode contents...
     std::vector<InventoryItemRef> equipped;
@@ -445,7 +445,7 @@ PyDict *Ship::ShipGetInfo()
             codelog( ITEM__ERROR, "%s (%u): Failed to load item %u for ShipGetInfo", itemName().c_str(), itemID(), (*cur)->itemID() );
         }
         else
-            result->SetItem(new PyInt((*cur)->itemID()), new PyObject("util.KeyVal", entry.Encode()));
+            result->SetItem(new PyInt((*cur)->itemID()), new PyObject("utillib.KeyVal", entry.Encode()));
     }
 
     return result;
@@ -469,8 +469,10 @@ PyDict *Ship::ShipGetState()
 	std::vector<InventoryItemRef> moduleList;
 	m_ModuleManager->GetModuleListOfRefs( &moduleList );
 
-	for(int i=0; i<moduleList.size(); i++)
-		result->SetItem(new PyInt(moduleList.at(i)->itemID()), moduleList.at(i)->GetItemStatusRow());
+    for(auto module : moduleList)
+    {
+        result->SetItem(new PyInt(module->itemID()), module->GetItemStatusRow());
+    }
 
 	return result;
 }

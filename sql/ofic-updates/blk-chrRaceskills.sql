@@ -13,47 +13,220 @@ CREATE TABLE blkChrRaceSkills (
 );
 
 INSERT INTO blkChrRaceSkills (raceID, skillTypeID, levels) VALUES
-(1, 3300, 2),
-(1, 3301, 3),
-(1, 3327, 3),
-(1, 3330, 2),
-(1, 3386, 2),
-(1, 3392, 2),
-(1, 3402, 3),
-(1, 3413, 3),
-(1, 3416, 2),
-(1, 3426, 3),
-(1, 3449, 3),
-(2, 3300, 2),
-(2, 3302, 3),
-(2, 3327, 3),
-(2, 3329, 2),
-(2, 3386, 2),
-(2, 3392, 2),
-(2, 3402, 3),
-(2, 3413, 3),
-(2, 3416, 2),
-(2, 3426, 3),
-(2, 3449, 3),
-(4, 3300, 2),
-(4, 3303, 3),
-(4, 3327, 3),
-(4, 3331, 2),
-(4, 3386, 2),
-(4, 3392, 2),
-(4, 3402, 3),
-(4, 3413, 3),
-(4, 3416, 2),
-(4, 3426, 3),
-(4, 3449, 3),
-(8, 3300, 2),
-(8, 3301, 3),
-(8, 3327, 3),
-(8, 3328, 2),
-(8, 3386, 2),
-(8, 3392, 2),
-(8, 3402, 3),
-(8, 3413, 3),
-(8, 3416, 2),
-(8, 3426, 3),
-(8, 3449, 3);
+# Caldari
+(1, 3437, 1), # Drone Avionics
+(1, 3436, 1), # Drones
+(1, 3427, 1), # Electronic Warfare
+(1, 3435, 1), # Propulsion Jamming
+(1, 3418, 3), # Capacitor Management
+(1, 3417, 3), # Capacitor Systems Operation
+(1, 3426, 4), # CPU Management
+(1, 3432, 3), # Electronics Upgrades
+(1, 3424, 1), # Energy Grid Upgrades
+(1, 3413, 4), # Power Grid Management
+(1, 28164, 1), # Thermodynamics
+(1, 3318, 2), # Weapons Upgrades
+(1, 3300, 4), # Gunnery
+(1, 3312, 2), # Motion Prediction
+(1, 3310, 2), # Rapid Firing
+(1, 3311, 2), # Sharpshooter
+(1, 3315, 1), # Surgical Strike
+(1, 3317, 1), # Trajectory Analysis
+(1, 3319, 1), # Missile Launcher Operation
+(1, 3452, 1), # Acceleration Control
+(1, 3450, 3), # Afterburner
+(1, 3453, 1), # Evasive Maneuvering
+(1, 3454, 1), # High Speed Maneuvering
+(1, 3449, 3), # Navigation
+(1, 3455, 1), # Warp Drive Operation
+(1, 3411, 1), # Cybernetics
+(1, 3380, 1), # Industry
+(1, 3386, 3), # Mining
+(1, 25863, 3), # Salvaging
+(1, 13278, 1), # Archaeology
+(1, 25811, 1), # Astrometric Aquisition
+(1, 25739, 1), # Astrometric Rangefinding
+(1, 3412, 3), # Astrometrics
+(1, 21718, 1), # Hacking
+(1, 3551, 3), # Survey
+(1, 3402, 4), # Science
+(1, 32918, 1), # Mining Frigate
+(1, 3327, 3), # Spaceship Command
+(1, 3428, 1), # Long Range Targeting
+(1, 3431, 1), # Signature Analysis
+(1, 3429, 1), # Target Management
+(1, 3443, 2), # Trade
+(1, 3330, 3), # Caldari Frigate
+(1, 3342, 1), # Caldari Industrial
+(1, 3301, 3), # Small Hybrid Turret
+(1, 3316, 2), # Controlled Bursts
+(1, 3419, 2), # Shield Management
+(1, 3416, 2), # Shield Operation
+(1, 3425, 2), # Shield Upgrades
+(1, 3420, 2), # Tactical Shield Manipulation
+(1, 3394, 2), # Hull Upgrades
+(1, 3392, 2), # Mechanics
+(1, 3393, 1), # Repair Systems
+# Minmatar skills.
+(2, 3437, 1), # Drone Avionics
+(2, 3436, 1), # Drones
+(2, 3427, 1), # Electronic Warfare
+(2, 3435, 1), # Propulsion Jamming
+(2, 3418, 3), # Capacitor Management
+(2, 3417, 3), # Capacitor Systems Operation
+(2, 3426, 4), # CPU Management
+(2, 3432, 3), # Electronics Upgrades
+(2, 3424, 1), # Energy Grid Upgrades
+(2, 3413, 4), # Power Grid Management
+(2, 28164, 1), # Thermodynamics
+(2, 3318, 2), # Weapons Upgrades
+(2, 3300, 4), # Gunnery
+(2, 3312, 2), # Motion Prediction
+(2, 3310, 2), # Rapid Firing
+(2, 3311, 2), # Sharpshooter
+(2, 3315, 1), # Surgical Strike
+(2, 3317, 1), # Trajectory Analysis
+(2, 3319, 1), # Missile Launcher Operation
+(2, 3452, 1), # Acceleration Control
+(2, 3450, 3), # Afterburner
+(2, 3453, 1), # Evasive Maneuvering
+(2, 3454, 1), # High Speed Maneuvering
+(2, 3449, 3), # Navigation
+(2, 3455, 1), # Warp Drive Operation
+(2, 3411, 1), # Cybernetics
+(2, 3380, 1), # Industry
+(2, 3386, 3), # Mining
+(2, 25863, 3), # Salvaging
+(2, 13278, 1), # Archaeology
+(2, 25811, 1), # Astrometric Aquisition
+(2, 25739, 1), # Astrometric Rangefinding
+(2, 3412, 3), # Astrometrics
+(2, 21718, 1), # Hacking
+(2, 3551, 3), # Survey
+(2, 3402, 4), # Science
+(2, 32918, 1), # Mining Frigate
+(2, 3327, 3), # Spaceship Command
+(2, 3428, 1), # Long Range Targeting
+(2, 3431, 1), # Signature Analysis
+(2, 3429, 1), # Target Management
+(2, 3443, 2), # Trade
+(2, 3329, 3), # Minmatar Frigate
+(2, 3341, 1), # Minmatar Industrial
+(2, 3302, 3), # Small Projectile Turret
+(2, 3316, 1), # Controlled Bursts
+(2, 3419, 1), # Shield Management
+(2, 3416, 1), # Shield Operation
+(2, 3425, 1), # Shield Upgrades
+(2, 3420, 1), # Tactical Shield Manipulation
+(2, 3394, 3), # Hull Upgrades
+(2, 3392, 3), # Mechanics
+(2, 3393, 3), # Repair Systems
+# Amarr skills.
+(3, 3437, 1), # Drone Avionics
+(3, 3436, 1), # Drones
+(3, 3427, 1), # Electronic Warfare
+(3, 3435, 1), # Propulsion Jamming
+(3, 3418, 3), # Capacitor Management
+(3, 3417, 3), # Capacitor Systems Operation
+(3, 3426, 4), # CPU Management
+(3, 3432, 3), # Electronics Upgrades
+(3, 3424, 1), # Energy Grid Upgrades
+(3, 3413, 4), # Power Grid Management
+(3, 28164, 1), # Thermodynamics
+(3, 3318, 2), # Weapons Upgrades
+(3, 3300, 4), # Gunnery
+(3, 3312, 2), # Motion Prediction
+(3, 3310, 2), # Rapid Firing
+(3, 3311, 2), # Sharpshooter
+(3, 3315, 1), # Surgical Strike
+(3, 3317, 1), # Trajectory Analysis
+(3, 3319, 1), # Missile Launcher Operation
+(3, 3452, 1), # Acceleration Control
+(3, 3450, 3), # Afterburner
+(3, 3453, 1), # Evasive Maneuvering
+(3, 3454, 1), # High Speed Maneuvering
+(3, 3449, 3), # Navigation
+(3, 3455, 1), # Warp Drive Operation
+(3, 3411, 1), # Cybernetics
+(3, 3380, 1), # Industry
+(3, 3386, 3), # Mining
+(3, 25863, 3), # Salvaging
+(3, 13278, 1), # Archaeology
+(3, 25811, 1), # Astrometric Aquisition
+(3, 25739, 1), # Astrometric Rangefinding
+(3, 3412, 3), # Astrometrics
+(3, 21718, 1), # Hacking
+(3, 3551, 3), # Survey
+(3, 3402, 4), # Science
+(3, 32918, 1), # Mining Frigate
+(3, 3327, 3), # Spaceship Command
+(3, 3428, 1), # Long Range Targeting
+(3, 3431, 1), # Signature Analysis
+(3, 3429, 1), # Target Management
+(3, 3443, 2), # Trade
+(3, 3331, 3), # Amarr Frigate
+(3, 3343, 1), # Amarr Industrial
+(3, 3303, 3), # Small Energy Turret
+(3, 3316, 2), # Controlled Bursts
+(3, 3419, 1), # Shield Management
+(3, 3416, 1), # Shield Operation
+(3, 3425, 1), # Shield Upgrades
+(3, 3420, 1), # Tactical Shield Manipulation
+(3, 3394, 3), # Hull Upgrades
+(3, 3392, 3), # Mechanics
+(3, 3393, 3), # Repair Systems
+# Gallente skills.
+(4, 3437, 1), # Drone Avionics
+(4, 3436, 1), # Drones
+(4, 3427, 1), # Electronic Warfare
+(4, 3435, 1), # Propulsion Jamming
+(4, 3418, 3), # Capacitor Management
+(4, 3417, 3), # Capacitor Systems Operation
+(4, 3426, 4), # CPU Management
+(4, 3432, 3), # Electronics Upgrades
+(4, 3424, 1), # Energy Grid Upgrades
+(4, 3413, 4), # Power Grid Management
+(4, 28164, 1), # Thermodynamics
+(4, 3318, 2), # Weapons Upgrades
+(4, 3300, 4), # Gunnery
+(4, 3312, 2), # Motion Prediction
+(4, 3310, 2), # Rapid Firing
+(4, 3311, 2), # Sharpshooter
+(4, 3315, 1), # Surgical Strike
+(4, 3317, 1), # Trajectory Analysis
+(4, 3319, 1), # Missile Launcher Operation
+(4, 3452, 1), # Acceleration Control
+(4, 3450, 3), # Afterburner
+(4, 3453, 1), # Evasive Maneuvering
+(4, 3454, 1), # High Speed Maneuvering
+(4, 3449, 3), # Navigation
+(4, 3455, 1), # Warp Drive Operation
+(4, 3411, 1), # Cybernetics
+(4, 3380, 1), # Industry
+(4, 3386, 3), # Mining
+(4, 25863, 3), # Salvaging
+(4, 13278, 1), # Archaeology
+(4, 25811, 1), # Astrometric Aquisition
+(4, 25739, 1), # Astrometric Rangefinding
+(4, 3412, 3), # Astrometrics
+(4, 21718, 1), # Hacking
+(4, 3551, 3), # Survey
+(4, 3402, 4), # Science
+(4, 32918, 1), # Mining Frigate
+(4, 3327, 3), # Spaceship Command
+(4, 3428, 1), # Long Range Targeting
+(4, 3431, 1), # Signature Analysis
+(4, 3429, 1), # Target Management
+(4, 3443, 2), # Trade
+(4, 3328, 3), # Gallente Frigate
+(4, 3340, 1), # Gallente Industrial
+(4, 3301, 3), # Small Hybrid Turret
+(4, 3316, 2), # Controlled Bursts
+(4, 3419, 1), # Shield Management
+(4, 3416, 1), # Shield Operation
+(4, 3425, 1), # Shield Upgrades
+(4, 3420, 1), # Tactical Shield Manipulation
+(4, 3394, 3), # Hull Upgrades
+(4, 3392, 3), # Mechanics
+(4, 3393, 3) # Repair Systems
+;

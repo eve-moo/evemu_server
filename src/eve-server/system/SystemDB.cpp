@@ -26,6 +26,7 @@
 #include "eve-server.h"
 
 #include "system/SystemDB.h"
+#include "inv/InvType.h"
 
 bool SystemDB::LoadSystemEntities(uint32 systemID, std::vector<DBSystemEntity> &into) {
     DBQueryResult res;
@@ -47,6 +48,7 @@ bool SystemDB::LoadSystemEntities(uint32 systemID, std::vector<DBSystemEntity> &
     while(res.GetRow(row)) {
         entry.itemID = row.GetInt(0);
         entry.typeID = row.GetInt(1);
+        InvTypeRef type = InvType::getType(entry.typeID);
         entry.groupID = row.GetInt(2);
         entry.orbitID = (row.IsNull(3) ? 0 : row.GetInt(3));
         entry.position.x = row.GetDouble(4);
@@ -54,7 +56,7 @@ bool SystemDB::LoadSystemEntities(uint32 systemID, std::vector<DBSystemEntity> &
         entry.position.z = row.GetDouble(6);
         entry.radius = (row.IsNull(7) ? 1 : row.GetDouble(7));
         entry.security = (row.IsNull(8) ? 0.0 : row.GetDouble(8));
-        entry.itemName = row.GetText(9);
+        entry.itemName = (row.IsNull(9) ? type->typeName : row.GetText(9));
         into.push_back(entry);
     }
 
@@ -154,12 +156,12 @@ PyObject *SystemDB::ListJumps(uint32 stargateID) {
     DBQueryResult res;
 
     if(!DBcore::RunQuery(res,
-        "SELECT "
-        " celestialID AS toCelestialID,"
-        " solarSystemID AS locationID"
-        " FROM mapJumps "
-        "    LEFT JOIN mapDenormalize ON celestialID=itemID"
-        " WHERE stargateID=%u", stargateID))
+                         "SELECT "
+                         " destinationID AS toCelestialID,"
+                         " solarSystemID AS locationID"
+                         " FROM mapJumps "
+                         " LEFT JOIN mapDenormalize ON destinationID=itemID"
+                         " WHERE stargateID=%u", stargateID))
     {
         codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
         return NULL;

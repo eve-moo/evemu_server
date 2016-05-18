@@ -109,6 +109,8 @@ private:
     PyCallable_DECL_CALL(GetCharCreationInfo)
     PyCallable_DECL_CALL(GetCharNewExtraCreationInfo)
     PyCallable_DECL_CALL(CreateCharacterWithDoll)
+
+       PyCallable_DECL_CALL(GetCharacterSelectionData)
 };
 
 #endif // __CHARUNBOUNDMGRSERVICE__H__INCL__

@@ -149,8 +149,13 @@ protected:
     bool _Load();
     static uint32 _Spawn(ItemData &data);
 
-    uint32 inventoryID() const { return itemID(); }
-    PyRep *GetItem() const { return GetItemRow(); }
+    uint32 inventoryID() const { return itemID();
+    }
+
+    PyRep *GetItem() 
+    {
+        return getPackedRow();
+    }
 
     /*
      * Data members:

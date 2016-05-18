@@ -40,6 +40,7 @@ protected:
 
     PyCallable_DECL_CALL(GetAllTextChanges)
     PyCallable_DECL_CALL(UpdateLocalizationQASettings)
+    PyCallable_DECL_CALL(UpdateLocalizationQAWrap)
 };
 
 #endif

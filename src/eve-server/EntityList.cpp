@@ -218,7 +218,9 @@ void EntityList::Broadcast(const PyAddress &dest, EVENotificationStream &noti) {
     client_list::const_iterator cur, end;
     cur = m_clients.begin();
     end = m_clients.end();
-    for(; cur != end; cur++) {
+    // TO-DO: Limit broadcasts to system or station.
+    for(; cur != end; cur++)
+    {
         (*cur)->SendNotification(dest, noti);
     }
 }

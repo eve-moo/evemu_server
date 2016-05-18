@@ -133,10 +133,6 @@ public:
      */
     bool Populate(Rsp_CommonGetInfo_Entry &into);
 
-    //PyTuple* GetItemRow() const;
-    PyPackedRow* GetItemRow() const;
-    void GetItemRow( PyPackedRow* into ) const;
-
     PyPackedRow* GetItemStatusRow() const;
     void GetItemStatusRow( PyPackedRow* into ) const;
 
@@ -200,9 +196,18 @@ public:
 
     void SaveItem();  //save the item to the DB.
 
-    /************************************************************************/
-    /* start experimental new attribute system ( semi-operational )         */
-    /************************************************************************/
+    /**
+     * Get a packed row for the item change notice.
+     * @return The packed row.
+     */
+    PyPackedRow *getPackedRow();
+    void getPackedRow(PyPackedRow* into) const;
+    /**
+     * Send a notice to the client about the item changing.
+     * @param client The client to notify.
+     */
+    void sendItemChangeNotice(Client *client);
+
 protected:
     AttributeMap m_AttributeMap;
     AttributeMap m_DefaultAttributeMap;
@@ -309,10 +314,6 @@ public:
      */
     void RemoveAttributeModifier(AttributeModifierSourceRef modifier);
 
-    /************************************************************************/
-    /* end experimental new attribute system                                */
-    /************************************************************************/
-
 protected:
     InventoryItem(
         uint32 _itemID,
@@ -380,7 +381,6 @@ protected:
 		ItemData &data
 	);
 
-    void SendItemChange(uint32 toID, std::map<int32, PyRep *> &changes) const;
     void SetOnline(bool online);
 
     /*
