@@ -35,7 +35,7 @@ class CrimeWatchServiceBound
 : public PyBoundObject
 {
 public:
-    CrimeWatchServiceBound(uint32 locationID);
+    CrimeWatchServiceBound(uint32 locationID, uint32 groupID);
     virtual ~CrimeWatchServiceBound();
 
     PyCallable_DECL_CALL(GetClientStates)
@@ -49,7 +49,7 @@ public:
     //GetJumpTimers
     //GetMyBoosters
     //GetMyEngagements
-    //GetMySecurityStatus
+    PyCallable_DECL_CALL(GetMySecurityStatus)
     //GetNpcTimer
     //GetPvpTimer
     //GetRequiredSafetyLevelForEffect
@@ -104,8 +104,10 @@ PyBoundObject *CrimeWatchService::_CreateBoundObject(Client *c, const PyRep *bin
     }
 
     uint32 locationID = tup->items[0]->AsInt()->value();
+    // groupID 15 = station, 5 = solar system, 935 = world space
+    uint32 groupID = tup->items[1]->AsInt()->value();
 
-    CrimeWatchServiceBound *obj = new CrimeWatchServiceBound(locationID);
+    CrimeWatchServiceBound *obj = new CrimeWatchServiceBound(locationID, groupID);
     if(!obj->Load())
     {
         _log(SERVICE__ERROR, "Failed to load static info for location %u.", locationID);
@@ -120,13 +122,14 @@ PyBoundObject *CrimeWatchService::_CreateBoundObject(Client *c, const PyRep *bin
 
 //******************************************************************************
 
-CrimeWatchServiceBound::CrimeWatchServiceBound(uint32 locationID)
+CrimeWatchServiceBound::CrimeWatchServiceBound(uint32 locationID, uint32 groupID)
 : PyBoundObject(new Dispatcher(this)),
 m_locationID(locationID)
 {
     m_strBoundObjectName = "CrimeWatchServiceBound";
 
     PyCallable_REG_CALL(CrimeWatchServiceBound, GetClientStates)
+    PyCallable_REG_CALL(CrimeWatchServiceBound, GetMySecurityStatus)
 }
 
 CrimeWatchServiceBound::~CrimeWatchServiceBound() { }
@@ -142,30 +145,78 @@ bool CrimeWatchServiceBound::Load()
     return true;
 }
 
+#define weaponsTimerStateIdle 100
+#define weaponsTimerStateActive 101
+#define weaponsTimerStateTimer 102
+#define weaponsTimerStateInherited 103
+#define pvpTimerStateIdle 200
+#define pvpTimerStateActive 201
+#define pvpTimerStateTimer 202
+#define pvpTimerStateInherited 203
+#define criminalTimerStateIdle 300
+#define criminalTimerStateActiveCriminal 301
+#define criminalTimerStateActiveSuspect 302
+#define criminalTimerStateTimerCriminal 303
+#define criminalTimerStateTimerSuspect 304
+#define criminalTimerStateInheritedCriminal 305
+#define criminalTimerStateInheritedSuspect 306
+#define npcTimerStateIdle 400
+#define npcTimerStateActive 401
+#define npcTimerStateTimer 402
+#define npcTimerStateInherited 403
+// Safety levels
+#define shipSafetyLevelNone 0
+#define shipSafetyLevelPartial 1
+#define shipSafetyLevelFull 2
+
 PyResult CrimeWatchServiceBound::Handle_GetClientStates(PyCallArgs &call)
 {
-    PyTuple *result = new PyTuple(4);
-
-    // T0-DO: Figure out what all this means!
-
     // Set first as tuple
-    PyTuple *tup0 = new PyTuple(4);
-    tup0->SetItem(0, new_tuple(new PyInt(100), new PyNone()));
-    tup0->SetItem(1, new_tuple(new PyInt(200), new PyNone()));
-    tup0->SetItem(2, new_tuple(new PyInt(400), new PyNone()));
-    tup0->SetItem(3, new_tuple(new PyInt(300), new PyNone()));
-    result->SetItem(0, tup0);
-    // Set second as dictionary
-    result->SetItem(1, new PyDict());
-    // Set third as tuple
-    PyTuple *tup3 = new PyTuple(2);
-    PyObjectEx_Type1 *obj1 = new PyObjectEx_Type1(new PyToken("__builtin__.set"), new_tuple(new PyList()));
-    PyObjectEx_Type1 *obj2 = new PyObjectEx_Type1(new PyToken("__builtin__.set"), new_tuple(new PyList()));
-    tup3->SetItem(0, obj1);
-    tup3->SetItem(1, obj2);
-    result->SetItem(2, tup3);
-    // Set fourth as Int
-    result->SetItem(3, new PyInt(2));
+    PyTuple *myCombatTimers = new PyTuple(4);
+    // If active the PyNone should be a PyInt with the expire timestamp.
+    PyTuple *weaponTimerState = new_tuple(new PyInt(weaponsTimerStateIdle), new PyNone());
+    PyTuple *pvpTimerState = new_tuple(new PyInt(pvpTimerStateIdle), new PyNone());
+    PyTuple *npcTimerState = new_tuple(new PyInt(npcTimerStateIdle), new PyNone());
+    PyTuple *criminalTimerState = new_tuple(new PyInt(criminalTimerStateIdle), new PyNone());
+    myCombatTimers->SetItem(0, weaponTimerState);
+    myCombatTimers->SetItem(1, pvpTimerState);
+    myCombatTimers->SetItem(2, npcTimerState);
+    myCombatTimers->SetItem(3, criminalTimerState);
+
+    // Create engagements.
+    PyDict *myEngagements = new PyDict();
+    // Unconfirmed: the dict is key = charID, value = ??
+
+    // Setup flagged characters.
+    PyTuple *flaggedCharacters = new PyTuple(2);
+    // TO-DO: populate criminal list with characterIDs of characters with criminal flag.
+    PyList *criminalList = new PyList();
+    PyObjectEx_Type1 *criminals = new PyObjectEx_Type1(new PyToken("__builtin__.set"), new_tuple(criminalList));
+    // TO-DO: populate suspect list with characterIDs of characters with suspect flag.
+    PyList *suspectList = new PyList();
+    PyObjectEx_Type1 *suspects = new PyObjectEx_Type1(new PyToken("__builtin__.set"), new_tuple(suspectList));
+    flaggedCharacters->SetItem(0, criminals);
+    flaggedCharacters->SetItem(1, suspects);
+
+    // Setup safety level.    
+    PyInt *safetyLevel = new PyInt(shipSafetyLevelFull);
+
+    // Setup result.
+    PyTuple *result = new PyTuple(4);
+    result->SetItem(0, myCombatTimers);
+    result->SetItem(1, myEngagements);
+    result->SetItem(2, flaggedCharacters);
+    result->SetItem(3, safetyLevel);
 
     return result;
+}
+
+PyResult CrimeWatchServiceBound::Handle_GetMySecurityStatus(PyCallArgs &call)
+{
+    CharacterRef chr = call.client->GetChar();
+    if(chr.get() != nullptr)
+    {
+        return new PyFloat(chr->securityRating());
+    }
+    return new PyFloat(0);
 }
