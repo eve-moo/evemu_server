@@ -232,6 +232,7 @@ CREATE TABLE `srvCharacter` (
   `nextRespecDateTime` bigint(20) unsigned NOT NULL default '0',
   `deletePrepareDateTime` BIGINT(20) UNSIGNED NULL DEFAULT '0',
   `shipID` int(10) unsigned NOT NULL default '0',
+  `freeSkillPoints` int(10) NOT NULL default '0',
   PRIMARY KEY  (`characterID`),
   KEY `FK_CHARACTER__ACCOUNTS` (`accountID`),
   KEY `FK_CHARACTER__CHRANCESTRIES` (`ancestryID`),

@@ -705,7 +705,7 @@ uint32 InventoryItem::_SpawnEntity(
     return ItemFactory::GetNextEntityID();
 }
 
-void InventoryItem::Delete()
+void InventoryItem::Delete(bool notify)
 {
     // Remove us from our inventory.
     Inventory *inventory = ItemFactory::GetInventory(m_locationID, false);
@@ -718,8 +718,11 @@ void InventoryItem::Delete()
     // Set new owner and location.
     m_ownerID = 2;
     m_locationID = 6;
-    // Issue changes notice to client.
-    sendItemChangeNotice(EntityList::FindCharacter(ownerID));
+    if(notify)
+    {
+        // Issue changes notice to client.
+        sendItemChangeNotice(EntityList::FindCharacter(ownerID));
+    }
 
     //take ourself out of the DB
     DBerror err;
@@ -927,13 +930,20 @@ bool InventoryItem::SetQuantity(uint32 qty_new, bool notify)
 
     m_quantity = qty_new;
 
-    DBerror err;
-    if (!DBcore::RunQuery(err,
-                          "UPDATE srvEntity SET quantity = %u WHERE itemID = %u",
-                          m_quantity, m_itemID))
+    if(m_quantity == 0)
     {
-        _log(DATABASE__ERROR, "Error in query: %s.", err.c_str());
-        return false;
+        Delete(false);
+    }
+    else
+    {
+        DBerror err;
+        if(!DBcore::RunQuery(err,
+                             "UPDATE srvEntity SET quantity = %u WHERE itemID = %u",
+                             m_quantity, m_itemID))
+        {
+            _log(DATABASE__ERROR, "Error in query: %s.", err.c_str());
+            return false;
+        }
     }
 
     //notify about the changes.

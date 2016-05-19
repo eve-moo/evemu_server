@@ -51,6 +51,8 @@ public:
     PyCallable_DECL_CALL(GetRespecInfo)
     PyCallable_DECL_CALL(RespecCharacter)
     PyCallable_DECL_CALL(AbortTraining)
+    PyCallable_DECL_CALL(GetDiminishedSpFromInjectors)
+    PyCallable_DECL_CALL(InjectSkillPoints)
 
     //    /**
     //     * CharStartTrainingSkillByTypeID
@@ -133,6 +135,8 @@ SkillMgr2Bound::SkillMgr2Bound()
     PyCallable_REG_CALL(SkillMgr2Bound, GetRespecInfo)
     PyCallable_REG_CALL(SkillMgr2Bound, RespecCharacter)
     PyCallable_REG_CALL(SkillMgr2Bound, AbortTraining)
+    PyCallable_REG_CALL(SkillMgr2Bound, GetDiminishedSpFromInjectors)
+    PyCallable_REG_CALL(SkillMgr2Bound, InjectSkillPoints)
             
     //    PyCallable_REG_CALL(SkillMgr2Bound, CharStartTrainingSkillByTypeID)
     //    PyCallable_REG_CALL(SkillMgr2Bound, CharStopTrainingSkill)
@@ -405,6 +409,49 @@ PyResult SkillMgr2Bound::Handle_AbortTraining(PyCallArgs &call)
     CharacterRef chr = call.client->GetChar();
     chr->stopTraining();
     return nullptr;
+}
+
+PyResult SkillMgr2Bound::Handle_GetDiminishedSpFromInjectors(PyCallArgs &call)
+{
+    CharacterRef chr = call.client->GetChar();
+    return new PyInt(chr->getInjectorSP());
+}
+
+PyResult SkillMgr2Bound::Handle_InjectSkillPoints(PyCallArgs &call)
+{
+    if(call.tuple->size() != 2)
+    {
+        codelog(CLIENT__ERROR, "%s: Inject skill points tuple wrong size.", call.client->GetName());
+        return NULL;
+    }
+    uint64 itemID = 0;
+    if(call.tuple->GetItem(0)->IsInt())
+    {
+        itemID = call.tuple->GetItem(0)->AsInt()->value();
+    }
+    else if(call.tuple->GetItem(0)->IsLong())
+    {
+        itemID = call.tuple->GetItem(0)->AsLong()->value();
+    }
+    else
+    {
+        codelog(CLIENT__ERROR, "%s: Inject skill points tuple(0) not an integer value.", call.client->GetName());
+        return NULL;
+    }
+    uint32 qty;
+    if(call.tuple->GetItem(1)->IsInt())
+    {
+        qty = call.tuple->GetItem(1)->AsInt()->value();
+    }
+    else
+    {
+        codelog(CLIENT__ERROR, "%s: Inject skill points tuple(1) not an integer value.", call.client->GetName());
+        return NULL;
+    }
+    InventoryItemRef injector = ItemFactory::GetItem(itemID);
+    CharacterRef chr = call.client->GetChar();
+    chr->useInjector(injector, qty);
+    return new PyNone();
 }
 
 //PyResult SkillMgr2Bound::Handle_GetCharacterAttributeModifiers(PyCallArgs &call)

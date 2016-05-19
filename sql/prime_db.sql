@@ -87,7 +87,8 @@ INSERT INTO srvCharacter
   0 AS lastRespecDateTime, 
   0 AS nextRespecDateTime, 
   0 AS deletePrepareDateTime, 
-  0 AS shipID
+  0 AS shipID,
+  0 AS freeSkillPoints
  FROM blkCharacterStatic
 LEFT JOIN mapDenormalize ON mapDenormalize.itemID = blkCharacterStatic.stationID;
 

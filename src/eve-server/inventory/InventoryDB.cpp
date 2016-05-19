@@ -540,7 +540,8 @@ bool InventoryDB::GetCharacter(uint32 characterID, CharacterData &into) {
         "  chr.startDateTime,"
         "  chr.createDateTime,"
         "  chr.corporationDateTime,"
-        "  chr.shipID"
+                         "  chr.shipID,"
+                         "chr.freeSkillPoints"
         " FROM srvCharacter AS chr"
         " LEFT JOIN srvCorporation AS crp USING (corporationID)"
         " WHERE characterID = %u",
@@ -579,6 +580,7 @@ bool InventoryDB::GetCharacter(uint32 characterID, CharacterData &into) {
     into.createDateTime = row.GetUInt64( 20 );
     into.corporationDateTime = row.GetUInt64( 21 );
     into.shipID = row.GetUInt( 22 );
+    into.freeSkillPoints = row.GetUInt(23);
 
     return true;
 }
@@ -734,56 +736,58 @@ bool InventoryDB::SaveCharacter(uint32 characterID, const CharacterData &data) {
     DBcore::DoEscapeString(descriptionEsc, data.description);
 
     if(!DBcore::RunQuery(err,
-        "UPDATE srvCharacter"
-        " SET"
-        "  accountID = %u,"
-        "  title = '%s',"
-        "  description = '%s',"
-        "  gender = %u,"
-        "  bounty = %f,"
-        "  balance = %f,"
-        "  aurBalance = %f,"
-        "  securityRating = %f,"
-        "  logonMinutes = %u,"
-        "  skillPoints = %f,"
-        "  corporationID = %u,"
-        "  stationID = %u,"
-        "  solarSystemID = %u,"
-        "  constellationID = %u,"
-        "  regionID = %u,"
-        "  ancestryID = %u,"
-        "  careerID = %u,"
-        "  schoolID = %u,"
-        "  careerSpecialityID = %u,"
-        "  startDateTime = %" PRIu64 ","
-        "  createDateTime = %" PRIu64 ","
-        "  corporationDateTime = %" PRIu64 ","
-        "  shipID = %u"
-        " WHERE characterID = %u",
-        data.accountID,
-        titleEsc.c_str(),
-        descriptionEsc.c_str(),
-        data.gender,
-        data.bounty,
-        data.balance,
-        data.aurBalance,
-        data.securityRating,
-        data.logonMinutes,
-        data.skillPoints,
-        data.corporationID,
-        data.stationID,
-        data.solarSystemID,
-        data.constellationID,
-        data.regionID,
-        data.ancestryID,
-        data.careerID,
-        data.schoolID,
-        data.careerSpecialityID,
-        data.startDateTime,
-        data.createDateTime,
-        data.corporationDateTime,
-        data.shipID,
-        characterID))
+                         "UPDATE srvCharacter"
+                         " SET"
+                         " accountID = %u,"
+                         " title = '%s',"
+                         " description = '%s',"
+                         " gender = %u,"
+                         " bounty = %f,"
+                         " balance = %f,"
+                         " aurBalance = %f,"
+                         " securityRating = %f,"
+                         " logonMinutes = %u,"
+                         " skillPoints = %f,"
+                         " corporationID = %u,"
+                         " stationID = %u,"
+                         " solarSystemID = %u,"
+                         " constellationID = %u,"
+                         " regionID = %u,"
+                         " ancestryID = %u,"
+                         " careerID = %u,"
+                         " schoolID = %u,"
+                         " careerSpecialityID = %u,"
+                         " startDateTime = %" PRIu64 ","
+                         " createDateTime = %" PRIu64 ","
+                         " corporationDateTime = %" PRIu64 ","
+                         " shipID = %u,"
+                         " freeSkillPoints = %u"
+                         " WHERE characterID = %u",
+                         data.accountID,
+                         titleEsc.c_str(),
+                         descriptionEsc.c_str(),
+                         data.gender,
+                         data.bounty,
+                         data.balance,
+                         data.aurBalance,
+                         data.securityRating,
+                         data.logonMinutes,
+                         data.skillPoints,
+                         data.corporationID,
+                         data.stationID,
+                         data.solarSystemID,
+                         data.constellationID,
+                         data.regionID,
+                         data.ancestryID,
+                         data.careerID,
+                         data.schoolID,
+                         data.careerSpecialityID,
+                         data.startDateTime,
+                         data.createDateTime,
+                         data.corporationDateTime,
+                         data.shipID,
+                         data.freeSkillPoints,
+                         characterID))
     {
         _log(DATABASE__ERROR, "Failed to save character %u: %s.", characterID, err.c_str());
         return false;

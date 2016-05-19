@@ -38,58 +38,60 @@
  * CharacterData
  */
 CharacterData::CharacterData(
-    uint32 _accountID,
-    const char *_title,
-    const char *_desc,
-    bool _gender,
-    double _bounty,
-    double _balance,
-    double _aurBalance,
-    double _securityRating,
-    uint32 _logonMinutes,
-    double _skillPoints,
-    uint32 _corporationID,
-    uint32 _allianceID,
-    uint32 _warFactionID,
-    uint32 _stationID,
-    uint32 _solarSystemID,
-    uint32 _constellationID,
+                             uint32 _accountID,
+                             const char *_title,
+                             const char *_desc,
+                             bool _gender,
+                             double _bounty,
+                             double _balance,
+                             double _aurBalance,
+                             double _securityRating,
+                             uint32 _logonMinutes,
+                             double _skillPoints,
+                             uint32 _corporationID,
+                             uint32 _allianceID,
+                             uint32 _warFactionID,
+                             uint32 _stationID,
+                             uint32 _solarSystemID,
+                             uint32 _constellationID,
                              uint32 _regionID,
                              ChrBloodlineRef _bloodline,
-    uint32 _ancestryID,
-    uint32 _careerID,
-    uint32 _schoolID,
-    uint32 _careerSpecialityID,
-    uint64 _startDateTime,
-    uint64 _createDateTime,
-    uint64 _corporationDateTime,
-    uint32 _shipID)
+                             uint32 _ancestryID,
+                             uint32 _careerID,
+                             uint32 _schoolID,
+                             uint32 _careerSpecialityID,
+                             uint64 _startDateTime,
+                             uint64 _createDateTime,
+                             uint64 _corporationDateTime,
+                             uint32 _shipID,
+                             uint32 _freeSkillPoints)
 : accountID(_accountID),
-  title(_title),
-  description(_desc),
-  gender(_gender),
-  bounty(_bounty),
-  balance(_balance),
-  aurBalance(_aurBalance),
-  securityRating(_securityRating),
-  logonMinutes(_logonMinutes),
-  skillPoints(_skillPoints),
-  corporationID(_corporationID),
-  allianceID(_allianceID),
-  warFactionID(_warFactionID),
-  stationID(_stationID),
-  solarSystemID(_solarSystemID),
-  constellationID(_constellationID),
+title(_title),
+description(_desc),
+gender(_gender),
+bounty(_bounty),
+balance(_balance),
+aurBalance(_aurBalance),
+securityRating(_securityRating),
+logonMinutes(_logonMinutes),
+skillPoints(_skillPoints),
+corporationID(_corporationID),
+allianceID(_allianceID),
+warFactionID(_warFactionID),
+stationID(_stationID),
+solarSystemID(_solarSystemID),
+constellationID(_constellationID),
 regionID(_regionID),
 bloodline(_bloodline),
-  ancestryID(_ancestryID),
-  careerID(_careerID),
-  schoolID(_schoolID),
-  careerSpecialityID(_careerSpecialityID),
-  startDateTime(_startDateTime),
-  createDateTime(_createDateTime),
-  corporationDateTime(_corporationDateTime),
-  shipID(_shipID)
+ancestryID(_ancestryID),
+careerID(_careerID),
+schoolID(_schoolID),
+careerSpecialityID(_careerSpecialityID),
+startDateTime(_startDateTime),
+createDateTime(_createDateTime),
+corporationDateTime(_corporationDateTime),
+shipID(_shipID),
+freeSkillPoints(_freeSkillPoints)
 {
 }
 
@@ -237,46 +239,47 @@ fleetJob(_fleetJob)
  * Character
  */
 Character::Character(
-    uint32 _characterID,
-    // InventoryItem stuff:
+                     uint32 _characterID,
+                     // InventoryItem stuff:
                      const InvTypeRef _charType,
-    const ItemData &_data,
-    // Character stuff:
-    const CharacterData &_charData,
-    const CorpMemberInfo &_corpData)
+                     const ItemData &_data,
+                     // Character stuff:
+                     const CharacterData &_charData,
+                     const CorpMemberInfo &_corpData)
 : Owner(_characterID, _charType, _data),
-  m_accountID(_charData.accountID),
-  m_title(_charData.title),
-  m_description(_charData.description),
-  m_gender(_charData.gender),
-  m_bounty(_charData.bounty),
-  m_balance(_charData.balance),
-  m_aurBalance(_charData.aurBalance),
-  m_securityRating(_charData.securityRating),
-  m_logonMinutes(_charData.logonMinutes),
-  m_totalSPtrained(((double)(_charData.skillPoints))),
-  m_corporationID(_charData.corporationID),
-  m_corpHQ(_corpData.corpHQ),
-  m_allianceID(_charData.allianceID),
-  m_warFactionID(_charData.warFactionID),
-  m_corpRole(_corpData.corpRole),
-  m_rolesAtAll(_corpData.rolesAtAll),
-  m_rolesAtBase(_corpData.rolesAtBase),
-  m_rolesAtHQ(_corpData.rolesAtHQ),
-  m_rolesAtOther(_corpData.rolesAtOther),
-  m_stationID(_charData.stationID),
-  m_solarSystemID(_charData.solarSystemID),
-  m_constellationID(_charData.constellationID),
+m_accountID(_charData.accountID),
+m_title(_charData.title),
+m_description(_charData.description),
+m_gender(_charData.gender),
+m_bounty(_charData.bounty),
+m_balance(_charData.balance),
+m_aurBalance(_charData.aurBalance),
+m_securityRating(_charData.securityRating),
+m_logonMinutes(_charData.logonMinutes),
+m_totalSPtrained(((double) (_charData.skillPoints))),
+m_corporationID(_charData.corporationID),
+m_corpHQ(_corpData.corpHQ),
+m_allianceID(_charData.allianceID),
+m_warFactionID(_charData.warFactionID),
+m_corpRole(_corpData.corpRole),
+m_rolesAtAll(_corpData.rolesAtAll),
+m_rolesAtBase(_corpData.rolesAtBase),
+m_rolesAtHQ(_corpData.rolesAtHQ),
+m_rolesAtOther(_corpData.rolesAtOther),
+m_stationID(_charData.stationID),
+m_solarSystemID(_charData.solarSystemID),
+m_constellationID(_charData.constellationID),
 m_regionID(_charData.regionID),
 m_bloodline(_charData.bloodline),
-  m_ancestryID(_charData.ancestryID),
-  m_careerID(_charData.careerID),
-  m_schoolID(_charData.schoolID),
-  m_careerSpecialityID(_charData.careerSpecialityID),
-  m_startDateTime(_charData.startDateTime),
-  m_createDateTime(_charData.createDateTime),
-  m_corporationDateTime(_charData.corporationDateTime),
-  m_shipID(_charData.shipID)
+m_ancestryID(_charData.ancestryID),
+m_careerID(_charData.careerID),
+m_schoolID(_charData.schoolID),
+m_careerSpecialityID(_charData.careerSpecialityID),
+m_startDateTime(_charData.startDateTime),
+m_createDateTime(_charData.createDateTime),
+m_corporationDateTime(_charData.corporationDateTime),
+m_shipID(_charData.shipID),
+m_freeSkillPoints(_charData.freeSkillPoints)
 {
     // allow characters to be only singletons
     //assert(singleton() && quantity() == -1);
@@ -1185,6 +1188,61 @@ SkillRef Character::GetSkillInQueue(uint32 index)
     return SkillRef();
 }
 
+uint32 Character::getInjectorSP()
+{
+    uint32 sp = GetTotalSPTrained();
+    if(sp > 80000000)
+    {
+        // 80M sp
+        return 150000;
+    }
+    if(sp > 50000000)
+    {
+        // 50M sp
+        return 300000;
+    }
+    if(sp > 5000000)
+    {
+        // 5M sp
+        return 400000;
+    }
+    // less than 5M sp
+    return 500000;
+}
+
+bool Character::useInjector(InventoryItemRef injector, uint32 qty)
+{
+    // TO-DO: implement using injectors
+    sendSkillFreePointsChanged();
+    if(injector->quantity() < qty)
+    {
+        return false;
+    }
+    m_freeSkillPoints += getInjectorSP() * qty;
+    injector->AlterQuantity(-qty);
+    return true;
+}
+
+void Character::sendSkillFreePointsChanged()
+{
+    Client * client = EntityList::FindCharacter(itemID());
+    if(client == nullptr)
+    {
+        return;
+    }
+    PyTuple *tup = new PyTuple(1);
+    tup->SetItem(0, new PyInt(m_freeSkillPoints));
+    PyTuple *result = new_tuple001(tup);
+    client->SendNotification("OnFreeSkillPointsChanged", "charid", &result);
+    PySafeDecRef(result);
+}
+
+bool Character::canUseSkillExtractor()
+{
+    // True if 5.5M sp or more trained.
+    return GetTotalSPTrained() >= 5500000;
+}
+
 InventoryItemRef Character::GetImplant(uint32 slot)
 {
 
@@ -1328,7 +1386,7 @@ void Character::SaveCharacter()
             aurBalance(),
             securityRating(),
             logonMinutes(),
-            m_totalSPtrained.get_float(),
+            m_totalSPtrained,
             corporationID(),
             allianceID(),
             warFactionID(),
@@ -1458,15 +1516,13 @@ void Character::_CalculateTotalSPTrained()
 {
     // Loop through all skills trained and calculate total SP this character has trained so far,
     // NOT including the skill currently being trained:
-    EvilNumber totalSP = 0.0f;
+    double totalSP = 0.0f;
     std::vector<InventoryItemRef> skills;
     GetSkillsList( skills );
-    std::vector<InventoryItemRef>::iterator cur, end;
-    cur = skills.begin();
-    end = skills.end();
-    for(; cur != end; cur++)
+    for(auto skill : skills)
     {
-        totalSP = totalSP + cur->get()->getAttribute(AttrSkillPoints); // much cleaner and more accurate    -allan
+        // much cleaner and more accurate    -allan
+        totalSP = totalSP + skill->getAttribute(AttrSkillPoints).get_float();
     }
 
     m_totalSPtrained = totalSP;

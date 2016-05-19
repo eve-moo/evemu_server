@@ -38,32 +38,33 @@
 class CharacterData {
 public:
     CharacterData(
-        uint32 _accountID = 0,
-        const char *_title = "",
-        const char *_desc = "",
-        bool _gender = false,
-        double _bounty = 0.0,
-        double _balance = 0.0,
-        double _aurBalance = 0.0,
-        double _securityRating = 0.0,
-        uint32 _logonMinutes = 0,
-        double _skillPoints = 0,
-        uint32 _corporationID = 0,
-        uint32 _allianceID = 0,
-        uint32 _warFactionID = 0,
-        uint32 _stationID = 0,
-        uint32 _solarSystemID = 0,
-        uint32 _constellationID = 0,
+                  uint32 _accountID = 0,
+                  const char *_title = "",
+                  const char *_desc = "",
+                  bool _gender = false,
+                  double _bounty = 0.0,
+                  double _balance = 0.0,
+                  double _aurBalance = 0.0,
+                  double _securityRating = 0.0,
+                  uint32 _logonMinutes = 0,
+                  double _skillPoints = 0,
+                  uint32 _corporationID = 0,
+                  uint32 _allianceID = 0,
+                  uint32 _warFactionID = 0,
+                  uint32 _stationID = 0,
+                  uint32 _solarSystemID = 0,
+                  uint32 _constellationID = 0,
                   uint32 _regionID = 0,
                   ChrBloodlineRef _bloodline = ChrBloodlineRef(),
-        uint32 _ancestryID = 0,
-        uint32 _careerID = 0,
-        uint32 _schoolID = 0,
-        uint32 _careerSpecialityID = 0,
-        uint64 _startDateTime = 0,
-        uint64 _createDateTime = 0,
-        uint64 _corporationDateTime = 0,
-        uint32 _shipID = 0);
+                  uint32 _ancestryID = 0,
+                  uint32 _careerID = 0,
+                  uint32 _schoolID = 0,
+                  uint32 _careerSpecialityID = 0,
+                  uint64 _startDateTime = 0,
+                  uint64 _createDateTime = 0,
+                  uint64 _corporationDateTime = 0,
+                  uint32 _shipID = 0,
+                  uint32 _freeSkillPoints = 0);
 
     uint32 accountID;
 
@@ -98,6 +99,7 @@ public:
     uint64 corporationDateTime;
 
     uint32 shipID;
+    uint32 freeSkillPoints;
 };
 
 /**
@@ -256,12 +258,16 @@ public:
      */
     void GetSkillsList(std::vector<InventoryItemRef> &skills) const;
 
-    /**
+/**
      * Calculates Total Skillpoints the character has trained
      *
      * @return Skillpoints per minute rate.
+     * TO-DO; add current training skill sp
      */
-    EvilNumber GetTotalSPTrained() { return m_totalSPtrained; };
+    double GetTotalSPTrained()
+    {
+        return m_totalSPtrained;
+    };
     /**
      * Calculates Skillpoints per minute rate.
      *
@@ -368,6 +374,26 @@ public:
      * @return The skill at that index.
      */
     SkillRef GetSkillInQueue(uint32 index);
+
+    /**
+     * Get the number of skill points an injector adds to the character.
+     * @return The number of skill points that would be added.
+     */
+    uint32 getInjectorSP();
+    /**
+     * Check if we can use a skill injector.
+     * @param The injector or stack of injectors to use.
+     */
+    bool useInjector(InventoryItemRef injector, uint32 qty);
+    /**
+     * Send a OnFreeSkillPointsChanged notification.
+     */
+    void sendSkillFreePointsChanged();
+    /**
+     * Check if a skill extractor can be used.
+     * @return True if an extractor can be used.
+     */
+    bool canUseSkillExtractor();
 
     /**
      * Get implant in slot.
@@ -575,8 +601,9 @@ protected:
 
     // Skill queue:
     SkillQueue m_skillQueue;
-    EvilNumber m_totalSPtrained;
+    double m_totalSPtrained;
     uint64 m_trainingStartTime;
+    uint32 m_freeSkillPoints;
 
     Certificates m_certificates;
 

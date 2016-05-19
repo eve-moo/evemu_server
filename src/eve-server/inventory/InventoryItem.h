@@ -119,7 +119,7 @@ public:
     /*
      * Helper routines:
      */
-    virtual void Delete();  //remove the item from the DB.
+    virtual void Delete(bool notify = false); //remove the item from the DB.
     virtual InventoryItemRef Split(int32 qty_to_take, bool notify=true);
     virtual bool Merge(InventoryItemRef to_merge, int32 qty=0, bool notify=true);
 
