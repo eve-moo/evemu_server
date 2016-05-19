@@ -38,6 +38,7 @@ class MissionDB
 {
 public:
     static PyObjectEx *GetAgents();
+    static PyDict *GetAgentsInSpace();
     static bool LoadAgentActions(uint32 agentID, std::map<uint32, AgentActions *> &into);
 
     //AgentLevel *LoadAgentLevel(uint8 level);

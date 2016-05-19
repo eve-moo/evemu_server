@@ -272,9 +272,15 @@ PyObject *CorporationDB::ListNPCDivisions() {
     DBQueryResult res;
 
     if(!DBcore::RunQuery(res,
-                         "SELECT "
-                         "divisionID, crpNPCDivisions.divisionName, divisionNameID, description, leaderType, leaderTypeID "
-                         "FROM crpNPCDivisions LEFT JOIN extCrpNPCDivisions ON crpNPCDivisions.divisionID = extCrpNPCDivisions.divisionID"
+                         "SELECT"
+                         " divisionID,"
+                         " crpNPCDivisions.divisionName,"
+                         " divisionNameID,"
+                         " description,"
+                         " leaderType,"
+                         " leaderTypeID "
+                         "FROM crpNPCDivisions"
+                         " LEFT JOIN extCrpNPCDivisions USING(divisionID)"
     ))
     {
         codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());

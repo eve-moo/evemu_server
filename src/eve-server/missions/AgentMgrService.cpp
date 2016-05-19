@@ -192,10 +192,28 @@ PyResult AgentMgrService::Handle_GetSolarSystemOfAgent(PyCallArgs &call) {
 
 PyResult AgentMgrService::Handle_GetAgentsInSpace(PyCallArgs &call)
 {
+    PyRep *result = NULL;
 
-    SysLog::Debug("AgentMgrService", "Called GetSolarSystemOfAgent Stub.");
+    ObjectCachedMethodID method_id(GetName(), "GetAgentsInSpace");
 
-    return NULL;
+    //check to see if this method is in the cache already.
+    if(!PyServiceMgr::cache_service->IsCacheLoaded(method_id))
+    {
+        //this method is not in cache yet, load up the contents and cache it.
+        result = MissionDB::GetAgentsInSpace();
+        if(result == NULL)
+        {
+            codelog(SERVICE__ERROR, "Failed to load cache, generating empty contents.");
+            result = new PyNone();
+        }
+        PyServiceMgr::cache_service->GiveCache(method_id, &result);
+    }
+
+    //now we know its in the cache one way or the other, so build a
+    //cached object cached method call result.
+    result = PyServiceMgr::cache_service->MakeObjectCachedMethodCallResult(method_id);
+
+    return result;
 }
 
 PyResult AgentMgrBound::Handle_GetInfoServiceDetails(PyCallArgs& call)

@@ -27,30 +27,56 @@
 
 #include "missions/MissionDB.h"
 
-PyObjectEx *MissionDB::GetAgents() {
+PyObjectEx *MissionDB::GetAgents()
+{
     DBQueryResult res;
 
     if(!DBcore::RunQuery(res,
-        "SELECT"
-        "    agt.agentID,"
-        "    agt.agentTypeID,"
-        "    agt.divisionID,"
-        "    agt.level,"
-        "    chr.stationID,"
-        "    agt.quality,"
-        "    agt.corporationID,"
-        "    bl.bloodlineID,"
-        "    chr.gender"
-        " FROM agtAgents AS agt"
+                         "SELECT"
+                         " agt.agentID,"
+                         " agt.agentTypeID,"
+                         " agt.divisionID,"
+                         " agt.level,"
+                         " IFNULL(chr.stationID, 0) AS stationID,"
+                         " bl.bloodlineID,"
+                         " agt.quality,"
+                         " agt.corporationID,"
+                         " IFNULL(chr.gender, 0) AS gender,"
+                         " agt.isLocator AS isLocatorAgent"
+                         " FROM agtAgents AS agt"
                          " LEFT JOIN blkCharacterStatic AS chr ON chr.characterID = agt.agentID"
-        " LEFT JOIN blkBloodlineTypes AS bl ON bl.bloodlineID = agt.agentTypeID"
-    ))
+                         " LEFT JOIN blkBloodlineTypes AS bl ON bl.bloodlineID = agt.agentTypeID"
+                         ))
     {
         codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
         return NULL;
     }
 
-    return(DBResultToCRowset(res));
+    return (DBResultToCRowset(res));
+}
+
+PyDict *MissionDB::GetAgentsInSpace()
+{
+    DBQueryResult res;
+
+    if(!DBcore::RunQuery(res,
+                         "SELECT agentID, locationID FROM agtAgents WHERE locationID < 33000000"
+                         ))
+    {
+        codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
+        return NULL;
+    }
+
+    PyDict *dict = new PyDict();
+    DBResultRow row;
+    while(res.GetRow(row))
+    {
+        uint32 agentID = row.GetInt(0);
+        uint32 locationID = row.GetInt(1);
+        dict->SetItem(new PyInt(agentID), new PyInt(locationID));
+    }
+
+    return dict;
 }
 
 #ifdef NOT_DONE
