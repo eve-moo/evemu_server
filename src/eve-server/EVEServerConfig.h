@@ -111,14 +111,19 @@ public:
     /// From <net/>
     struct EVEConfigNet
     {
+        EVEConfigNet();
         /// Port at which the server should listen.
         uint16 port;
         /// The ip address or name this configuration is bound to.
         std::string serverBind;
-        /// Port at which the imageServer should listen.
+        /// Port to connect to the imageServer.
         uint16 imageServerPort;
-        /// the imageServer for char images. should be the evemu server external ip/host
+        /// The address for the imageServer client.
         std::string imageServer;
+        /// Port to connect to the crestServer.
+        uint16 crestServerPort;
+        /// The address for the crestServer client.
+        std::string crestServer;
     };
 
     /// From <net/>

@@ -467,18 +467,15 @@ SET( system_SOURCE
      "${TARGET_SOURCE_DIR}/system/SystemManager.cpp"
      "${TARGET_SOURCE_DIR}/system/WrecksAndLoot.cpp" )
 
-SET(services_lscproxy_INCLUDE
+SET(services_INCLUDE
         "${TARGET_INCLUDE_DIR}/services/lscProxy/LscProxyService.h"
-        )
-SET(services_lscproxy_SOURCE
-        "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
-        )
-
-SET(services_eventlog_INCLUDE
         "${TARGET_INCLUDE_DIR}/services/eventLog/EventLogService.h"
+        "${TARGET_INCLUDE_DIR}/services/crestAPI/CrestAPIService.h"
         )
-SET(services_eventlog_SOURCE
+SET(services_SOURCE
+        "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
         "${TARGET_SOURCE_DIR}/services/eventLog/EventLogService.cpp"
+        "${TARGET_SOURCE_DIR}/services/crestAPI/CrestAPIService.cpp"
         )
 
 ########################
@@ -510,8 +507,7 @@ SOURCE_GROUP( "src\\ship\\modules" FILES ${ship_modules_SOURCE} )
 SOURCE_GROUP( "src\\standing"      FILES ${standing_SOURCE} )
 SOURCE_GROUP( "src\\station"       FILES ${station_SOURCE} )
 SOURCE_GROUP( "src\\system"        FILES ${system_SOURCE} )
-SOURCE_GROUP( "src\\services\\lscProxy"        FILES ${services_lscproxy_SOURCE} )
-SOURCE_GROUP( "src\\services\\eventLog"        FILES ${services_eventlog_SOURCE} )
+SOURCE_GROUP( "src\\services"      FILES ${services_SOURCE} )
 
 ADD_EXECUTABLE( "${TARGET_NAME}"
         ${SOURCE}
@@ -540,8 +536,7 @@ ADD_EXECUTABLE( "${TARGET_NAME}"
         ${standing_SOURCE}
         ${station_SOURCE}
         ${system_SOURCE}
-        ${services_lscproxy_SOURCE}
-        ${services_eventlog_SOURCE}
+        ${services_SOURCE}
         )
 
 IF(PCH)

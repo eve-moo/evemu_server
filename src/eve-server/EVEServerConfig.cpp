@@ -287,7 +287,25 @@ bool EVEServerConfig::ProcessNet(const std::shared_ptr<XMLElement> ele)
         {
             _net.imageServer = value->getValue();
         }
+        if(value->getName() == "crestServerPort")
+        {
+            _net.crestServerPort = std::stoi(value->getValue());
+        }
+        if(value->getName() == "crestServer")
+        {
+            _net.crestServer = value->getValue();
+        }
     }
     networks.push_back(_net);
     return true;
+}
+
+EVEServerConfig::EVEConfigNet::EVEConfigNet()
+{
+    port = 26000;
+    serverBind = "localhost";
+    imageServerPort = 26001;
+    imageServer = "localhost";
+    crestServerPort = 0;
+    crestServer = "localhost";
 }

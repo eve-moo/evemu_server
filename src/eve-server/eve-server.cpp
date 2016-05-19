@@ -157,6 +157,7 @@ trapfpe()
 
 #include "services/lscProxy/LscProxyService.h"
 #include "services/eventLog/EventLogService.h"
+#include "services/crestAPI/CrestAPIService.h"
 // service manager
 #include "PyServiceMgr.h"
 
@@ -382,6 +383,7 @@ int main( int argc, char* argv[] )
 
     PyServiceMgr::RegisterService(new LSCProxyService());
     PyServiceMgr::RegisterService(new EventLogService());
+    PyServiceMgr::RegisterService(new CrestAPIService());
 
     SysLog::Log("Server Init", "Priming cached objects.");
     PyServiceMgr::cache_service->PrimeCache();

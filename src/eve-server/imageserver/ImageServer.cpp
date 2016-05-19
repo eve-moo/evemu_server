@@ -118,7 +118,7 @@ bool ImageServer::validateCategory(std::string& category)
     return false;
 }
 
-std::string ImageServer::getURL(EVEServerConfig::EVEConfigNet &network)
+std::string ImageServer::getURL(const EVEServerConfig::EVEConfigNet &network)
 {
     std::stringstream urlBuilder;
     urlBuilder << "http://" << network.imageServer << ":" << (network.imageServerPort) << "/";

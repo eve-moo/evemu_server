@@ -242,6 +242,8 @@ public:
     void DisconnectClient();
     void BanClient();
 
+    const EVEServerConfig::EVEConfigNet m_networkConfig;
+
 protected:
     void _ReduceDamage(Damage &d);
     void _UpdateSession( const CharacterConstRef& character );
@@ -317,8 +319,6 @@ protected:
     bool Handle_Notify( PyPacket* packet );
     bool Handle_PingReq( PyPacket* packet ) { _SendPingResponse( packet->dest, packet->source.callID ); return true; }
     bool Handle_PingRsp( PyPacket* packet ) { /* do nothing */ return true; }
-
-    EVEServerConfig::EVEConfigNet m_networkConfig;
 
 private:
     //queues for destiny updates:
