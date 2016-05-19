@@ -1121,12 +1121,21 @@ PyPackedRow *InventoryItem::getPackedRow()
 
 void InventoryItem::getPackedRow(PyPackedRow* into) const
 {
-    into->SetField("itemID", new PyLong(itemID()));
+    into->SetField("itemID", new PyLong(m_itemID));
     into->SetField("typeID", new PyInt(m_type->typeID));
     into->SetField("ownerID", new PyInt(m_ownerID));
     into->SetField("locationID", new PyLong(m_locationID));
     into->SetField("flagID", new PyInt(m_flag));
-    into->SetField("quantity", new PyInt(m_quantity));
+    uint32 qty = m_singleton ? -1 : m_quantity;
+    if(m_type->groupID == EVEDB::invCategories::Blueprint)
+    {
+        BlueprintRef bp = ItemFactory::GetBlueprint(m_itemID);
+        if(bp->copy())
+        {
+            qty = -2;
+        }
+    }
+    into->SetField("quantity", new PyInt(qty));
     into->SetField("groupID", new PyInt(m_type->groupID));
     into->SetField("categoryID", new PyInt(m_type->getCategoryID()));
     into->SetField("customInfo", new PyString(m_customInfo));
