@@ -111,6 +111,8 @@ private:
     PyCallable_DECL_CALL(CreateCharacterWithDoll)
 
        PyCallable_DECL_CALL(GetCharacterSelectionData)
+    PyCallable_DECL_CALL(GetCohortsForUser)
+    PyCallable_DECL_CALL(GetCohortsForCharacter)
 };
 
 #endif // __CHARUNBOUNDMGRSERVICE__H__INCL__

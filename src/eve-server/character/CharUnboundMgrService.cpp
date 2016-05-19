@@ -56,6 +56,8 @@ CharUnboundMgrService::CharUnboundMgrService()
     PyCallable_REG_CALL(CharUnboundMgrService, GetCharNewExtraCreationInfo)
     PyCallable_REG_CALL(CharUnboundMgrService, CreateCharacterWithDoll)
     PyCallable_REG_CALL(CharUnboundMgrService, GetCharacterSelectionData)
+    PyCallable_REG_CALL(CharUnboundMgrService, GetCohortsForUser)
+    PyCallable_REG_CALL(CharUnboundMgrService, GetCohortsForCharacter)
 }
 
 CharUnboundMgrService::~CharUnboundMgrService() {
@@ -593,3 +595,16 @@ Tuple: 3 elements
   [ 2]   [ 0]   Args:   [29] Key: String: 'petitionMessage'
   [ 2]   [ 0]   Args:   [29] Value: Integer field: 0
  */
+
+PyResult CharUnboundMgrService::Handle_GetCohortsForUser(PyCallArgs &call)
+{
+    // Find what this should contain.
+    return new PyList();
+}
+
+PyResult CharUnboundMgrService::Handle_GetCohortsForCharacter(PyCallArgs &call)
+{
+    // Find what this should contain.
+    return new PyList();
+}
+
