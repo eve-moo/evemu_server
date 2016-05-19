@@ -20,33 +20,39 @@
     Place - Suite 330, Boston, MA 02111-1307, USA, or go to
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
-    Author:        caytchen
+    Author:        Cometo
 */
 
-#ifndef __NOTIFICATIONMGRSERVICE__H__INCL__
-#define __NOTIFICATIONMGRSERVICE__H__INCL__
 
-#include "PyService.h"
+#include "eve-server.h"
+#include "EventLogService.h"
+#include "PyBoundObject.h"
+#include "PyServiceCD.h"
+#include "PyServiceMgr.h"
 
-class NotificationMgrService : public PyService {
-public:
-    NotificationMgrService();
-    virtual ~NotificationMgrService();
+PyCallable_Make_InnerDispatcher(EventLogService)
 
-private:
-    class Dispatcher;
-   
+EventLogService::EventLogService()
+        : PyService("eventLog", new Dispatcher(this))
+{
+    PyCallable_REG_CALL(EventLogService, LogClientStats)
+    PyCallable_REG_CALL(EventLogService, LogClientEvent)
 
-    PyCallable_DECL_CALL(GetByGroupID)
-    PyCallable_DECL_CALL(GetUnprocessed)
-    PyCallable_DECL_CALL(MarkGroupAsProcessed)
-    PyCallable_DECL_CALL(MarkAllAsProcessed)
-    PyCallable_DECL_CALL(MarkAsProcessed)
-    PyCallable_DECL_CALL(DeleteGroupNotifications)
-    PyCallable_DECL_CALL(DeleteAllNotifications)
-    PyCallable_DECL_CALL(DeleteNotifications)
-    PyCallable_DECL_CALL(GetAllNotifications)
+}
 
-};
+EventLogService::~EventLogService() {
+}
 
-#endif
+PyResult EventLogService::Handle_LogClientStats(PyCallArgs &call)
+{
+//    call.tuple->Dump(stdout, "EL:LCS: ");
+
+    return new PyNone();
+}
+
+PyResult EventLogService::Handle_LogClientEvent(PyCallArgs &call)
+{
+//    call.tuple->Dump(stdout, "EL:LCE: ");
+
+    return new PyNone();
+}

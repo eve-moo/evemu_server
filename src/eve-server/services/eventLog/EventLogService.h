@@ -20,32 +20,27 @@
     Place - Suite 330, Boston, MA 02111-1307, USA, or go to
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
-    Author:        caytchen
+    Author:        Cometo
 */
 
-#ifndef __NOTIFICATIONMGRSERVICE__H__INCL__
-#define __NOTIFICATIONMGRSERVICE__H__INCL__
+#ifndef __EVEMOO_SERVICES_EVENTLOG_H_INCL__
+#define __EVEMOO_SERVICES_EVENTLOG_H_INCL__
 
 #include "PyService.h"
 
-class NotificationMgrService : public PyService {
+class PyRep;
+
+class EventLogService: public PyService
+{
 public:
-    NotificationMgrService();
-    virtual ~NotificationMgrService();
+    EventLogService();
+    virtual ~EventLogService();
 
-private:
+    PyCallable_DECL_CALL(LogClientStats)
+    PyCallable_DECL_CALL(LogClientEvent)
+
+protected:
     class Dispatcher;
-   
-
-    PyCallable_DECL_CALL(GetByGroupID)
-    PyCallable_DECL_CALL(GetUnprocessed)
-    PyCallable_DECL_CALL(MarkGroupAsProcessed)
-    PyCallable_DECL_CALL(MarkAllAsProcessed)
-    PyCallable_DECL_CALL(MarkAsProcessed)
-    PyCallable_DECL_CALL(DeleteGroupNotifications)
-    PyCallable_DECL_CALL(DeleteAllNotifications)
-    PyCallable_DECL_CALL(DeleteNotifications)
-    PyCallable_DECL_CALL(GetAllNotifications)
 
 };
 

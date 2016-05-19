@@ -154,6 +154,9 @@ trapfpe()
 #include "system/KeeperService.h"
 #include "system/ScenarioService.h"
 #include "system/WrecksAndLoot.h"
+
+#include "services/lscProxy/LscProxyService.h"
+#include "services/eventLog/EventLogService.h"
 // service manager
 #include "PyServiceMgr.h"
 
@@ -376,6 +379,9 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new UserService());
     PyServiceMgr::RegisterService(new VoiceMgrService());
     PyServiceMgr::RegisterService(new WarRegistryService());
+
+    PyServiceMgr::RegisterService(new LSCProxyService());
+    PyServiceMgr::RegisterService(new EventLogService());
 
     SysLog::Log("Server Init", "Priming cached objects.");
     PyServiceMgr::cache_service->PrimeCache();

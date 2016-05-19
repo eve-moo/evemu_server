@@ -106,9 +106,11 @@ ${network_SOURCE}
 ${threading_SOURCE}
 ${utils_SOURCE} )
 
-TARGET_BUILD_PCH( "${TARGET_NAME}"
-                  "${TARGET_INCLUDE_DIR}/eve-core.h"
-                  "${TARGET_SOURCE_DIR}/eve-compat.cpp" )
+IF(PCH)
+    TARGET_BUILD_PCH( "${TARGET_NAME}"
+                      "${TARGET_INCLUDE_DIR}/eve-core.h"
+                      "${TARGET_SOURCE_DIR}/eve-compat.cpp" )
+ENDIF()
 TARGET_INCLUDE_DIRECTORIES( "${TARGET_NAME}"
                             ${Boost_INCLUDE_DIRS}
                             ${MYSQL_INCLUDE_DIRS}

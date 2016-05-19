@@ -74,9 +74,11 @@ ${blk_SOURCE}
 ${chr_SOURCE}
 )
 
-TARGET_BUILD_PCH( "${TARGET_NAME}"
-                  "${TARGET_INCLUDE_DIR}/eveStatic.h"
-                  "${TARGET_SOURCE_DIR}/eveStatic.cpp" )
+IF(PCH)
+    TARGET_BUILD_PCH( "${TARGET_NAME}"
+                      "${TARGET_INCLUDE_DIR}/eveStatic.h"
+                      "${TARGET_SOURCE_DIR}/eveStatic.cpp" )
+ENDIF()
 TARGET_INCLUDE_DIRECTORIES( "${TARGET_NAME}"
                             ${eve-common_INCLUDE_DIRS}
                             ${eve-core_INCLUDE_DIRS}

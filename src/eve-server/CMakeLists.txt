@@ -467,6 +467,20 @@ SET( system_SOURCE
      "${TARGET_SOURCE_DIR}/system/SystemManager.cpp"
      "${TARGET_SOURCE_DIR}/system/WrecksAndLoot.cpp" )
 
+SET(services_lscproxy_INCLUDE
+        "${TARGET_INCLUDE_DIR}/services/lscProxy/LscProxyService.h"
+        )
+SET(services_lscproxy_SOURCE
+        "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
+        )
+
+SET(services_eventlog_INCLUDE
+        "${TARGET_INCLUDE_DIR}/services/eventLog/EventLogService.h"
+        )
+SET(services_eventlog_SOURCE
+        "${TARGET_SOURCE_DIR}/services/eventLog/EventLogService.cpp"
+        )
+
 ########################
 # Setup the executable #
 ########################
@@ -496,38 +510,45 @@ SOURCE_GROUP( "src\\ship\\modules" FILES ${ship_modules_SOURCE} )
 SOURCE_GROUP( "src\\standing"      FILES ${standing_SOURCE} )
 SOURCE_GROUP( "src\\station"       FILES ${station_SOURCE} )
 SOURCE_GROUP( "src\\system"        FILES ${system_SOURCE} )
+SOURCE_GROUP( "src\\services\\lscProxy"        FILES ${services_lscproxy_SOURCE} )
+SOURCE_GROUP( "src\\services\\eventLog"        FILES ${services_eventlog_SOURCE} )
 
 ADD_EXECUTABLE( "${TARGET_NAME}"
-${SOURCE}
-${account_SOURCE}
-${admin_SOURCE}
-${cache_SOURCE}
-${character_SOURCE}
-${chat_SOURCE}
-${config_SOURCE}
-${corporation_SOURCE}
-${dogmaim_SOURCE}
-${fleet_SOURCE}
-${imageserver_SOURCE}
-${inventory_SOURCE}
-${mail_SOURCE}
-${manufacturing_SOURCE}
-${map_SOURCE}
-${market_SOURCE}
-${mining_SOURCE}
-${missions_SOURCE}
-${npc_SOURCE}
-${pos_SOURCE}
-${search_SOURCE}
-${ship_SOURCE}
-${ship_modules_SOURCE}
-${standing_SOURCE}
-${station_SOURCE}
-${system_SOURCE} )
+        ${SOURCE}
+        ${account_SOURCE}
+        ${admin_SOURCE}
+        ${cache_SOURCE}
+        ${character_SOURCE}
+        ${chat_SOURCE}
+        ${config_SOURCE}
+        ${corporation_SOURCE}
+        ${dogmaim_SOURCE}
+        ${fleet_SOURCE}
+        ${imageserver_SOURCE}
+        ${inventory_SOURCE}
+        ${mail_SOURCE}
+        ${manufacturing_SOURCE}
+        ${map_SOURCE}
+        ${market_SOURCE}
+        ${mining_SOURCE}
+        ${missions_SOURCE}
+        ${npc_SOURCE}
+        ${pos_SOURCE}
+        ${search_SOURCE}
+        ${ship_SOURCE}
+        ${ship_modules_SOURCE}
+        ${standing_SOURCE}
+        ${station_SOURCE}
+        ${system_SOURCE}
+        ${services_lscproxy_SOURCE}
+        ${services_eventlog_SOURCE}
+        )
 
-TARGET_BUILD_PCH( "${TARGET_NAME}"
-                  "${TARGET_INCLUDE_DIR}/eve-server.h"
-                  "${TARGET_SOURCE_DIR}/eve-server.cpp" )
+IF(PCH)
+	TARGET_BUILD_PCH( "${TARGET_NAME}"
+                      "${TARGET_INCLUDE_DIR}/eve-server.h"
+                      "${TARGET_SOURCE_DIR}/eve-server.cpp" )
+ENDIF()
 TARGET_INCLUDE_DIRECTORIES( "${TARGET_NAME}"
                             ${eve-common_INCLUDE_DIRS}
                             ${eve-static_INCLUDE_DIRS}

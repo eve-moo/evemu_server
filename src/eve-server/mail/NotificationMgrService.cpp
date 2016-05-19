@@ -41,6 +41,7 @@ NotificationMgrService::NotificationMgrService()
     PyCallable_REG_CALL(NotificationMgrService, DeleteGroupNotifications)
     PyCallable_REG_CALL(NotificationMgrService, DeleteAllNotifications)
     PyCallable_REG_CALL(NotificationMgrService, DeleteNotifications)
+    PyCallable_REG_CALL(NotificationMgrService, GetAllNotifications)
 }
 
 NotificationMgrService::~NotificationMgrService() {
@@ -119,4 +120,12 @@ PyResult NotificationMgrService::Handle_DeleteNotifications(PyCallArgs &call)
     }
     PyRep* notificationsIDs = args.arg;
     return NULL;
+}
+
+
+PyResult NotificationMgrService::Handle_GetAllNotifications(PyCallArgs &call)
+{
+    SysLog::Log("NotificationMgrService", "Called GetAllNotifications stub");
+
+    return new PyList(0);
 }
