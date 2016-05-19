@@ -1130,9 +1130,9 @@ void InventoryItem::getPackedRow(PyPackedRow* into) const
     if(m_type->groupID == EVEDB::invCategories::Blueprint)
     {
         BlueprintRef bp = ItemFactory::GetBlueprint(m_itemID);
-        if(bp->copy())
+        if(bp.get() != nullptr)
         {
-            qty = -2;
+            qty = bp->copy() ? -2 : qty;
         }
     }
     into->SetField("quantity", new PyInt(qty));
