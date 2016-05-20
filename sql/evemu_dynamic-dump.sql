@@ -935,4 +935,14 @@ insert  into `srvChannels`(`channelID`,`ownerID`,`displayName`,`motd`,`compariso
 (1000115,1000115,NULL,NULL,NULL,1,NULL,1,127,0,1,1,1252),
 (30001407,30001407,NULL,NULL,NULL,1,NULL,1,127,0,1,1,1252);
 
+DROP TABLE IF EXISTS `srvKillRights`;
+CREATE TABLE `srvKillRights` (
+  `killRightID` INT NOT NULL AUTO_INCREMENT,
+  `fromID` INT(10) NOT NULL DEFAULT '0',
+  `toID` INT(10) NOT NULL DEFAULT '0',
+  `expiryTime` BIGINT(20) NOT NULL DEFAULT '0',
+  `price` DOUBLE NOT NULL DEFAULT '0',
+  `restrictedTo` INT(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`killRightID`));
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

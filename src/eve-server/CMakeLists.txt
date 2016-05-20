@@ -471,11 +471,13 @@ SET(services_INCLUDE
         "${TARGET_INCLUDE_DIR}/services/lscProxy/LscProxyService.h"
         "${TARGET_INCLUDE_DIR}/services/eventLog/EventLogService.h"
         "${TARGET_INCLUDE_DIR}/services/crestAPI/CrestAPIService.h"
+        "${TARGET_INCLUDE_DIR}/services/bounty/BountyProxy.h"
         )
 SET(services_SOURCE
         "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
         "${TARGET_SOURCE_DIR}/services/eventLog/EventLogService.cpp"
         "${TARGET_SOURCE_DIR}/services/crestAPI/CrestAPIService.cpp"
+        "${TARGET_SOURCE_DIR}/services/bounty/BountyProxy.cpp"
         )
 
 ########################
