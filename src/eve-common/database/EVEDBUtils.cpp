@@ -589,3 +589,18 @@ PyTuple *DBResultToTupleKeyVal(DBQueryResult &result)
     }
     return rtn;
 }
+
+PyTuple * DBResultToTupleColumnList(const DBQueryResult &result)
+{
+    PyTuple *tupleList = new PyTuple(result.ColumnCount());
+
+    for(int i = 0; i < result.ColumnCount(); i++)
+    {
+        PyTuple* col = new PyTuple(2);
+        col->SetItem(0, new PyString(result.ColumnName(i)));
+        col->SetItem(1, new PyInt(result.ColumnType(i)));
+        tupleList->SetItem(i, col);
+    }
+
+    return tupleList;
+}

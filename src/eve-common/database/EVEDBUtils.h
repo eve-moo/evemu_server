@@ -81,6 +81,7 @@ PyTuple *DBResultToTupleKeyVal(DBQueryResult &result);
 void FillPackedRow(const DBResultRow& row, PyPackedRow* into);
 PyPackedRow* CreatePackedRow(const DBResultRow& row, DBRowDescriptor* header);
 
+PyTuple * DBResultToTupleColumnList(const DBQueryResult &result);
 
 #endif
 

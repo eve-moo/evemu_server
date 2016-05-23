@@ -126,7 +126,13 @@ public:
     /**
      * @param[in] rowDesc DBRowDescriptor header to be used.
      */
-    CRowSet( DBRowDescriptor** rowDesc );
+    CRowSet(DBRowDescriptor** rowDesc);
+    /**
+     * Create a CRowset with a combined DBRowDescriptor and tuple list of row descriptors.
+     * @param[in] rowDesc DBRowDescriptor header to be used.
+     * @param[in] columnList A tuple list of tuple descriptors.
+     */
+    CRowSet(DBRowDescriptor** rowDesc, PyTuple** columnList);
 
     /**
      * @return Row count.
@@ -147,7 +153,7 @@ public:
 
 protected:
     DBRowDescriptor* _GetRowDesc() const;
-    static PyDict* _CreateKeywords(DBRowDescriptor* rowDesc);
+    static PyDict* _CreateKeywords(PyRep* rowDesc);
 };
 
 /**

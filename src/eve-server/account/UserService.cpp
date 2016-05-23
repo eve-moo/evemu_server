@@ -41,13 +41,32 @@ UserService::UserService()
 UserService::~UserService() {
 }
 
-PyResult UserService::Handle_GetRedeemTokens( PyCallArgs& call )
+PyResult UserService::Handle_GetRedeemTokens( PyCallArgs& call)
 {
-    // takes no args
+    uint32 accountID = call.client->GetAccountID();
+    DBQueryResult res;
+    if(!DBcore::RunQuery(res, "SELECT"
+                         " tokenID,"
+                         " massTokenID,"
+                         " typeID,"
+                         " quantity,"
+                         " blueprintRuns,"
+                         " blueprintMaterialLevel,"
+                         " blueprintProductivityLevel,"
+                         " label,"
+                         " description,"
+                         " dateTime,"
+                         " expireDateTime,"
+                         " availableDateTime,"
+                         " stationID"
+                         " FROM srvRedeemTokens"
+                         " WHERE accountID = %u", accountID))
+    {
+        codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
+        return NULL;
+    }
 
-    SysLog::Debug( "UserService", "Called GetRedeemTokens stub." );
-
-    return new PyList;
+    return DBResultToCRowset(res);
 }
 
 PyResult UserService::Handle_GetCreateDate( PyCallArgs& call )

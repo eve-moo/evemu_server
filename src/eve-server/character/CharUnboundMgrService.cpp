@@ -438,6 +438,7 @@ PyResult CharUnboundMgrService::Handle_GetCharacterSelectionData(PyCallArgs &cal
 {
     uint32 accountID = call.client->GetAccountID();
 
+    // items are - userDetails, trainingDetails, characterDetails
     PyTuple *rtn = new PyTuple(3);
 
     // userDetails

@@ -945,4 +945,21 @@ CREATE TABLE `srvKillRights` (
   `restrictedTo` INT(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`killRightID`));
 
+CREATE TABLE `srvRedeemTokens` (
+  `accountID` INT(10) NOT NULL DEFAULT '0',
+  `tokenID` INT(10) NOT NULL DEFAULT '0',
+  `massTokenID` INT(10) NOT NULL DEFAULT '0',
+  `typeID` INT(10) NOT NULL DEFAULT '0',
+  `quantity` INT(10) NOT NULL DEFAULT '0',
+  `blueprintRuns` INT(10) NOT NULL DEFAULT '0',
+  `blueprintMaterialLevel` INT(10) NOT NULL DEFAULT '0',
+  `blueprintProductivityLevel` INT(10) NOT NULL DEFAULT '0',
+  `label` LONGTEXT NULL,
+  `description` LONGTEXT NULL,
+  `dateTime` INT(10) NOT NULL DEFAULT '0',
+  `expireDateTime` INT(10) NOT NULL DEFAULT '0',
+  `availableDateTime` INT(10) NOT NULL DEFAULT '0',
+  `stationID` INT(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`accountID`));
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

@@ -137,6 +137,13 @@ CRowSet::CRowSet( DBRowDescriptor** rowDesc)
     *rowDesc = NULL;
 }
 
+CRowSet::CRowSet(DBRowDescriptor** rowDesc, PyTuple** columnList)
+: PyObjectEx_Type2(new_tuple(new PyToken("carbon.common.script.sys.crowset.CRowset")), _CreateKeywords(new PyObjectEx(false, new_tuple(*rowDesc, *columnList))))
+{
+    *rowDesc = NULL;
+    *columnList = NULL;
+}
+
 PyPackedRow* CRowSet::NewRow()
 {
     DBRowDescriptor* rowDesc = _GetRowDesc();
@@ -156,7 +163,7 @@ DBRowDescriptor* CRowSet::_GetRowDesc() const
     return (DBRowDescriptor*)r->AsObjectEx();
 }
 
-PyDict* CRowSet::_CreateKeywords(DBRowDescriptor* rowDesc)
+PyDict* CRowSet::_CreateKeywords(PyRep* rowDesc)
 {
     assert( rowDesc );
 
