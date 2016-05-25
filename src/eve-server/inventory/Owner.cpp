@@ -21,7 +21,7 @@
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
     Author:        Bloody.Rabbit
-*/
+ */
 
 #include "eve-server.h"
 
@@ -29,74 +29,76 @@
 #include "inventory/Owner.h"
 
 Owner::Owner(
-    uint32 _ownerID,
-    // InventoryItem stuff:
+             uint32 _ownerID,
+             // InventoryItem stuff:
              const InvTypeRef _type,
-    const ItemData &_data)
-: InventoryItem( _ownerID, _type, _data )
-{
-}
+             const ItemData &_data)
+: InventoryItem(_ownerID, _type, _data) { }
 
 OwnerRef Owner::Load(uint32 ownerID)
 {
-    return InventoryItem::Load<Owner>( ownerID );
+    return InventoryItem::Load<Owner>(ownerID);
 }
 
 template<class _Ty>
 RefPtr<_Ty> Owner::_LoadOwner(uint32 ownerID,
-    // InventoryItem stuff:
+                              // InventoryItem stuff:
                               const InvTypeRef type, const ItemData &data)
 {
     // decide what to do next:
-    switch (type->groupID)
+    switch(type->groupID)
     {
-        ///////////////////////////////////////
-        // Character:
-        ///////////////////////////////////////
-        case EVEDB::invGroups::Character: {
+            ///////////////////////////////////////
+            // Character:
+            ///////////////////////////////////////
+        case EVEDB::invGroups::Character:
+        {
             // create character
-            return Character::_LoadOwner<Character>( ownerID, type, data );
+            return Character::_LoadOwner<Character>(ownerID, type, data);
         }
     }
 
     // fallback to default:
-    return OwnerRef( new Owner( ownerID, type, data ) );
+    return OwnerRef(new Owner(ownerID, type, data));
 }
 
 OwnerRef Owner::Spawn(ItemData &data)
 {
     // obtain type of new item
     const InvTypeRef t = InvType::getType(data.typeID);
-    if (t.get() == nullptr)
+    if(t.get() == nullptr)
     {
         return OwnerRef();
     }
 
-    switch( t->groupID )
+    switch(t->groupID)
     {
-        ///////////////////////////////////////
-        // Character:
-        ///////////////////////////////////////
-        case EVEDB::invGroups::Character: {
+            ///////////////////////////////////////
+            // Character:
+            ///////////////////////////////////////
+        case EVEDB::invGroups::Character:
+        {
             // we're not gonna create character from default attributes ...
-            _log( ITEM__ERROR, "Refusing to create character '%s' from default attributes.", data.name.c_str() );
+            _log(ITEM__ERROR, "Refusing to create character '%s' from default attributes.", data.name.c_str());
 
             return OwnerRef();
         }
     }
 
     // fallback to default:
-    uint32 ownerID = Owner::_Spawn( data );
-    if( ownerID == 0 )
+    uint32 ownerID = Owner::_Spawn(data);
+    if(ownerID == 0)
+    {
         return OwnerRef();
-    return Owner::Load( ownerID );
+    }
+    return Owner::Load(ownerID);
 }
 
 uint32 Owner::_Spawn(
-    // InventoryItem stuff:
-    ItemData &data )
+                     // InventoryItem stuff:
+                     ItemData &data)
 {
     // no additional stuff
-    return InventoryItem::_Spawn( data );
+    return InventoryItem::_Spawn(data);
 }
 

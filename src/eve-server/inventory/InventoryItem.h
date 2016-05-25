@@ -75,7 +75,8 @@ public:
     bool            singleton;
     uint32          quantity;
     Vector3D          position;
-    std::string     customInfo;
+    std::string customInfo;
+    std::map<uint32, EvilNumber> attributes;
 };
 
 /**
@@ -331,12 +332,16 @@ protected:
     {
         // static load
         RefPtr<_Ty> i = _Ty::template _Load<_Ty>( itemID );
-        if( !i )
+        if(!i)
+        {
             return RefPtr<_Ty>();
+        }
 
         // dynamic load
-        if( !i->_Load() )
+        if(!i->loadState())
+        {
             return RefPtr<_Ty>();
+        }
 
         return i;
     }
@@ -347,8 +352,10 @@ protected:
     {
         // pull the item info
         ItemData data;
-        if( !InventoryDB::GetItem( itemID, data ) )
+        if(!InventoryDB::GetItem(itemID, data))
+        {
             return RefPtr<_Ty>();
+        }
 
         // obtain type
         const InvTypeRef type = InvType::getType(data.typeID);
@@ -367,19 +374,9 @@ protected:
                                  const InvTypeRef type, const ItemData &data
     );
 
-    virtual bool _Load();
+    virtual bool loadState();
 
-	static InventoryItemRef LoadEntity(uint32 itemID, const ItemData &data);
-
-    static uint32 _Spawn(
-        // InventoryItem stuff:
-        ItemData &data
-    );
-
-	static uint32 _SpawnEntity(
-		// InventoryItem stuff:
-		ItemData &data
-	);
+    static uint32 _Spawn(ItemData &data);
 
     void SetOnline(bool online);
 

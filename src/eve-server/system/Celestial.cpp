@@ -93,15 +93,40 @@ RefPtr<_Ty> CelestialObject::_LoadCelestialObject(uint32 celestialID,
         ///////////////////////////////////////
         // Solar system:
         ///////////////////////////////////////
-        case EVEDB::invGroups::Solar_System: {
-            return SolarSystem::_LoadCelestialObject<SolarSystem>( celestialID, type, data, cData );
+        case EVEDB::invGroups::Solar_System:
+        {
+            // load solar system data
+            SolarSystemData ssData;
+            if(!InventoryDB::GetSolarSystem(celestialID, ssData))
+            {
+                return RefPtr<_Ty>();
+            }
+
+            // get sun type
+            const InvTypeRef sunType = InvType::getType(ssData.sunTypeID);
+            if(sunType.get() == nullptr)
+            {
+                return RefPtr<_Ty>();
+            }
+
+            // we have it all
+            return SolarSystemRef(new SolarSystem(celestialID, type, data, cData, sunType, ssData));
         }
 
         ///////////////////////////////////////
         // Station:
         ///////////////////////////////////////
-        case EVEDB::invGroups::Station: {
-            return Station::_LoadCelestialObject<Station>( celestialID, type, data, cData );
+        case EVEDB::invGroups::Station:
+        {
+            // load station data
+            StationData stData;
+            if(!InventoryDB::GetStation(celestialID, stData))
+            {
+                return RefPtr<_Ty>();
+            }
+
+            // ready to create
+            return StationRef(new Station(celestialID, type, data, cData, stData));
         }
     }
 
@@ -109,13 +134,24 @@ RefPtr<_Ty> CelestialObject::_LoadCelestialObject(uint32 celestialID,
     return CelestialObjectRef( new CelestialObject( celestialID, type, data, cData ) );
 }
 
-CelestialObjectRef CelestialObject::Spawn(
-    // InventoryItem stuff:
-    ItemData &data
-) {
-    uint32 celestialID = CelestialObject::_Spawn( data );
-    if( celestialID == 0 )
+CelestialObjectRef CelestialObject::Spawn(ItemData &data)
+{
+    InvTypeRef type = InvType::getType(data.typeID);
+    // Create default dynamic attributes in the AttributeMap:
+    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+    data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+    data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
+    data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
+    data.attributes[AttrMass] = type->mass; // Mass
+    data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
+    data.attributes[AttrVolume] = type->volume; // Volume
+    data.attributes[AttrCapacity] = type->capacity; // Capacity
+
+    uint32 celestialID = CelestialObject::_Spawn(data);
+    if(celestialID == 0)
+    {
         return CelestialObjectRef();
+    }
     return CelestialObject::Load( celestialID );
 }
 
@@ -136,8 +172,6 @@ uint32 CelestialObject::_Spawn(
     {
         return 0;
     }
-
-    // nothing additional
 
     return celestialID;
 }

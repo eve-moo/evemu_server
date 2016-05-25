@@ -46,10 +46,13 @@ public:
 
     virtual uint32 inventoryID() const = 0;
 
-    /*
+/*
      * Contents management:
      */
-    bool ContentsLoaded() const { return mContentsLoaded; }
+    bool ContentsLoaded() const
+    {
+        return mContentsLoaded;
+    }
     bool LoadContents();
     void DeleteContents();
 

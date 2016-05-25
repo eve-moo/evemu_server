@@ -84,24 +84,26 @@ StationRef Station::Load(uint32 stationID)
 
 template<class _Ty>
 RefPtr<_Ty> Station::_LoadStation(uint32 stationID,
-    // InventoryItem stuff:
+                                  // InventoryItem stuff:
                                   const InvTypeRef type, const ItemData &data,
-    // CelestialObject stuff:
-    const CelestialObjectData &cData,
-    // Station stuff:
-    const StationData &stData)
+                                  // CelestialObject stuff:
+                                  const CelestialObjectData &cData,
+                                  // Station stuff:
+                                  const StationData &stData)
 {
     // ready to create
-    return StationRef( new Station( stationID, type, data, cData, stData ) );
+    return StationRef(new Station(stationID, type, data, cData, stData));
 }
 
-bool Station::_Load()
+bool Station::loadState()
 {
     // load contents
-    if( !LoadContents() )
+    if(!LoadContents())
+    {
         return false;
+    }
 
-    return CelestialObject::_Load();
+    return CelestialObject::loadState();
 }
 
 uint32 Station::_Spawn(
@@ -117,10 +119,10 @@ uint32 Station::_Spawn(
 
     // store item data
     uint32 stationID = InventoryItem::_Spawn(data);
-    if( stationID == 0 )
+    if(stationID == 0)
+    {
         return 0;
-
-    // nothing additional
+    }
 
     return stationID;
 }

@@ -45,40 +45,36 @@ CargoContainerRef CargoContainer::Load(uint32 containerID)
     return InventoryItem::Load<CargoContainer>( containerID );
 }
 
-template<class _Ty>
-RefPtr<_Ty> CargoContainer::_LoadCargoContainer(uint32 containerID,
-    // InventoryItem stuff:
-                                                const InvTypeRef itemType, const ItemData &data)
+CargoContainerRef CargoContainer::Spawn(ItemData &data)
 {
-    // we don't need any additional stuff
-    return CargoContainerRef( new CargoContainer( containerID, itemType, data ) );
-}
-
-CargoContainerRef CargoContainer::Spawn(
-    // InventoryItem stuff:
-    ItemData &data
-) {
-    uint32 containerID = CargoContainer::_Spawn( data );
-    if( containerID == 0 )
-        return CargoContainerRef();
-    CargoContainerRef containerRef = CargoContainer::Load( containerID );
-
+    InvTypeRef type = InvType::getType(data.typeID);
     // Create default dynamic attributes in the AttributeMap:
-    containerRef->setAttribute(AttrRadius, containerRef->type()->getDoubleAttribute(AttrRadius), true); // Radius
+    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+    data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+    //data.attributes[AttrShieldCharge,  type->getAttribute(AttrShieldCapacity));  // Shield Charge
+    //data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
+    data.attributes[AttrMass] = type->mass; // Mass
+    data.attributes[AttrVolume] = type->volume; // Volume
+    data.attributes[AttrCapacity] = type->capacity; // Capacity
+    data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
+    data.attributes[AttrDamage] = EvilNumber(0);
 
-    // Check for existence of some attributes that may or may not have already been loaded and set them
-    // to default values:
-	// Hull Damage
-	if( !(containerRef->hasAttribute(AttrDamage)) )
-        containerRef->setAttribute(AttrDamage, 0, true );
+    // Set type attributes
+    for(auto attr : type->m_attributes)
+    {
+        data.attributes[attr.first] = attr.second;
+    }
 
-	return containerRef;
+    uint32 containerID = CargoContainer::_Spawn(data);
+    if(containerID == 0)
+    {
+        return CargoContainerRef();
+    }
+    return CargoContainer::Load(containerID);
 }
 
-uint32 CargoContainer::_Spawn(
-    // InventoryItem stuff:
-    ItemData &data
-) {
+uint32 CargoContainer::_Spawn(ItemData &data)
+{
     // make sure it's a cargo container
     const InvTypeRef st = InvType::getType(data.typeID);
     if (st.get() == nullptr)
@@ -89,20 +85,24 @@ uint32 CargoContainer::_Spawn(
     // store item data
     uint32 containerID = InventoryItem::_Spawn(data);
     if(containerID == 0)
+    {
         return 0;
+    }
 
     // nothing additional
 
     return containerID;
 }
 
-bool CargoContainer::_Load()
+bool CargoContainer::loadState()
 {
     // load contents
-    if( !LoadContents(  ) )
+    if(!LoadContents())
+    {
         return false;
+    }
 
-    return InventoryItem::_Load();
+    return InventoryItem::loadState();
 }
 
 void CargoContainer::Delete()
@@ -143,26 +143,6 @@ bool CargoContainer::ValidateAddItem(EVEItemFlags flag, InventoryItemRef item) c
         return true;
     }
     return false;
-}
-
-PyObject *CargoContainer::CargoContainerGetInfo()
-{
-    if( !LoadContents(  ) )
-    {
-        codelog( ITEM__ERROR, "%s (%u): Failed to load contents for CargoContainerGetInfo", itemName().c_str(), itemID() );
-        return NULL;
-    }
-
-    Rsp_CommonGetInfo result;
-    Rsp_CommonGetInfo_Entry entry;
-
-    //first populate the CargoContainer.
-    if( !Populate( entry ) )
-        return NULL;    //print already done.
-
-    result.items[ itemID() ] = entry.Encode();
-
-    return result.Encode();
 }
 
 void CargoContainer::AddItem(InventoryItemRef item)

@@ -72,12 +72,6 @@ public:
      */
     const InvTypeRef     type() const { return static_cast<const InvTypeRef >(InventoryItem::type()); }
 
-    /*
-     * Primary public packet builders:
-     */
-    PyObject *StructureGetInfo();
-
-
 protected:
     Structure(
         uint32 _structureID,
@@ -89,8 +83,6 @@ protected:
     /*
      * Member functions
      */
-    using InventoryItem::_Load;
-
     // Template loader:
     template<class _Ty>
     static RefPtr<_Ty> _LoadItem(uint32 structureID,
@@ -103,22 +95,12 @@ protected:
             _log(ITEM__ERROR, "Trying to load %s as Structure.", type->getCategory()->categoryName.c_str());
             return RefPtr<_Ty>();
         }
-        //// cast the type
-        //const InvTypeRef itemType = static_cast<const InvTypeRef >( type );
 
-        // no additional stuff
-
-        return _Ty::template _LoadStructure<_Ty>( structureID, type, data );
+        // we don't need any additional stuff
+        return StructureRef(new Structure(structureID, type, data));
     }
 
-    // Actual loading stuff:
-    template<class _Ty>
-    static RefPtr<_Ty> _LoadStructure(uint32 structureID,
-        // InventoryItem stuff:
-        const InvTypeRef itemType, const ItemData &data
-    );
-
-    bool _Load();
+    virtual bool loadState();
 
     static uint32 _Spawn(
         // InventoryItem stuff:

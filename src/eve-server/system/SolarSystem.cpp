@@ -108,20 +108,15 @@ SolarSystemRef SolarSystem::Load(uint32 solarSystemID)
 
 template<class _Ty>
 RefPtr<_Ty> SolarSystem::_LoadSolarSystem(uint32 solarSystemID,
-    // InventoryItem stuff:
-    const InvTypeRef type, const ItemData &data,
-    // CelestialObject stuff:
-    const CelestialObjectData &cData,
-    // SolarSystem stuff:
-    const InvTypeRef sunType, const SolarSystemData &ssData)
+                                          // InventoryItem stuff:
+                                          const InvTypeRef type, const ItemData &data,
+                                          // CelestialObject stuff:
+                                          const CelestialObjectData &cData,
+                                          // SolarSystem stuff:
+                                          const InvTypeRef sunType, const SolarSystemData &ssData)
 {
     // we have it all
-    return SolarSystemRef( new SolarSystem( solarSystemID, type, data, cData, sunType, ssData ) );
-}
-
-bool SolarSystem::_Load()
-{
-    return CelestialObject::_Load();
+    return SolarSystemRef(new SolarSystem(solarSystemID, type, data, cData, sunType, ssData));
 }
 
 void SolarSystem::AddItemToInventory(InventoryItemRef item)

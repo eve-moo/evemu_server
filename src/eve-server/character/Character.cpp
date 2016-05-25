@@ -295,17 +295,6 @@ CharacterRef Character::Load(uint32 characterID)
     return InventoryItem::Load<Character>( characterID );
 }
 
-template<class _Ty>
-RefPtr<_Ty> Character::_LoadCharacter(uint32 characterID,
-    // InventoryItem stuff:
-                                      const InvTypeRef charType, const ItemData &data,
-    // Character stuff:
-    const CharacterData &charData, const CorpMemberInfo &corpData)
-{
-    // construct the item
-    return CharacterRef( new Character( characterID, charType, data, charData, corpData ) );
-}
-
 CharacterRef Character::Spawn(
     // InventoryItem stuff:
     ItemData &data,
@@ -337,7 +326,8 @@ uint32 Character::_Spawn(
     }
 
     // make sure it's a singleton with qty 1
-    if(!data.singleton || data.quantity != 1) {
+    if(!data.singleton || data.quantity != 1)
+    {
         _log(ITEM__ERROR, "Tried to create non-singleton character %s.", data.name.c_str());
         return 0;
     }
@@ -345,7 +335,9 @@ uint32 Character::_Spawn(
     // first the item
     uint32 characterID = Owner::_Spawn(data);
     if(characterID == 0)
+    {
         return 0;
+    }
 
     // then character
     if(!InventoryDB::NewCharacter(characterID, charData, corpData)) {
@@ -358,7 +350,7 @@ uint32 Character::_Spawn(
     return characterID;
 }
 
-bool Character::_Load()
+bool Character::loadState()
 {
 	bool bLoadSuccessful = false;
 
@@ -392,16 +384,20 @@ bool Character::_Load()
     }
     updateSkillQueueTimes();
 
-    bLoadSuccessful = Owner::_Load();
+    bLoadSuccessful = Owner::loadState();
 
 	// Update Skill Queue and Total Skill Points Trained:
-	if( bLoadSuccessful)
+    if(bLoadSuccessful)
+    {
         updateSkillQueue();
+    }
     // OLD //// Calculate total SP trained and store in internal variable:
     // OLD //_CalculateTotalSPTrained();
 
-    if( !InventoryDB::LoadCertificates( itemID(), m_certificates ) )
+    if(!InventoryDB::LoadCertificates(itemID(), m_certificates))
+    {
         return false;
+    }
 
 	return bLoadSuccessful;
 }
@@ -1050,7 +1046,8 @@ PyTuple *Character::CharGetInfo()
 {
     //TODO: verify that we are a char?
 
-    if( !LoadContents( ) ) {
+    if(!LoadContents())
+    {
         codelog(ITEM__ERROR, "%s (%u): Failed to load contents for CharGetInfo", m_itemName.c_str(), m_itemID);
         return NULL;
     }

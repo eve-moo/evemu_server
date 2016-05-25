@@ -112,8 +112,6 @@ protected:
     /*
      * Member functions
      */
-    using InventoryItem::_Load;
-
     // Template loader:
     template<class _Ty>
     static RefPtr<_Ty> _LoadItem(uint32 skillID,
@@ -127,17 +125,8 @@ protected:
             return RefPtr<_Ty>();
         }
 
-        // no additional stuff
-
-        return _Ty::template _LoadSkill<_Ty>( skillID, type, data );
+        return SkillRef(new Skill(skillID, type, data));
     }
-
-    // Actual loading stuff:
-    template<class _Ty>
-    static RefPtr<_Ty> _LoadSkill(uint32 skillID,
-        // InventoryItem stuff:
-                                  const InvTypeRef type, const ItemData &data
-    );
 
     static uint32 _Spawn(
         // InventoryItem stuff:

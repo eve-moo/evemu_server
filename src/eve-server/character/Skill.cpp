@@ -49,26 +49,18 @@ SkillRef Skill::Load(uint32 skillID)
     return InventoryItem::Load<Skill>( skillID );
 }
 
-template<class _Ty>
-RefPtr<_Ty> Skill::_LoadSkill(uint32 skillID,
-    // InventoryItem stuff:
-                              const InvTypeRef type, const ItemData &data)
-{
-    return SkillRef( new Skill( skillID, type, data ) );
-}
-
 SkillRef Skill::Spawn(ItemData &data)
 {
-    uint32 skillID = _Spawn( data );
-    if( skillID == 0 )
+    data.attributes[AttrIsOnline] = EvilNumber((int) 1);
+    data.attributes[AttrSkillPoints] = EvilNumber((int) 0);
+    data.attributes[AttrSkillLevel] = EvilNumber((int) 0);
+    uint32 skillID = _Spawn(data);
+    if(skillID == 0)
+    {
         return SkillRef();
+    }
 
-    SkillRef skillRef = Skill::Load( skillID );
-
-    skillRef->setAttribute(AttrIsOnline, 1);      // Is Online
-	skillRef->SaveItem();
-
-    return skillRef;
+    return Skill::Load(skillID);
 }
 
 uint32 Skill::_Spawn(ItemData &data)
@@ -86,7 +78,6 @@ uint32 Skill::_Spawn(ItemData &data)
         return 0;
     }
 
-    // spawn item, nothing else
     return InventoryItem::_Spawn( data );
 }
 

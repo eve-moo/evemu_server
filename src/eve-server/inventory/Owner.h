@@ -21,7 +21,7 @@
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
     Author:        Bloody.Rabbit
-*/
+ */
 
 #ifndef __OWNER__H__INCL__
 #define __OWNER__H__INCL__
@@ -53,24 +53,23 @@ public:
 
 protected:
     Owner(
-        uint32 _ownerID,
-        // InventoryItem stuff:
+          uint32 _ownerID,
+          // InventoryItem stuff:
           const InvTypeRef _type,
-        const ItemData &_data);
+          const ItemData &_data);
 
     /*
      * Member functions
      */
-    using InventoryItem::_Load;
-
     // Template loader:
+
     template<class _Ty>
     static RefPtr<_Ty> _LoadItem(uint32 ownerID,
-        // InventoryItem stuff:
+                                 // InventoryItem stuff:
                                  const InvTypeRef type, const ItemData &data)
     {
         // check it's an owner
-        if (type->getCategoryID() != EVEDB::invCategories::Owner)
+        if(type->getCategoryID() != EVEDB::invCategories::Owner)
         {
             SysLog::Error("Owner", "Trying to load %s as Owner.", type->getCategory()->categoryName.c_str());
             return RefPtr<_Ty>();
@@ -78,23 +77,23 @@ protected:
 
         // no additional stuff
 
-        return _Ty::template _LoadOwner<_Ty>( ownerID, type, data );
+        return _Ty::template _LoadOwner<_Ty>(ownerID, type, data);
     }
 
     // Actual loading stuff:
     template<class _Ty>
     static RefPtr<_Ty> _LoadOwner(
 
-        uint32 ownerID,
-        // InventoryItem stuff:
+                                  uint32 ownerID,
+                                  // InventoryItem stuff:
                                   const InvTypeRef type,
-        const ItemData &data
-    );
+                                  const ItemData &data
+                                  );
 
     static uint32 _Spawn(
-        // InventoryItem stuff:
-        ItemData &data
-    );
+                         // InventoryItem stuff:
+                         ItemData &data
+                         );
 };
 
 #endif /* !__OWNER__H__INCL__ */

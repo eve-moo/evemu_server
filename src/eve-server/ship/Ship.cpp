@@ -58,109 +58,83 @@ ShipRef Ship::Load(uint32 shipID)
     return InventoryItem::Load<Ship>( shipID );
 }
 
-template<class _Ty>
-RefPtr<_Ty> Ship::_LoadShip(uint32 shipID,
-    // InventoryItem stuff:
-                            const InvTypeRef shipType, const ItemData &data)
+ShipRef Ship::Spawn(ItemData &data)
 {
-    // we don't need any additional stuff
-    return ShipRef( new Ship(shipID, shipType, data ) );
-}
+    InvTypeRef type = InvType::getType(data.typeID);
+    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+    data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
+    data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
+    data.attributes[AttrMass] = type->mass; // Mass
+    data.attributes[AttrRadius] = type->getDoubleAttribute(AttrRadius); // Radius
+    data.attributes[AttrVolume] = type->volume; // Volume
+    data.attributes[AttrCapacity] = type->capacity; // Capacity
+    data.attributes[AttrInertia] = EvilNumber(1); // Inertia
+    data.attributes[AttrCharge] = type->getAttribute(AttrCapacitorCapacity); // Set Capacitor Charge to the Capacitor Capacity
+    // Hull Damage
+    data.attributes[AttrDamage] = EvilNumber(0);
+    // Theoretical Maximum Targeting Range
+    data.attributes[AttrMaximumRangeCap] = EvilNumber(((double) BUBBLE_RADIUS_METERS));
+    // Maximum Armor Damage Resonance
+    data.attributes[AttrArmorMaxDamageResonance] = EvilNumber(1.0f);
+    // Maximum Shield Damage Resonance
+    data.attributes[AttrShieldMaxDamageResonance] = EvilNumber(1.0f);
+    // Warp Speed Multiplier
+    data.attributes[AttrWarpSpeedMultiplier] = EvilNumber(1.0f);
+    // CPU Load of the ship (new ships have zero load with no modules fitted, of course):
+    data.attributes[AttrCpuLoad] = EvilNumber(0);
+    // Power Load of the ship (new ships have zero load with no modules fitted, of course):
+    data.attributes[AttrPowerLoad] = EvilNumber(0);
+    // Warp Scramble Status of the ship (most ships have zero warp scramble status, but some already have it defined):
+    data.attributes[AttrWarpScrambleStatus] = EvilNumber(0.0);
 
-ShipRef Ship::Spawn(ItemData &data) {
-    uint32 shipID = Ship::_Spawn( data );
-    if( shipID == 0 )
+    // Shield Resonance
+    // AttrShieldEmDamageResonance
+    data.attributes[AttrShieldEmDamageResonance] = EvilNumber(1.0);
+    // AttrShieldExplosiveDamageResonance
+    data.attributes[AttrShieldExplosiveDamageResonance] = EvilNumber(1.0);
+    // AttrShieldKineticDamageResonance
+    data.attributes[AttrShieldKineticDamageResonance] = EvilNumber(1.0);
+    // AttrShieldThermalDamageResonance
+    data.attributes[AttrShieldThermalDamageResonance] = EvilNumber(1.0);
+
+    // Armor Resonance
+    // AttrArmorEmDamageResonance
+    data.attributes[AttrArmorEmDamageResonance] = EvilNumber(1.0);
+    // AttrArmorExplosiveDamageResonance
+    data.attributes[AttrArmorExplosiveDamageResonance] = EvilNumber(1.0);
+    // AttrArmorKineticDamageResonance
+    data.attributes[AttrArmorKineticDamageResonance] = EvilNumber(1.0);
+    // AttrArmorThermalDamageResonance
+    data.attributes[AttrArmorThermalDamageResonance] = EvilNumber(1.0);
+
+    // Hull Resonance
+    // AttrHullEmDamageResonance
+    data.attributes[AttrHullEmDamageResonance] = EvilNumber(1.0);
+    // AttrHullExplosiveDamageResonance
+    data.attributes[AttrHullExplosiveDamageResonance] = EvilNumber(1.0);
+    // AttrHullKineticDamageResonance
+    data.attributes[AttrHullKineticDamageResonance] = EvilNumber(1.0);
+    // AttrHullThermalDamageResonance
+    data.attributes[AttrHullThermalDamageResonance] = EvilNumber(1.0);
+
+    // AttrTurretSlotsLeft
+    data.attributes[AttrTurretSlotsLeft] = EvilNumber(0);
+    // AttrLauncherSlotsLeft
+    data.attributes[AttrLauncherSlotsLeft] = EvilNumber(0);
+
+    // Set type attributes
+    for(auto attr : type->m_attributes)
+    {
+        data.attributes[attr.first] = attr.second;
+    }
+
+    uint32 shipID = Ship::_Spawn(data);
+    if(shipID == 0)
+    {
         return ShipRef();
+    }
 
     ShipRef sShipRef = Ship::Load( shipID );
-
-    // Create default dynamic attributes in the AttributeMap:
-    sShipRef->setAttribute(AttrIsOnline, 1, true); // Is Online
-    sShipRef->setAttribute(AttrShieldCharge, sShipRef->getAttribute(AttrShieldCapacity), true); // Shield Charge
-    sShipRef->setAttribute(AttrArmorDamage, 0.0, true); // Armor Damage
-    sShipRef->setAttribute(AttrMass, sShipRef->type()->mass, true); // Mass
-    sShipRef->setAttribute(AttrRadius, sShipRef->type()->getDoubleAttribute(AttrRadius), true); // Radius
-    sShipRef->setAttribute(AttrVolume, sShipRef->type()->volume, true); // Volume
-    sShipRef->setAttribute(AttrCapacity, sShipRef->type()->capacity, true); // Capacity
-    sShipRef->setAttribute(AttrInertia, 1, true); // Inertia
-    sShipRef->setAttribute(AttrCharge, sShipRef->getAttribute(AttrCapacitorCapacity), true); // Set Capacitor Charge to the Capacitor Capacity
-
-    // Check for existence of some attributes that may or may not have already been loaded and set them
-    // to default values:
-	// Hull Damage
-    if (!(sShipRef->hasAttribute(AttrDamage)))
-        sShipRef->setAttribute(AttrDamage, 0, true);
-    // Theoretical Maximum Targeting Range
-    if (!(sShipRef->hasAttribute(AttrMaximumRangeCap)))
-        sShipRef->setAttribute(AttrMaximumRangeCap, ((double) BUBBLE_RADIUS_METERS), true);
-    // Maximum Armor Damage Resonance
-    if (!(sShipRef->hasAttribute(AttrArmorMaxDamageResonance)))
-        sShipRef->setAttribute(AttrArmorMaxDamageResonance, 1.0f, true);
-    // Maximum Shield Damage Resonance
-    if (!(sShipRef->hasAttribute(AttrShieldMaxDamageResonance)))
-        sShipRef->setAttribute(AttrShieldMaxDamageResonance, 1.0f, true);
-    // Warp Speed Multiplier
-    if (!(sShipRef.get()->hasAttribute(AttrWarpSpeedMultiplier)))
-        sShipRef.get()->setAttribute(AttrWarpSpeedMultiplier, 1.0f, true);
-    // CPU Load of the ship (new ships have zero load with no modules fitted, of course):
-    if (!(sShipRef.get()->hasAttribute(AttrCpuLoad)))
-        sShipRef.get()->setAttribute(AttrCpuLoad, 0, true);
-    // Power Load of the ship (new ships have zero load with no modules fitted, of course):
-    if (!(sShipRef.get()->hasAttribute(AttrPowerLoad)))
-        sShipRef.get()->setAttribute(AttrPowerLoad, 0, true);
-	// Warp Scramble Status of the ship (most ships have zero warp scramble status, but some already have it defined):
-    if (!(sShipRef.get()->hasAttribute(AttrWarpScrambleStatus)))
-        sShipRef.get()->setAttribute(AttrWarpScrambleStatus, 0.0, true);
-
-	// Shield Resonance
-	// AttrShieldEmDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrShieldEmDamageResonance)))
-        sShipRef.get()->setAttribute(AttrShieldEmDamageResonance, 1.0, true);
-	// AttrShieldExplosiveDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrShieldExplosiveDamageResonance)))
-        sShipRef.get()->setAttribute(AttrShieldExplosiveDamageResonance, 1.0, true);
-	// AttrShieldKineticDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrShieldKineticDamageResonance)))
-        sShipRef.get()->setAttribute(AttrShieldKineticDamageResonance, 1.0, true);
-	// AttrShieldThermalDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrShieldThermalDamageResonance)))
-        sShipRef.get()->setAttribute(AttrShieldThermalDamageResonance, 1.0, true);
-
-	// Armor Resonance
-	// AttrArmorEmDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrArmorEmDamageResonance)))
-        sShipRef.get()->setAttribute(AttrArmorEmDamageResonance, 1.0, true);
-	// AttrArmorExplosiveDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrArmorExplosiveDamageResonance)))
-        sShipRef.get()->setAttribute(AttrArmorExplosiveDamageResonance, 1.0, true);
-	// AttrArmorKineticDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrArmorKineticDamageResonance)))
-        sShipRef.get()->setAttribute(AttrArmorKineticDamageResonance, 1.0, true);
-	// AttrArmorThermalDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrArmorThermalDamageResonance)))
-        sShipRef.get()->setAttribute(AttrArmorThermalDamageResonance, 1.0, true);
-
-	// Hull Resonance
-	// AttrHullEmDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrHullEmDamageResonance)))
-        sShipRef.get()->setAttribute(AttrHullEmDamageResonance, 1.0, true);
-	// AttrHullExplosiveDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrHullExplosiveDamageResonance)))
-        sShipRef.get()->setAttribute(AttrHullExplosiveDamageResonance, 1.0, true);
-	// AttrHullKineticDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrHullKineticDamageResonance)))
-        sShipRef.get()->setAttribute(AttrHullKineticDamageResonance, 1.0, true);
-	// AttrHullThermalDamageResonance
-    if (!(sShipRef.get()->hasAttribute(AttrHullThermalDamageResonance)))
-        sShipRef.get()->setAttribute(AttrHullThermalDamageResonance, 1.0, true);
-
-	// AttrTurretSlotsLeft
-    if (!(sShipRef.get()->hasAttribute(AttrTurretSlotsLeft)))
-        sShipRef.get()->setAttribute(AttrTurretSlotsLeft, 0, true);
-	// AttrLauncherSlotsLeft
-    if (!(sShipRef.get()->hasAttribute(AttrLauncherSlotsLeft)))
-        sShipRef.get()->setAttribute(AttrLauncherSlotsLeft, 0, true);
-
     return sShipRef;
 }
 
@@ -184,13 +158,15 @@ uint32 Ship::_Spawn(ItemData &data) {
     return shipID;
 }
 
-bool Ship::_Load()
+bool Ship::loadState()
 {
     // load contents
-    if( !LoadContents() )
+    if(!LoadContents())
+    {
         return false;
+    }
 
-    bool loadSuccess = InventoryItem::_Load();      // Attributes are loaded here!
+    bool loadSuccess = InventoryItem::loadState(); // Attributes are loaded here!
 
     double capacity;
 	// fill cargo holds data here:
@@ -208,12 +184,16 @@ bool Ship::_Load()
 	_UpdateCargoHoldsUsedVolume();
 
     // allocate the module manager, only the first time:
-    if( m_ModuleManager == NULL )
+    if(m_ModuleManager == NULL)
+    {
         m_ModuleManager = new ModuleManager(this);
+    }
 
     // check for module manager load success
-    if( m_ModuleManager == NULL )
+    if(m_ModuleManager == NULL)
+    {
         loadSuccess = false;
+    }
 
     return loadSuccess;
 }

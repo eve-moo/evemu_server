@@ -102,8 +102,6 @@ protected:
     /*
      * Member functions:
      */
-    using InventoryItem::_Load;
-
     // Template loader:
     template<class _Ty>
     static RefPtr<_Ty> _LoadItem(uint32 celestialID,
@@ -121,8 +119,10 @@ protected:
 
         // load celestial data
         CelestialObjectData cData;
-        if (!InventoryDB::GetCelestialObject(celestialID, cData))
+        if(!InventoryDB::GetCelestialObject(celestialID, cData))
+        {
             return RefPtr<_Ty>();
+        }
 
         return _Ty::template _LoadCelestialObject<_Ty>( celestialID, type, data, cData );
     }

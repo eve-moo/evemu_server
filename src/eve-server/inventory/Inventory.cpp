@@ -172,33 +172,34 @@ bool Inventory::LoadContents()
         // and if not, then do not "get" the entire contents of this for() loop for that item, except in the case that
         // this item is located in space or belongs to this character's corporation:
         InventoryDB::GetItem( *cur, into );
-        if (ItemFactory::GetUsingClient() != NULL)
+        if(ItemFactory::GetUsingClient() != NULL)
         {
             characterID = ItemFactory::GetUsingClient()->GetCharacterID();
             corporationID = ItemFactory::GetUsingClient()->GetCorporationID();
             locationID = ItemFactory::GetUsingClient()->GetLocationID();
         }
         else
-            SysLog::Error( "Inventory::LoadContents()", "Failed to resolve pointer to Client object currently using the ItemFactory." );
-        if( (into.ownerID == characterID) || (characterID == 0) || (into.ownerID == corporationID) )// || (into.locationID == locationID) )
-            //    || (ItemFactory::GetUsingClient() == NULL) )
+            SysLog::Error("Inventory::LoadContents()", "Failed to resolve pointer to Client object currently using the ItemFactory.");
+        if((into.ownerID == characterID) || (characterID == 0) || (into.ownerID == corporationID))// || (into.locationID == locationID) )
         {
             // Continue to GetItem() if the client calling this is owned by the character that owns this item
             // --OR--
             // The characterID == 0, which means this is attempting to load the character of this client for the first time.
             // --OR--
             // The pointer to the client object currently "using" the ItemFactory is NULL, meaning no client is using it at the moment.
-            if (ItemFactory::GetUsingClient() == NULL)
-                SysLog::Error( "Inventory::LoadContents()", "WARNING! Loading Contents while ItemFactory::GetUsingClient() returned NULL!" );
+            if(ItemFactory::GetUsingClient() == NULL)
+            {
+                SysLog::Error("Inventory::LoadContents()", "WARNING! Loading Contents while ItemFactory::GetUsingClient() returned NULL!");
+            }
 
-            InventoryItemRef i = ItemFactory::GetItem(*cur);
-            if( !i )
+            InventoryItemRef item = ItemFactory::GetItem(*cur);
+            if(!item)
             {
                 SysLog::Error("Inventory::LoadContents()", "Failed to load item %u contained in %u. Skipping.", *cur, inventoryID() );
                 continue;
             }
 
-            AddItem( i );
+            AddItem(item);
         }
     }
 
@@ -289,10 +290,14 @@ InventoryItemRef Inventory::FindFirstByFlag(EVEItemFlags _flag) const
 InventoryItemRef Inventory::GetByID(uint32 id) const
 {
     std::map<uint32, InventoryItemRef>::const_iterator res = mContents.find( id );
-    if( res != mContents.end() )
+    if(res != mContents.end())
+    {
         return res->second;
+    }
     else
+    {
         return InventoryItemRef();
+    }
 }
 
 InventoryItemRef Inventory::GetByTypeFlag(uint32 typeID, EVEItemFlags flag) const

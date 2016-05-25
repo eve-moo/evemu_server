@@ -172,8 +172,6 @@ protected:
     /*
      * Member functions
      */
-    using InventoryItem::_Load;
-
     // Template loader:
     template<class _Ty>
     static RefPtr<_Ty> _LoadItem(uint32 blueprintID,
@@ -189,20 +187,14 @@ protected:
 
         // we are blueprint; pull additional blueprint info
         BlueprintData bpData;
-        if( !InventoryDB::GetBlueprint( blueprintID, bpData ) )
+        if(!InventoryDB::GetBlueprint(blueprintID, bpData))
+        {
             return RefPtr<_Ty>();
+        }
 
-        return _Ty::template _LoadBlueprint<_Ty>( blueprintID, bpType, data, bpData );
+        // we have enough data, construct the item
+        return BlueprintRef(new Blueprint(blueprintID, bpType, data, bpData));
     }
-
-    // Actual loading stuff:
-    template<class _Ty>
-    static RefPtr<_Ty> _LoadBlueprint(uint32 blueprintID,
-        // InventoryItem stuff:
-                                      const InvTypeRef bpType, const ItemData &data,
-        // Blueprint stuff:
-        const BlueprintData &bpData
-    );
 
     static uint32 _Spawn(
         // InventoryItem stuff:

@@ -68,30 +68,17 @@ BlueprintRef Blueprint::Load(uint32 blueprintID)
     return InventoryItem::Load<Blueprint>( blueprintID );
 }
 
-template<class _Ty>
-RefPtr<_Ty> Blueprint::_LoadBlueprint(uint32 blueprintID,
-    // InventoryItem stuff:
-                                      const InvTypeRef bpType, const ItemData &data,
-                                      // Blueprint stuff:
-    const BlueprintData &bpData)
-{
-    // we have enough data, construct the item
-    return BlueprintRef( new Blueprint( blueprintID, bpType, data, bpData ) );
-}
-
 BlueprintRef Blueprint::Spawn(ItemData &data, BlueprintData &bpData) {
     uint32 blueprintID = Blueprint::_Spawn(data, bpData);
     if(blueprintID == 0)
+    {
         return BlueprintRef();
+    }
     return Blueprint::Load(blueprintID);
 }
 
-uint32 Blueprint::_Spawn(
-    // InventoryItem stuff:
-    ItemData &data,
-    // Blueprint stuff:
-    BlueprintData &bpData
-) {
+uint32 Blueprint::_Spawn(ItemData &data, BlueprintData &bpData)
+{
     // make sure it's a blueprint type
     const InvTypeRef bt = InvType::getType(data.typeID);
     if (bt.get() == nullptr)
@@ -102,10 +89,13 @@ uint32 Blueprint::_Spawn(
     // get the blueprintID
     uint32 blueprintID = InventoryItem::_Spawn(data);
     if(blueprintID == 0)
+    {
         return 0;
+    }
 
     // insert blueprint entry into DB
-    if(!InventoryDB::NewBlueprint(blueprintID, bpData)) {
+    if(!InventoryDB::NewBlueprint(blueprintID, bpData))
+    {
         // delete item
         InventoryDB::DeleteItem(blueprintID);
 

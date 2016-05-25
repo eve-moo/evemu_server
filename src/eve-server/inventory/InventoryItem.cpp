@@ -190,17 +190,6 @@ InventoryItemRef InventoryItem::Load(uint32 itemID)
     return InventoryItem::Load<InventoryItem>( itemID );
 }
 
-InventoryItemRef InventoryItem::LoadEntity(uint32 itemID, const ItemData &data)
-{
-    const InvTypeRef type = InvType::getType(data.typeID);
-
-	InventoryItemRef itemRef = InventoryItemRef( new InventoryItem(itemID, type, data) );
-
-	itemRef->_Load();
-
-	return itemRef;
-}
-
 template<class _Ty>
 RefPtr<_Ty> InventoryItem::_LoadItem(uint32 itemID,
     // InventoryItem stuff:
@@ -308,7 +297,7 @@ RefPtr<_Ty> InventoryItem::_LoadItem(uint32 itemID,
     return InventoryItemRef( new InventoryItem( itemID, type, data ) );
 }
 
-bool InventoryItem::_Load()
+bool InventoryItem::loadState()
 {
     // load attributes
     m_AttributeMap.Load();
@@ -319,8 +308,10 @@ bool InventoryItem::_Load()
 
     // update inventory
     Inventory *inventory = ItemFactory::GetInventory(locationID(), false);
-    if( inventory != NULL )
-        inventory->AddItem( InventoryItemRef( this ) );
+    if(inventory != NULL)
+    {
+        inventory->AddItem(InventoryItemRef(this));
+    }
 
     return true;
 }
@@ -328,14 +319,14 @@ bool InventoryItem::_Load()
 InventoryItemRef InventoryItem::Spawn(ItemData &data)
 {
     // obtain type of new item
-    const InvTypeRef t = InvType::getType(data.typeID);
-    if (t.get() == nullptr)
+    const InvTypeRef type = InvType::getType(data.typeID);
+    if(type.get() == nullptr)
     {
         return InventoryItemRef();
     }
 
     // See what to do next:
-    switch (t->getCategoryID())
+    switch(type->getCategoryID())
     {
         //! TODO not handled.
         case EVEDB::invCategories::_System:
@@ -353,14 +344,11 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         // Entity:
         ///////////////////////////////////////
         case EVEDB::invCategories::Entity: {
-			// Spawn generic item for Entities at this time:
-			// (commented lines for _SpawnEntity and LoadEntity can be used alternatively to prevent Entities from being created and saved to the DB,
-			//  however, this may be causing the weird and bad targetting of NPC ships when they enter the bubble and your ship is already in it)
-			//uint32 itemID = InventoryItem::_SpawnEntity( data );		// Use this to prevent Asteroids from being stored in DB
 			uint32 itemID = InventoryItem::_Spawn( data );
-			if( itemID == 0 )
-				return InventoryItemRef();
-			//InventoryItemRef itemRef = InventoryItem::LoadEntity( itemID, data );		// Use this to prevent Asteroids from being stored in DB
+            if(itemID == 0)
+            {
+                return InventoryItemRef();
+            }
 			InventoryItemRef itemRef = InventoryItem::Load( itemID );
 			return itemRef;
 		}
@@ -370,11 +358,7 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         ///////////////////////////////////////
         case EVEDB::invCategories::Blueprint: {
             BlueprintData bdata; // use default blueprint attributes
-
-            BlueprintRef blueRef = Blueprint::Spawn( data, bdata );
-            blueRef.get()->SaveAttributes();
-
-            return blueRef;
+            return Blueprint::Spawn(data, bdata);
         }
 
         ///////////////////////////////////////
@@ -383,60 +367,31 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         //  Cosmic Signatures, Mobile Sentry Guns, Global Warp Disruptors, Agents in Space, Cosmic Anomaly, Beacons, Wormholes,
         //  and other celestial static objects such as NPC stations, stars, moons, planets, and stargates)
         ///////////////////////////////////////
-        case EVEDB::invCategories::Celestial: {
-            if ( (t->groupID == EVEDB::invGroups::Secure_Cargo_Container)
-                || (t->groupID == EVEDB::invGroups::Cargo_Container)
-                || (t->groupID == EVEDB::invGroups::Freight_Container)
-                || (t->groupID == EVEDB::invGroups::Audit_Log_Secure_Container)
-                || (t->groupID == EVEDB::invGroups::Spawn_Container)
-                || (t->groupID == EVEDB::invGroups::Wreck) )
+        case EVEDB::invCategories::Celestial:
+        {
+            if((type->groupID == EVEDB::invGroups::Secure_Cargo_Container)
+               || (type->groupID == EVEDB::invGroups::Cargo_Container)
+               || (type->groupID == EVEDB::invGroups::Freight_Container)
+               || (type->groupID == EVEDB::invGroups::Audit_Log_Secure_Container)
+               || (type->groupID == EVEDB::invGroups::Spawn_Container)
+               || (type->groupID == EVEDB::invGroups::Wreck))
             {
                 // Spawn new Cargo Container
-                uint32 itemID = CargoContainer::_Spawn( data );
-                if( itemID == 0 )
-                    return CargoContainerRef();
-
-                CargoContainerRef cargoRef = CargoContainer::Load( itemID );
-
-                // THESE SHOULD BE MOVED INTO A CargoContainer::Spawn() function that does not exist yet
-                // Create default dynamic attributes in the AttributeMap:
-                cargoRef.get()->setAttribute(AttrIsOnline, 1); // Is Online
-                cargoRef.get()->setAttribute(AttrDamage, 0.0); // Structure Damage
-                //cargoRef.get()->SetAttribute(AttrShieldCharge,  cargoRef.get()->GetAttribute(AttrShieldCapacity));  // Shield Charge
-                //cargoRef.get()->SetAttribute(AttrArmorDamage,   0.0);                                               // Armor Damage
-                cargoRef.get()->setAttribute(AttrMass, cargoRef.get()->type()->getAttribute(AttrMass)); // Mass
-                cargoRef.get()->setAttribute(AttrRadius, cargoRef.get()->type()->getAttribute(AttrRadius)); // Radius
-                cargoRef.get()->setAttribute(AttrVolume, cargoRef.get()->type()->getAttribute(AttrVolume)); // Volume
-                cargoRef.get()->setAttribute(AttrCapacity, cargoRef.get()->type()->getAttribute(AttrCapacity)); // Capacity
-                cargoRef.get()->SaveAttributes();
-
-                return cargoRef;
-                //uint32 itemID = InventoryItem::_Spawn( data );
-                //if( itemID == 0 )
-                //    return InventoryItemRef();
-                //return InventoryItem::Load( itemID );
+                return CargoContainer::Spawn(data);
             }
             else
             {
                 // Spawn new Celestial Object
-                uint32 itemID = CelestialObject::_Spawn( data );
-                if( itemID == 0 )
-                    return CelestialObjectRef();
-                CelestialObjectRef celestialRef = CelestialObject::Load( itemID );
-                celestialRef.get()->SaveAttributes();
-
-                return celestialRef;
+                return CelestialObject::Spawn(data);
             }
         }
 
         ///////////////////////////////////////
         // Ship:
         ///////////////////////////////////////
-        case EVEDB::invCategories::Ship: {
-            ShipRef shipRef = Ship::Spawn( data );
-            shipRef.get()->SaveAttributes();
-
-            return shipRef;
+        case EVEDB::invCategories::Ship:
+        {
+            return Ship::Spawn(data);
         }
 
         ///////////////////////////////////////
@@ -458,25 +413,23 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         // Charge:
         ///////////////////////////////////////
         case EVEDB::invCategories::Charge:
-		{
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if( itemID == 0 )
-                return InventoryItemRef();
-
-            InventoryItemRef itemRef = InventoryItem::Load( itemID );
-
+        {
             // THESE SHOULD BE MOVED INTO A Charge::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            itemRef.get()->setAttribute(AttrIsOnline, 1); // Is Online
-            itemRef.get()->setAttribute(AttrDamage, 0.0); // Structure Damage
-            itemRef.get()->setAttribute(AttrMass, itemRef.get()->type()->getAttribute(AttrMass)); // Mass
-            itemRef.get()->setAttribute(AttrRadius, itemRef.get()->type()->getAttribute(AttrRadius)); // Radius
-            itemRef.get()->setAttribute(AttrVolume, itemRef.get()->type()->getAttribute(AttrVolume)); // Volume
-            itemRef.get()->setAttribute(AttrCapacity, itemRef.get()->type()->getAttribute(AttrCapacity)); // Capacity
-            itemRef.get()->SaveAttributes();
+            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+            data.attributes[AttrMass] = type->mass; // Mass
+            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
+            data.attributes[AttrVolume] = type->volume; // Volume
+            data.attributes[AttrCapacity] = type->capacity; // Capacity
+            // Spawn generic item:
+            uint32 itemID = InventoryItem::_Spawn( data );
+            if(itemID == 0)
+            {
+                return InventoryItemRef();
+            }
 
-            return itemRef;
+            return InventoryItem::Load(itemID);
 		}
 
 		///////////////////////////////////////
@@ -484,24 +437,22 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         ///////////////////////////////////////
         case EVEDB::invCategories::Module:
         {
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if( itemID == 0 )
-                return InventoryItemRef();
-
-            InventoryItemRef itemRef = InventoryItem::Load( itemID );
-
             // THESE SHOULD BE MOVED INTO A Module::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            itemRef.get()->setAttribute(AttrIsOnline, 1); // Is Online
-            itemRef.get()->setAttribute(AttrDamage, 0.0); // Structure Damage
-            itemRef.get()->setAttribute(AttrMass, itemRef.get()->type()->getAttribute(AttrMass)); // Mass
-            itemRef.get()->setAttribute(AttrRadius, itemRef.get()->type()->getAttribute(AttrRadius)); // Radius
-            itemRef.get()->setAttribute(AttrVolume, itemRef.get()->type()->getAttribute(AttrVolume)); // Volume
-            itemRef.get()->setAttribute(AttrCapacity, itemRef.get()->type()->getAttribute(AttrCapacity)); // Capacity
-            itemRef.get()->SaveAttributes();
+            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+            data.attributes[AttrMass] = type->mass; // Mass
+            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
+            data.attributes[AttrVolume] = type->volume; // Volume
+            data.attributes[AttrCapacity] = type->capacity; // Capacity
+            // Spawn generic item:
+            uint32 itemID = InventoryItem::_Spawn( data );
+            if(itemID == 0)
+            {
+                return InventoryItemRef();
+            }
 
-            return itemRef;
+            return InventoryItem::Load(itemID);
         }
 
         ///////////////////////////////////////
@@ -509,26 +460,25 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         ///////////////////////////////////////
         case EVEDB::invCategories::Drone:
         {
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if( itemID == 0 )
-                return InventoryItemRef();
-
-            InventoryItemRef itemRef = InventoryItem::Load( itemID );
-
             // THESE SHOULD BE MOVED INTO A Drone::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            itemRef.get()->setAttribute(AttrIsOnline, 1); // Is Online
-            itemRef.get()->setAttribute(AttrDamage, 0.0); // Structure Damage
-            itemRef.get()->setAttribute(AttrShieldCharge, itemRef.get()->getAttribute(AttrShieldCapacity)); // Shield Charge
-            itemRef.get()->setAttribute(AttrArmorDamage, 0.0); // Armor Damage
-            itemRef.get()->setAttribute(AttrMass, itemRef.get()->type()->getAttribute(AttrMass)); // Mass
-            itemRef.get()->setAttribute(AttrRadius, itemRef.get()->type()->getAttribute(AttrRadius)); // Radius
-            itemRef.get()->setAttribute(AttrVolume, itemRef.get()->type()->getAttribute(AttrVolume)); // Volume
-            itemRef.get()->setAttribute(AttrCapacity, itemRef.get()->type()->getAttribute(AttrCapacity)); // Capacity
-            itemRef.get()->SaveAttributes();
+            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+            data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
+            data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
+            data.attributes[AttrMass] = type->mass; // Mass
+            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
+            data.attributes[AttrVolume] = type->volume; // Volume
+            data.attributes[AttrCapacity] = type->capacity; // Capacity
 
-            return itemRef;
+            // Spawn generic item:
+            uint32 itemID = InventoryItem::_Spawn( data );
+            if(itemID == 0)
+            {
+                return InventoryItemRef();
+            }
+
+            return InventoryItem::Load(itemID);
         }
 
         ///////////////////////////////////////
@@ -536,26 +486,25 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         ///////////////////////////////////////
         case EVEDB::invCategories::Deployable:
         {
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if( itemID == 0 )
-                return InventoryItemRef();
-
-            InventoryItemRef itemRef = InventoryItem::Load( itemID );
-
             // THESE SHOULD BE MOVED INTO A Deployable::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            itemRef.get()->setAttribute(AttrIsOnline, 1); // Is Online
-            itemRef.get()->setAttribute(AttrDamage, 0.0); // Structure Damage
-            //itemRef.get()->SetAttribute(AttrShieldCharge,   itemRef.get()->GetAttribute(AttrShieldCapacity));       // Shield Charge
-            //itemRef.get()->SetAttribute(AttrArmorDamage,    0.0);                                        // Armor Damage
-            itemRef.get()->setAttribute(AttrMass, itemRef.get()->type()->getAttribute(AttrMass)); // Mass
-            itemRef.get()->setAttribute(AttrRadius, itemRef.get()->type()->getAttribute(AttrRadius)); // Radius
-            itemRef.get()->setAttribute(AttrVolume, itemRef.get()->type()->getAttribute(AttrVolume)); // Volume
-            itemRef.get()->setAttribute(AttrCapacity, itemRef.get()->type()->getAttribute(AttrCapacity)); // Capacity
-            itemRef.get()->SaveAttributes();
+            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+            //itemRef->SetAttribute(AttrShieldCharge,   itemRef->GetAttribute(AttrShieldCapacity));       // Shield Charge
+            //itemRef->SetAttribute(AttrArmorDamage,    0.0);                                        // Armor Damage
+            data.attributes[AttrMass] = type->mass; // Mass
+            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
+            data.attributes[AttrVolume] = type->volume; // Volume
+            data.attributes[AttrCapacity] = type->capacity; // Capacity
 
-            return itemRef;
+            // Spawn generic item:
+            uint32 itemID = InventoryItem::_Spawn( data );
+            if(itemID == 0)
+            {
+                return InventoryItemRef();
+            }
+
+            return InventoryItem::Load(itemID);
         }
 
         ///////////////////////////////////////
@@ -563,27 +512,21 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         ///////////////////////////////////////
         case EVEDB::invCategories::Asteroid:
         {
-            // Spawn generic item:
-			// (commented lines for _SpawnEntity and LoadEntity can be used alternatively to prevent asteroids from being created and saved to the DB,
-			//  however, initial testing of this throws a client exception when attempting to show brackets for these asteroid space objects when using
-			//  these alternative functions.  more investigation into that is required before they can be used with Asteroids)
-            uint32 itemID = InventoryItem::_Spawn( data );
-            //uint32 itemID = InventoryItem::_SpawnEntity( data );		// Use this to prevent Asteroids from being stored in DB
-            if( itemID == 0 )
-                return InventoryItemRef();
-
-            InventoryItemRef itemRef = InventoryItem::Load( itemID );
-            //InventoryItemRef itemRef = InventoryItem::LoadEntity( itemID, data );		// Use this to prevent Asteroids from being stored in DB
-
             // THESE SHOULD BE MOVED INTO AN Asteroid::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            itemRef.get()->setAttribute(AttrRadius, 500.0); // Radius
-            itemRef.get()->setAttribute(AttrMass, 1000000.0); // Mass
-            itemRef.get()->setAttribute(AttrVolume, itemRef.get()->type()->getAttribute(AttrVolume)); // Volume
-            itemRef.get()->setAttribute(AttrQuantity, 5000.0); // Quantity
-            itemRef.get()->SaveAttributes();
+            data.attributes[AttrRadius] = EvilNumber(500.0); // Radius
+            data.attributes[AttrMass] = EvilNumber(1000000.0); // Mass
+            data.attributes[AttrVolume] = type->volume; // Volume
+            data.attributes[AttrQuantity] = EvilNumber(5000.0); // Quantity
 
-            return itemRef;
+            // Spawn generic item:
+            uint32 itemID = InventoryItem::_Spawn( data );
+            if(itemID == 0)
+            {
+                return InventoryItemRef();
+            }
+
+            return InventoryItem::Load(itemID);
         }
 
         ///////////////////////////////////////
@@ -591,75 +534,54 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         ///////////////////////////////////////
         case EVEDB::invCategories::Structure:
         {
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if( itemID == 0 )
-                return InventoryItemRef();
-
-            InventoryItemRef itemRef = InventoryItem::Load( itemID );
-
             // THESE SHOULD BE MOVED INTO A Structure::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            itemRef.get()->setAttribute(AttrIsOnline, 1); // Is Online
-            itemRef.get()->setAttribute(AttrDamage, 0.0); // Structure Damage
-            itemRef.get()->setAttribute(AttrShieldCharge, itemRef.get()->getAttribute(AttrShieldCapacity)); // Shield Charge
-            itemRef.get()->setAttribute(AttrArmorDamage, 0.0); // Armor Damage
-            itemRef.get()->setAttribute(AttrMass, itemRef.get()->type()->getAttribute(AttrMass)); // Mass
-            itemRef.get()->setAttribute(AttrRadius, itemRef.get()->type()->getAttribute(AttrRadius)); // Radius
-            itemRef.get()->setAttribute(AttrVolume, itemRef.get()->type()->getAttribute(AttrVolume)); // Volume
-            itemRef.get()->setAttribute(AttrCapacity, itemRef.get()->type()->getAttribute(AttrCapacity)); // Capacity
-            itemRef.get()->SaveAttributes();
+            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+            data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
+            data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
+            data.attributes[AttrMass] = type->mass; // Mass
+            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
+            data.attributes[AttrVolume] = type->volume; // Volume
+            data.attributes[AttrCapacity] = type->capacity; // Capacity
 
-            return itemRef;
+            // Spawn generic item:
+            uint32 itemID = InventoryItem::_Spawn( data );
+            if(itemID == 0)
+            {
+                return InventoryItemRef();
+            }
+
+            return InventoryItem::Load(itemID);
         }
     }
 
-    switch( t->groupID ) {
+    switch(type->groupID)
+    {
         ///////////////////////////////////////
         // Station:
         ///////////////////////////////////////
-        case EVEDB::invGroups::Station: {
-            //_log( ITEM__ERROR, "Refusing to create station '%s'.", data.name.c_str() );
-            //return InventoryItemRef();
-            //return Station::Spawn( data );
-            uint32 itemID = Station::_Spawn( data );
-            if( itemID == 0 )
-                return StationRef();
-
-            StationRef stationRef = Station::Load( itemID );
-
-            // THESE SHOULD BE MOVED INTO A Station::Spawn() function that does not exist yet
-            // Create default dynamic attributes in the AttributeMap:
-            stationRef.get()->setAttribute(AttrIsOnline, 1); // Is Online
-            stationRef.get()->setAttribute(AttrDamage, 0.0); // Structure Damage
-            stationRef.get()->setAttribute(AttrShieldCharge, stationRef.get()->getAttribute(AttrShieldCapacity)); // Shield Charge
-            stationRef.get()->setAttribute(AttrArmorDamage, 0.0); // Armor Damage
-            stationRef.get()->setAttribute(AttrMass, stationRef.get()->type()->getAttribute(AttrMass)); // Mass
-            stationRef.get()->setAttribute(AttrRadius, stationRef.get()->type()->getAttribute(AttrRadius)); // Radius
-            stationRef.get()->setAttribute(AttrVolume, stationRef.get()->type()->getAttribute(AttrVolume)); // Volume
-            stationRef.get()->setAttribute(AttrCapacity, stationRef.get()->type()->getAttribute(AttrCapacity)); // Capacity
-            stationRef.get()->SaveAttributes();
-
-            return stationRef;
+        case EVEDB::invGroups::Station:
+        {
+            return Station::Spawn(data);
         }
     }
 
+    // Create some basic attributes that are NOT found in dgmTypeAttributes for most items, yet most items DO need:
+    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+    data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+    data.attributes[AttrMass] = type->mass; // Mass
+    data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
+    data.attributes[AttrVolume] = type->volume; // Volume
+    data.attributes[AttrCapacity] = type->capacity; // Capacity
+
     // Spawn generic item:
     uint32 itemID = InventoryItem::_Spawn( data );
-    if( itemID == 0 )
+    if(itemID == 0)
+    {
         return InventoryItemRef();
-    InventoryItemRef itemRef = InventoryItem::Load( itemID );
-
-	// Create some basic attributes that are NOT found in dgmTypeAttributes for most items, yet most items DO need:
-    itemRef.get()->setAttribute(AttrIsOnline, 1); // Is Online
-    itemRef.get()->setAttribute(AttrDamage, 0.0); // Structure Damage
-    itemRef.get()->setAttribute(AttrMass, itemRef.get()->type()->getAttribute(AttrMass)); // Mass
-    itemRef.get()->setAttribute(AttrRadius, itemRef.get()->type()->getAttribute(AttrRadius)); // Radius
-    itemRef.get()->setAttribute(AttrVolume, itemRef.get()->type()->getAttribute(AttrVolume)); // Volume
-    itemRef.get()->setAttribute(AttrCapacity, itemRef.get()->type()->getAttribute(AttrCapacity)); // Capacity
-
-	itemRef.get()->SaveAttributes();
-    return itemRef;
+    }
+    return InventoryItem::Load(itemID);
 }
 
 uint32 InventoryItem::_Spawn(
@@ -676,33 +598,61 @@ uint32 InventoryItem::_Spawn(
 
     // fix the name (if empty)
     if(data.name.empty())
-        data.name = t->typeName;
-
-    // insert new entry into DB
-    return InventoryDB::NewItem(data);
-}
-
-// This Spawn function is meant for in-memory only items created from the
-// EVEDB::invCategories::Entity category, items meant to never be saved to database
-// and be thrown away on server shutdown.
-uint32 InventoryItem::_SpawnEntity(
-    // InventoryItem stuff:
-    ItemData &data
-) {
-    // obtain type of new item
-    // this also checks that the type is valid
-    const InvTypeRef t = InvType::getType(data.typeID);
-    if (t.get() == nullptr)
     {
-        return 0;
+        data.name = t->typeName;
     }
 
-    // fix the name (if empty)
-    if(data.name.empty())
-        data.name = t->typeName;
-
-    // Get a new Entity ID from ItemFactory's ID Authority:
-    return ItemFactory::GetNextEntityID();
+    // Insert new entry into DB
+    uint32 itemID = InventoryDB::NewItem(data);
+    if(itemID == 0)
+    {
+        return itemID;
+    }
+    // Create attributes.
+    if(data.attributes.size() > 0)
+    {
+        auto itr = data.attributes.begin();
+        auto itr_end = data.attributes.end();
+        std::string values;
+        for(; itr != itr_end; itr++)
+        {
+            char buf[1024];
+            if(itr->second.get_type() == evil_number_int)
+            {
+                std::sprintf(buf, "(%u, %u, %" PRId64 ", NULL)",
+                             itemID, itr->first, itr->second.get_int());
+            }
+            else if(itr->second.get_type() == evil_number_float)
+            {
+                std::sprintf(buf, "(%u, %u, NULL, %f)",
+                             itemID, itr->first, itr->second.get_float());
+            }
+            if(values.length() > 0)
+            {
+                values += ", ";
+            }
+            values += buf;
+        }
+        if(values.length() > 0)
+        {
+            DBerror err;
+            bool success = DBcore::RunQuery(err,
+                                            "INSERT INTO srvEntity_default_attributes (itemID, attributeID, valueInt, valueFloat) VALUES %s",
+                                            values.c_str());
+            if(!success)
+            {
+                SysLog::Error("InventoryItem", "Unable to create default attributes for item %u", itemID);
+            }
+            success = DBcore::RunQuery(err,
+                                       "INSERT INTO srvEntity_attributes (itemID, attributeID, valueInt, valueFloat) VALUES %s",
+                                       values.c_str());
+            if(!success)
+            {
+            SysLog::Error("InventoryItem", "Unable to create attributes for item %u", itemID);
+            }
+        }
+    }
+    return itemID;
 }
 
 void InventoryItem::Delete(bool notify)

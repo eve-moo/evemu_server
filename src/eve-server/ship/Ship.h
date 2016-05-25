@@ -152,8 +152,6 @@ protected:
     /*
      * Member functions
      */
-    using InventoryItem::_Load;
-
     // Template loader:
     template<class _Ty>
     static RefPtr<_Ty> _LoadItem(uint32 shipID,
@@ -167,19 +165,11 @@ protected:
             return RefPtr<_Ty>();
         }
 
-        // no additional stuff
-
-        return _Ty::template _LoadShip<_Ty>(shipID, type, data);
+        // we don't need any additional stuff
+        return ShipRef(new Ship(shipID, type, data));
     }
 
-    // Actual loading stuff:
-    template<class _Ty>
-    static RefPtr<_Ty> _LoadShip(uint32 shipID,
-        // InventoryItem stuff:
-                                 const InvTypeRef shipType, const ItemData &data
-    );
-
-    bool _Load();
+    virtual bool loadState();
 
     static uint32 _Spawn(
         // InventoryItem stuff:

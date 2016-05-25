@@ -45,29 +45,18 @@ StructureRef Structure::Load(uint32 structureID)
     return InventoryItem::Load<Structure>( structureID );
 }
 
-template<class _Ty>
-RefPtr<_Ty> Structure::_LoadStructure(uint32 structureID,
-    // InventoryItem stuff:
-    const InvTypeRef itemType, const ItemData &data)
+StructureRef Structure::Spawn(ItemData &data)
 {
-    // we don't need any additional stuff
-    return StructureRef( new Structure( structureID, itemType, data ) );
-}
-
-StructureRef Structure::Spawn(
-    // InventoryItem stuff:
-    ItemData &data
-) {
     uint32 structureID = Structure::_Spawn( data );
-    if( structureID == 0 )
+    if(structureID == 0)
+    {
         return StructureRef();
+    }
     return Structure::Load( structureID );
 }
 
-uint32 Structure::_Spawn(
-    // InventoryItem stuff:
-    ItemData &data
-) {
+uint32 Structure::_Spawn(ItemData &data)
+{
     // make sure it's a Structure
     const InvTypeRef st = InvType::getType(data.typeID);
     if (st.get() == nullptr)
@@ -78,20 +67,22 @@ uint32 Structure::_Spawn(
     // store item data
     uint32 structureID = InventoryItem::_Spawn(data);
     if(structureID == 0)
+    {
         return 0;
-
-    // nothing additional
+    }
 
     return structureID;
 }
 
-bool Structure::_Load()
+bool Structure::loadState()
 {
     // load contents
-    if( !LoadContents() )
+    if(!LoadContents())
+    {
         return false;
+    }
 
-    return InventoryItem::_Load();
+    return InventoryItem::loadState();
 }
 
 void Structure::Delete()
@@ -164,26 +155,6 @@ bool Structure::ValidateAddItem(EVEItemFlags flag, InventoryItemRef item) const
         }
         return true;
     }
-}
-
-PyObject *Structure::StructureGetInfo()
-{
-    if( !LoadContents() )
-    {
-        codelog( ITEM__ERROR, "%s (%u): Failed to load contents for StructureGetInfo", itemName().c_str(), itemID() );
-        return NULL;
-    }
-
-    Rsp_CommonGetInfo result;
-    Rsp_CommonGetInfo_Entry entry;
-
-    //first populate the Structure.
-    if( !Populate( entry ) )
-        return NULL;    //print already done.
-
-    result.items[ itemID() ] = entry.Encode();
-
-    return result.Encode();
 }
 
 void Structure::AddItem(InventoryItemRef item)

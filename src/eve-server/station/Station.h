@@ -110,18 +110,17 @@ protected:
     /*
      * Member functions:
      */
-    using CelestialObject::_Load;
-
     // Template loader:
+
     template<class _Ty>
     static RefPtr<_Ty> _LoadCelestialObject(uint32 stationID,
-        // InventoryItem stuff:
+                                            // InventoryItem stuff:
                                             const InvTypeRef stType, const ItemData &data,
-        // CelestialObject stuff:
-        const CelestialObjectData &cData)
+                                            // CelestialObject stuff:
+                                            const CelestialObjectData &cData)
     {
         // check it's a station
-        if (stType->groupID != EVEDB::invGroups::Station)
+        if(stType->groupID != EVEDB::invGroups::Station)
         {
             _log(ITEM__ERROR, "Trying to load %s as Station.", stType->getGroup()->groupName.c_str());
             return RefPtr<_Ty>();
@@ -129,24 +128,24 @@ protected:
 
         // load station data
         StationData stData;
-        if (!InventoryDB::GetStation(stationID, stData))
+        if(!InventoryDB::GetStation(stationID, stData))
             return RefPtr<_Ty>();
 
-        return _Ty::template _LoadStation<_Ty>(  stationID, stType, data, cData, stData );
+        return _Ty::template _LoadStation<_Ty>(stationID, stType, data, cData, stData);
     }
 
     // Actual loading stuff:
     template<class _Ty>
     static RefPtr<_Ty> _LoadStation(uint32 stationID,
-        // InventoryItem stuff:
+                                    // InventoryItem stuff:
                                     const InvTypeRef type, const ItemData &data,
-        // CelestialObject stuff:
-        const CelestialObjectData &cData,
-        // Station stuff:
-        const StationData &stData
-    );
+                                    // CelestialObject stuff:
+                                    const CelestialObjectData &cData,
+                                    // Station stuff:
+                                    const StationData &stData
+                                    );
 
-    bool _Load();
+    virtual bool loadState();
     static uint32 _Spawn(ItemData &data);
 
     uint32 inventoryID() const { return itemID();

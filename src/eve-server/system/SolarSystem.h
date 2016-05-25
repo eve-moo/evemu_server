@@ -138,18 +138,17 @@ protected:
     /*
      * Member functions:
      */
-    using CelestialObject::_Load;
-
     // Template loader:
+
     template<class _Ty>
     static RefPtr<_Ty> _LoadCelestialObject(uint32 solarSystemID,
-        // InventoryItem stuff:
-        const InvTypeRef type, const ItemData &data,
-        // CelestialObject stuff:
-        const CelestialObjectData &cData)
+                                            // InventoryItem stuff:
+                                            const InvTypeRef type, const ItemData &data,
+                                            // CelestialObject stuff:
+                                            const CelestialObjectData &cData)
     {
         // check it's a solar system
-        if (type->groupID != EVEDB::invGroups::Solar_System)
+        if(type->groupID != EVEDB::invGroups::Solar_System)
         {
             _log(ITEM__ERROR, "Trying to load %s %u as Solar system.", type->typeName.c_str(), solarSystemID);
             return RefPtr<_Ty>();
@@ -157,31 +156,29 @@ protected:
 
         // load solar system data
         SolarSystemData ssData;
-        if (!InventoryDB::GetSolarSystem(solarSystemID, ssData))
+        if(!InventoryDB::GetSolarSystem(solarSystemID, ssData))
             return RefPtr<_Ty>();
 
         // get sun type
         const InvTypeRef sunType = InvType::getType(ssData.sunTypeID);
-        if (sunType.get() == nullptr)
+        if(sunType.get() == nullptr)
         {
             return RefPtr<_Ty>();
         }
 
-        return _Ty::template _LoadSolarSystem<_Ty>( solarSystemID, type, data, cData, sunType, ssData );
+        return _Ty::template _LoadSolarSystem<_Ty>(solarSystemID, type, data, cData, sunType, ssData);
     }
 
     // Actual loading stuff:
     template<class _Ty>
     static RefPtr<_Ty> _LoadSolarSystem(uint32 solarSystemID,
-        // InventoryItem stuff:
-        const InvTypeRef type, const ItemData &data,
-        // CelestialObject stuff:
-        const CelestialObjectData &cData,
-        // SolarSystem stuff:
-        const InvTypeRef sunType, const SolarSystemData &ssData
-    );
-
-    bool _Load();
+                                        // InventoryItem stuff:
+                                        const InvTypeRef type, const ItemData &data,
+                                        // CelestialObject stuff:
+                                        const CelestialObjectData &cData,
+                                        // SolarSystem stuff:
+                                        const InvTypeRef sunType, const SolarSystemData &ssData
+                                        );
 
     /*
      * Data members:

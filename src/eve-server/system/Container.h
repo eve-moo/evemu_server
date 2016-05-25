@@ -72,12 +72,6 @@ public:
      * Public fields:
      */
 
-    /*
-     * Primary public packet builders:
-     */
-    PyObject *CargoContainerGetInfo();
-
-
 protected:
     CargoContainer(
         uint32 _containerID,
@@ -89,8 +83,6 @@ protected:
     /*
      * Member functions
      */
-    using InventoryItem::_Load;
-
     // Template loader:
     template<class _Ty>
     static RefPtr<_Ty> _LoadItem(uint32 containerID,
@@ -108,22 +100,12 @@ protected:
             _log(ITEM__ERROR, "Trying to load category=%s, group=%s as CargoContainer.", type->getCategory()->categoryName.c_str(), type->getGroup()->groupName.c_str());
             return RefPtr<_Ty>();
         }
-        //// cast the type
-        //const InvTypeRef itemType = static_cast<const InvTypeRef >( type );
 
-        // no additional stuff
-
-        return _Ty::template _LoadCargoContainer<_Ty>( containerID, type, data );
+        // we don't need any additional stuff
+        return CargoContainerRef(new CargoContainer(containerID, type, data));
     }
 
-    // Actual loading stuff:
-    template<class _Ty>
-    static RefPtr<_Ty> _LoadCargoContainer(uint32 containerID,
-        // InventoryItem stuff:
-        const InvTypeRef itemType, const ItemData &data
-    );
-
-    bool _Load();
+    virtual bool loadState();
 
     static uint32 _Spawn(
         // InventoryItem stuff:
