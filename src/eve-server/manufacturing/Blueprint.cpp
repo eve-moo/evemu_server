@@ -47,19 +47,17 @@ BlueprintData::BlueprintData(
  */
 Blueprint::Blueprint(
     uint32 _blueprintID,
-    // InventoryItem stuff:
-                     const InvTypeRef _bpType,
     const ItemData &_data,
     // Blueprint stuff:
     const BlueprintData &_bpData)
-: InventoryItem(_blueprintID, _bpType, _data),
+: InventoryItem(_blueprintID, _data),
   m_copy(_bpData.copy),
   m_materialLevel(_bpData.materialLevel),
   m_productivityLevel(_bpData.productivityLevel),
   m_licensedProductionRunsRemaining(_bpData.licensedProductionRunsRemaining)
 {
     // data consistency asserts
-    assert(_bpType->getCategoryID() == EVEDB::invCategories::Blueprint);
+    assert(_data.type->getCategoryID() == EVEDB::invCategories::Blueprint);
     m_blueprintType = InvBlueprintType::getBlueprintType(m_type->typeID);
 }
 
@@ -68,8 +66,25 @@ BlueprintRef Blueprint::Load(uint32 blueprintID)
     return InventoryItem::Load<Blueprint>( blueprintID );
 }
 
-BlueprintRef Blueprint::Spawn(ItemData &data, BlueprintData &bpData) {
-    uint32 blueprintID = Blueprint::_Spawn(data, bpData);
+BlueprintRef Blueprint::Spawn(ItemData &data, BlueprintData &bpData)
+{
+    uint32 blueprintID = 0;
+    // make sure it's a blueprint type
+    if(data.type.get() != nullptr)
+    {
+        // get the blueprintID
+        blueprintID = InventoryItem::_Spawn(data);
+        if(blueprintID != 0)
+        {
+            // insert blueprint entry into DB
+            if(!InventoryDB::NewBlueprint(blueprintID, bpData))
+            {
+                // delete item
+                InventoryDB::DeleteItem(blueprintID);
+                blueprintID = 0;
+            }
+        }
+    }
     if(blueprintID == 0)
     {
         return BlueprintRef();
@@ -77,35 +92,8 @@ BlueprintRef Blueprint::Spawn(ItemData &data, BlueprintData &bpData) {
     return Blueprint::Load(blueprintID);
 }
 
-uint32 Blueprint::_Spawn(ItemData &data, BlueprintData &bpData)
+void Blueprint::Delete()
 {
-    // make sure it's a blueprint type
-    const InvTypeRef bt = InvType::getType(data.typeID);
-    if (bt.get() == nullptr)
-    {
-        return 0;
-    }
-
-    // get the blueprintID
-    uint32 blueprintID = InventoryItem::_Spawn(data);
-    if(blueprintID == 0)
-    {
-        return 0;
-    }
-
-    // insert blueprint entry into DB
-    if(!InventoryDB::NewBlueprint(blueprintID, bpData))
-    {
-        // delete item
-        InventoryDB::DeleteItem(blueprintID);
-
-        return 0;
-    }
-
-    return blueprintID;
-}
-
-void Blueprint::Delete() {
     // delete our blueprint record
     InventoryDB::DeleteBlueprint(m_itemID);
     // redirect to parent

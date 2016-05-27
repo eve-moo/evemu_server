@@ -57,15 +57,13 @@ StationData::StationData(
  */
 Station::Station(
     uint32 _stationID,
-    // InventoryItem stuff:
-                 const InvTypeRef _type,
     const ItemData &_data,
     // CelestialObject stuff:
     const CelestialObjectData &_cData,
     // Station stuff:
     const StationData &_stData)
-: CelestialObject(_stationID, _type, _data, _cData),
-m_stationType(StaStationType::getType(_type->typeID)),
+: CelestialObject(_stationID, _data, _cData),
+m_stationType(StaStationType::getType(_data.type->typeID)),
   m_security(_stData.security),
   m_dockingCostPerVolume(_stData.dockingCostPerVolume),
   m_maxShipVolumeDockable(_stData.maxShipVolumeDockable),
@@ -82,19 +80,6 @@ StationRef Station::Load(uint32 stationID)
     return InventoryItem::Load<Station>( stationID );
 }
 
-template<class _Ty>
-RefPtr<_Ty> Station::_LoadStation(uint32 stationID,
-                                  // InventoryItem stuff:
-                                  const InvTypeRef type, const ItemData &data,
-                                  // CelestialObject stuff:
-                                  const CelestialObjectData &cData,
-                                  // Station stuff:
-                                  const StationData &stData)
-{
-    // ready to create
-    return StationRef(new Station(stationID, type, data, cData, stData));
-}
-
 bool Station::loadState()
 {
     // load contents
@@ -104,27 +89,6 @@ bool Station::loadState()
     }
 
     return CelestialObject::loadState();
-}
-
-uint32 Station::_Spawn(
-    // InventoryItem stuff:
-    ItemData &data
-) {
-    // make sure it's a Station
-    const InvTypeRef item = InvType::getType(data.typeID);
-    if (!(item->getCategoryID() == EVEDB::invCategories::Station))
-    {
-        return 0;
-    }
-
-    // store item data
-    uint32 stationID = InventoryItem::_Spawn(data);
-    if(stationID == 0)
-    {
-        return 0;
-    }
-
-    return stationID;
 }
 
 using namespace Destiny;

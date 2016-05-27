@@ -48,26 +48,16 @@ CelestialObjectData::CelestialObjectData(
 /*
  * CelestialObject
  */
-CelestialObject::CelestialObject(
-    uint32 _celestialID,
-                                 const InvTypeRef _type,
-    const ItemData &_data)
-: InventoryItem(_celestialID, _type, _data),
+CelestialObject::CelestialObject(uint32 _celestialID, const ItemData &_data)
+: InventoryItem(_celestialID, _data),
   m_radius( 0.0 ),
   m_security( 0.0 ),
   m_celestialIndex( 0 ),
   m_orbitIndex( 0 )
-{
-}
+{ }
 
-CelestialObject::CelestialObject(
-    uint32 _celestialID,
-    // InventoryItem stuff:
-                                 const InvTypeRef _type,
-    const ItemData &_data,
-    // CelestialObject stuff:
-    const CelestialObjectData &_cData)
-: InventoryItem(_celestialID, _type, _data),
+CelestialObject::CelestialObject(uint32 _celestialID, const ItemData &_data, const CelestialObjectData &_cData)
+: InventoryItem(_celestialID, _data),
   m_radius(_cData.radius),
   m_security(_cData.security),
   m_celestialIndex(_cData.celestialIndex),
@@ -80,74 +70,26 @@ CelestialObjectRef CelestialObject::Load(uint32 celestialID)
     return InventoryItem::Load<CelestialObject>( celestialID );
 }
 
-template<class _Ty>
-RefPtr<_Ty> CelestialObject::_LoadCelestialObject(uint32 celestialID,
-    // InventoryItem stuff:
-                                                  const InvTypeRef type, const ItemData &data,
-    // CelestialObject stuff:
-    const CelestialObjectData &cData)
-{
-    // Our category is celestial; what to do next:
-    switch (type->groupID)
-    {
-        ///////////////////////////////////////
-        // Solar system:
-        ///////////////////////////////////////
-        case EVEDB::invGroups::Solar_System:
-        {
-            // load solar system data
-            SolarSystemData ssData;
-            if(!InventoryDB::GetSolarSystem(celestialID, ssData))
-            {
-                return RefPtr<_Ty>();
-            }
-
-            // get sun type
-            const InvTypeRef sunType = InvType::getType(ssData.sunTypeID);
-            if(sunType.get() == nullptr)
-            {
-                return RefPtr<_Ty>();
-            }
-
-            // we have it all
-            return SolarSystemRef(new SolarSystem(celestialID, type, data, cData, sunType, ssData));
-        }
-
-        ///////////////////////////////////////
-        // Station:
-        ///////////////////////////////////////
-        case EVEDB::invGroups::Station:
-        {
-            // load station data
-            StationData stData;
-            if(!InventoryDB::GetStation(celestialID, stData))
-            {
-                return RefPtr<_Ty>();
-            }
-
-            // ready to create
-            return StationRef(new Station(celestialID, type, data, cData, stData));
-        }
-    }
-
-    // Create a generic one:
-    return CelestialObjectRef( new CelestialObject( celestialID, type, data, cData ) );
-}
-
 CelestialObjectRef CelestialObject::Spawn(ItemData &data)
 {
-    InvTypeRef type = InvType::getType(data.typeID);
-    // Create default dynamic attributes in the AttributeMap:
-    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
-    data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
-    data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
-    data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
-    data.attributes[AttrMass] = type->mass; // Mass
-    data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
-    data.attributes[AttrVolume] = type->volume; // Volume
-    data.attributes[AttrCapacity] = type->capacity; // Capacity
+    uint32 celestialID = 0;
+    if(data.type.get() != nullptr && (
+       data.type->getCategoryID() == EVEDB::invCategories::Celestial ||
+       data.type->getCategoryID() == EVEDB::invCategories::Station))
+    {
+        // Create default dynamic attributes in the AttributeMap:
+        data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+        data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+        data.attributes[AttrShieldCharge] = data.type->getAttribute(AttrShieldCapacity); // Shield Charge
+        data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
+        data.attributes[AttrMass] = data.type->mass; // Mass
+        data.attributes[AttrRadius] = data.type->getAttribute(AttrRadius); // Radius
+        data.attributes[AttrVolume] = data.type->volume; // Volume
+        data.attributes[AttrCapacity] = data.type->capacity; // Capacity
 
-    uint32 celestialID = CelestialObject::_Spawn(data);
+        // store item data
+        celestialID = InventoryItem::_Spawn(data);
+    }
     if(celestialID == 0)
     {
         return CelestialObjectRef();
@@ -155,28 +97,8 @@ CelestialObjectRef CelestialObject::Spawn(ItemData &data)
     return CelestialObject::Load( celestialID );
 }
 
-uint32 CelestialObject::_Spawn(
-    // InventoryItem stuff:
-    ItemData &data
-) {
-    // make sure it's a ship
-    const InvTypeRef item = InvType::getType(data.typeID);
-    if (!(item->getCategoryID() == EVEDB::invCategories::Celestial))
-    {
-        return 0;
-    }
-
-    // store item data
-    uint32 celestialID = InventoryItem::_Spawn(data);
-    if (celestialID == 0)
-    {
-        return 0;
-    }
-
-    return celestialID;
-}
-
-void CelestialObject::Delete() {
+void CelestialObject::Delete()
+{
     InventoryItem::Delete();
 }
 

@@ -35,12 +35,8 @@
 /*
  * Skill
  */
-Skill::Skill(
-    uint32 _skillID,
-    // InventoryItem stuff:
-             const InvTypeRef _type,
-    const ItemData &_data )
-: InventoryItem(_skillID, _type, _data)
+Skill::Skill(uint32 _skillID, const ItemData &_data )
+: InventoryItem(_skillID, _data)
 {
 }
 
@@ -51,34 +47,20 @@ SkillRef Skill::Load(uint32 skillID)
 
 SkillRef Skill::Spawn(ItemData &data)
 {
-    data.attributes[AttrIsOnline] = EvilNumber((int) 1);
-    data.attributes[AttrSkillPoints] = EvilNumber((int) 0);
-    data.attributes[AttrSkillLevel] = EvilNumber((int) 0);
-    uint32 skillID = _Spawn(data);
+    uint32 skillID = 0;
+    // check it's a skill
+    if(data.type.get() != nullptr && data.type->getCategoryID() == EVEDB::invCategories::Skill)
+    {
+        data.attributes[AttrIsOnline] = EvilNumber((int) 1);
+        data.attributes[AttrSkillPoints] = EvilNumber((int) 0);
+        data.attributes[AttrSkillLevel] = EvilNumber((int) 0);
+        skillID = InventoryItem::_Spawn(data);
+    }
     if(skillID == 0)
     {
         return SkillRef();
     }
-
     return Skill::Load(skillID);
-}
-
-uint32 Skill::_Spawn(ItemData &data)
-{
-    // check it's a skill
-    const InvTypeRef type = InvType::getType(data.typeID);
-    if (type.get() == nullptr)
-    {
-        return 0;
-    }
-
-    if (type->getCategoryID() != EVEDB::invCategories::Skill)
-    {
-        _log(ITEM__ERROR, "Trying to spawn %s as Skill.", type->getCategory()->categoryName.c_str());
-        return 0;
-    }
-
-    return InventoryItem::_Spawn( data );
 }
 
 double Skill::GetSPForLevel(int level)

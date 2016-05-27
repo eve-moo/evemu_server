@@ -103,35 +103,8 @@ public:
     void sendSkillChangeNotice(Client *client, std::string eventName = "");
 
 protected:
-    Skill(
-        uint32 _skillID,
-        // InventoryItem stuff:
-          const InvTypeRef _type,
-        const ItemData &_data );
+    Skill(uint32 _skillID, const ItemData &_data);
 
-    /*
-     * Member functions
-     */
-    // Template loader:
-    template<class _Ty>
-    static RefPtr<_Ty> _LoadItem(uint32 skillID,
-        // InventoryItem stuff:
-                                 const InvTypeRef type, const ItemData &data)
-    {
-        // check it's a skill
-        if (type->getCategoryID() != EVEDB::invCategories::Skill)
-        {
-            SysLog::Error("Skill", "Trying to load %s as Skill.", type->getCategory()->categoryName.c_str());
-            return RefPtr<_Ty>();
-        }
-
-        return SkillRef(new Skill(skillID, type, data));
-    }
-
-    static uint32 _Spawn(
-        // InventoryItem stuff:
-        ItemData &data
-    );
 };
 
 class Certificate

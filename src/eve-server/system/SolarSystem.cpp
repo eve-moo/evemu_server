@@ -69,15 +69,13 @@ SolarSystemData::SolarSystemData(
  */
 SolarSystem::SolarSystem(
                          uint32 _solarSystemID,
-    // InventoryItem stuff:
-    const InvTypeRef _type,
     const ItemData &_data,
     // CelestialObject stuff:
     const CelestialObjectData &_cData,
     // SolarSystem stuff:
     const InvTypeRef _sunType,
     const SolarSystemData &_ssData)
-: CelestialObject(_solarSystemID, _type, _data, _cData),
+: CelestialObject(_solarSystemID, _data, _cData),
   m_minPosition(_ssData.minPosition),
   m_maxPosition(_ssData.maxPosition),
   m_luminosity(_ssData.luminosity),
@@ -104,19 +102,6 @@ SolarSystem::~SolarSystem() {
 SolarSystemRef SolarSystem::Load(uint32 solarSystemID)
 {
     return InventoryItem::Load<SolarSystem>( solarSystemID );
-}
-
-template<class _Ty>
-RefPtr<_Ty> SolarSystem::_LoadSolarSystem(uint32 solarSystemID,
-                                          // InventoryItem stuff:
-                                          const InvTypeRef type, const ItemData &data,
-                                          // CelestialObject stuff:
-                                          const CelestialObjectData &cData,
-                                          // SolarSystem stuff:
-                                          const InvTypeRef sunType, const SolarSystemData &ssData)
-{
-    // we have it all
-    return SolarSystemRef(new SolarSystem(solarSystemID, type, data, cData, sunType, ssData));
 }
 
 void SolarSystem::AddItemToInventory(InventoryItemRef item)

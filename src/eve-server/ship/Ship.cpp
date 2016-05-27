@@ -34,12 +34,8 @@
 /*
  * Ship
  */
-Ship::Ship(
-   uint32 _shipID,
-    // InventoryItem stuff:
-           const InvTypeRef _shipType,
-    const ItemData &_data)
-: InventoryItem(_shipID, _shipType, _data),
+Ship::Ship(uint32 _shipID, const ItemData &_data)
+: InventoryItem(_shipID, _data),
   m_processTimerTick(SHIP_PROCESS_TICK_MS),
   m_processTimer(SHIP_PROCESS_TICK_MS)
 {
@@ -60,102 +56,83 @@ ShipRef Ship::Load(uint32 shipID)
 
 ShipRef Ship::Spawn(ItemData &data)
 {
-    InvTypeRef type = InvType::getType(data.typeID);
-    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
-    data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
-    data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
-    data.attributes[AttrMass] = type->mass; // Mass
-    data.attributes[AttrRadius] = type->getDoubleAttribute(AttrRadius); // Radius
-    data.attributes[AttrVolume] = type->volume; // Volume
-    data.attributes[AttrCapacity] = type->capacity; // Capacity
-    data.attributes[AttrInertia] = EvilNumber(1); // Inertia
-    data.attributes[AttrCharge] = type->getAttribute(AttrCapacitorCapacity); // Set Capacitor Charge to the Capacitor Capacity
-    // Hull Damage
-    data.attributes[AttrDamage] = EvilNumber(0);
-    // Theoretical Maximum Targeting Range
-    data.attributes[AttrMaximumRangeCap] = EvilNumber(((double) BUBBLE_RADIUS_METERS));
-    // Maximum Armor Damage Resonance
-    data.attributes[AttrArmorMaxDamageResonance] = EvilNumber(1.0f);
-    // Maximum Shield Damage Resonance
-    data.attributes[AttrShieldMaxDamageResonance] = EvilNumber(1.0f);
-    // Warp Speed Multiplier
-    data.attributes[AttrWarpSpeedMultiplier] = EvilNumber(1.0f);
-    // CPU Load of the ship (new ships have zero load with no modules fitted, of course):
-    data.attributes[AttrCpuLoad] = EvilNumber(0);
-    // Power Load of the ship (new ships have zero load with no modules fitted, of course):
-    data.attributes[AttrPowerLoad] = EvilNumber(0);
-    // Warp Scramble Status of the ship (most ships have zero warp scramble status, but some already have it defined):
-    data.attributes[AttrWarpScrambleStatus] = EvilNumber(0.0);
-
-    // Shield Resonance
-    // AttrShieldEmDamageResonance
-    data.attributes[AttrShieldEmDamageResonance] = EvilNumber(1.0);
-    // AttrShieldExplosiveDamageResonance
-    data.attributes[AttrShieldExplosiveDamageResonance] = EvilNumber(1.0);
-    // AttrShieldKineticDamageResonance
-    data.attributes[AttrShieldKineticDamageResonance] = EvilNumber(1.0);
-    // AttrShieldThermalDamageResonance
-    data.attributes[AttrShieldThermalDamageResonance] = EvilNumber(1.0);
-
-    // Armor Resonance
-    // AttrArmorEmDamageResonance
-    data.attributes[AttrArmorEmDamageResonance] = EvilNumber(1.0);
-    // AttrArmorExplosiveDamageResonance
-    data.attributes[AttrArmorExplosiveDamageResonance] = EvilNumber(1.0);
-    // AttrArmorKineticDamageResonance
-    data.attributes[AttrArmorKineticDamageResonance] = EvilNumber(1.0);
-    // AttrArmorThermalDamageResonance
-    data.attributes[AttrArmorThermalDamageResonance] = EvilNumber(1.0);
-
-    // Hull Resonance
-    // AttrHullEmDamageResonance
-    data.attributes[AttrHullEmDamageResonance] = EvilNumber(1.0);
-    // AttrHullExplosiveDamageResonance
-    data.attributes[AttrHullExplosiveDamageResonance] = EvilNumber(1.0);
-    // AttrHullKineticDamageResonance
-    data.attributes[AttrHullKineticDamageResonance] = EvilNumber(1.0);
-    // AttrHullThermalDamageResonance
-    data.attributes[AttrHullThermalDamageResonance] = EvilNumber(1.0);
-
-    // AttrTurretSlotsLeft
-    data.attributes[AttrTurretSlotsLeft] = EvilNumber(0);
-    // AttrLauncherSlotsLeft
-    data.attributes[AttrLauncherSlotsLeft] = EvilNumber(0);
-
-    // Set type attributes
-    for(auto attr : type->m_attributes)
+    uint32 shipID = 0;
+    // make sure it's a ship
+    if(data.type.get() != nullptr)
     {
-        data.attributes[attr.first] = attr.second;
-    }
+        data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+        data.attributes[AttrShieldCharge] = data.type->getAttribute(AttrShieldCapacity); // Shield Charge
+        data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
+        data.attributes[AttrMass] = data.type->mass; // Mass
+        data.attributes[AttrRadius] = data.type->getDoubleAttribute(AttrRadius); // Radius
+        data.attributes[AttrVolume] = data.type->volume; // Volume
+        data.attributes[AttrCapacity] = data.type->capacity; // Capacity
+        data.attributes[AttrInertia] = EvilNumber(1); // Inertia
+        data.attributes[AttrCharge] = data.type->getAttribute(AttrCapacitorCapacity); // Set Capacitor Charge to the Capacitor Capacity
+        // Hull Damage
+        data.attributes[AttrDamage] = EvilNumber(0);
+        // Theoretical Maximum Targeting Range
+        data.attributes[AttrMaximumRangeCap] = EvilNumber(((double) BUBBLE_RADIUS_METERS));
+        // Maximum Armor Damage Resonance
+        data.attributes[AttrArmorMaxDamageResonance] = EvilNumber(1.0f);
+        // Maximum Shield Damage Resonance
+        data.attributes[AttrShieldMaxDamageResonance] = EvilNumber(1.0f);
+        // Warp Speed Multiplier
+        data.attributes[AttrWarpSpeedMultiplier] = EvilNumber(1.0f);
+        // CPU Load of the ship (new ships have zero load with no modules fitted, of course):
+        data.attributes[AttrCpuLoad] = EvilNumber(0);
+        // Power Load of the ship (new ships have zero load with no modules fitted, of course):
+        data.attributes[AttrPowerLoad] = EvilNumber(0);
+        // Warp Scramble Status of the ship (most ships have zero warp scramble status, but some already have it defined):
+        data.attributes[AttrWarpScrambleStatus] = EvilNumber(0.0);
 
-    uint32 shipID = Ship::_Spawn(data);
+        // Shield Resonance
+        // AttrShieldEmDamageResonance
+        data.attributes[AttrShieldEmDamageResonance] = EvilNumber(1.0);
+        // AttrShieldExplosiveDamageResonance
+        data.attributes[AttrShieldExplosiveDamageResonance] = EvilNumber(1.0);
+        // AttrShieldKineticDamageResonance
+        data.attributes[AttrShieldKineticDamageResonance] = EvilNumber(1.0);
+        // AttrShieldThermalDamageResonance
+        data.attributes[AttrShieldThermalDamageResonance] = EvilNumber(1.0);
+
+        // Armor Resonance
+        // AttrArmorEmDamageResonance
+        data.attributes[AttrArmorEmDamageResonance] = EvilNumber(1.0);
+        // AttrArmorExplosiveDamageResonance
+        data.attributes[AttrArmorExplosiveDamageResonance] = EvilNumber(1.0);
+        // AttrArmorKineticDamageResonance
+        data.attributes[AttrArmorKineticDamageResonance] = EvilNumber(1.0);
+        // AttrArmorThermalDamageResonance
+        data.attributes[AttrArmorThermalDamageResonance] = EvilNumber(1.0);
+
+        // Hull Resonance
+        // AttrHullEmDamageResonance
+        data.attributes[AttrHullEmDamageResonance] = EvilNumber(1.0);
+        // AttrHullExplosiveDamageResonance
+        data.attributes[AttrHullExplosiveDamageResonance] = EvilNumber(1.0);
+        // AttrHullKineticDamageResonance
+        data.attributes[AttrHullKineticDamageResonance] = EvilNumber(1.0);
+        // AttrHullThermalDamageResonance
+        data.attributes[AttrHullThermalDamageResonance] = EvilNumber(1.0);
+
+        // AttrTurretSlotsLeft
+        data.attributes[AttrTurretSlotsLeft] = EvilNumber(0);
+        // AttrLauncherSlotsLeft
+        data.attributes[AttrLauncherSlotsLeft] = EvilNumber(0);
+
+        // Set type attributes
+        data.loadTypeAttributes();
+
+        // store item data
+        shipID = InventoryItem::_Spawn(data);
+    }
     if(shipID == 0)
     {
         return ShipRef();
     }
 
-    ShipRef sShipRef = Ship::Load( shipID );
-    return sShipRef;
-}
-
-uint32 Ship::_Spawn(ItemData &data) {
-    // make sure it's a ship
-    const InvTypeRef st = InvType::getType(data.typeID);
-    if (st.get() == nullptr)
-    {
-        return 0;
-    }
-
-    // store item data
-    uint32 shipID = InventoryItem::_Spawn(data);
-    if (shipID == 0)
-    {
-        return 0;
-    }
-
-    // nothing additional
-
-    return shipID;
+    return Ship::Load(shipID);
 }
 
 bool Ship::loadState()

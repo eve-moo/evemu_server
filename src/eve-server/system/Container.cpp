@@ -33,12 +33,8 @@
 /*
  * CargoContainer
  */
-CargoContainer::CargoContainer(
-    uint32 _containerID,
-    // InventoryItem stuff:
-                               const InvTypeRef _containerType,
-    const ItemData &_data)
-: InventoryItem(_containerID, _containerType, _data) {}
+CargoContainer::CargoContainer(uint32 _containerID, const ItemData &_data)
+: InventoryItem(_containerID, _data) {}
 
 CargoContainerRef CargoContainer::Load(uint32 containerID)
 {
@@ -47,51 +43,31 @@ CargoContainerRef CargoContainer::Load(uint32 containerID)
 
 CargoContainerRef CargoContainer::Spawn(ItemData &data)
 {
-    InvTypeRef type = InvType::getType(data.typeID);
-    // Create default dynamic attributes in the AttributeMap:
-    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
-    data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
-    //data.attributes[AttrShieldCharge,  type->getAttribute(AttrShieldCapacity));  // Shield Charge
-    //data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
-    data.attributes[AttrMass] = type->mass; // Mass
-    data.attributes[AttrVolume] = type->volume; // Volume
-    data.attributes[AttrCapacity] = type->capacity; // Capacity
-    data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
-    data.attributes[AttrDamage] = EvilNumber(0);
-
-    // Set type attributes
-    for(auto attr : type->m_attributes)
+    uint32 containerID = 0;
+    if(data.type.get() != nullptr)
     {
-        data.attributes[attr.first] = attr.second;
-    }
+        // Create default dynamic attributes in the AttributeMap:
+        data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+        data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+        //data.attributes[AttrShieldCharge,  type->getAttribute(AttrShieldCapacity));  // Shield Charge
+        //data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
+        data.attributes[AttrMass] = data.type->mass; // Mass
+        data.attributes[AttrVolume] = data.type->volume; // Volume
+        data.attributes[AttrCapacity] = data.type->capacity; // Capacity
+        data.attributes[AttrRadius] = data.type->getAttribute(AttrRadius); // Radius
+        data.attributes[AttrDamage] = EvilNumber(0);
 
-    uint32 containerID = CargoContainer::_Spawn(data);
+        // Set type attributes
+        data.loadTypeAttributes();
+
+        // store item data
+        containerID = InventoryItem::_Spawn(data);
+    }
     if(containerID == 0)
     {
         return CargoContainerRef();
     }
     return CargoContainer::Load(containerID);
-}
-
-uint32 CargoContainer::_Spawn(ItemData &data)
-{
-    // make sure it's a cargo container
-    const InvTypeRef st = InvType::getType(data.typeID);
-    if (st.get() == nullptr)
-    {
-        return 0;
-    }
-
-    // store item data
-    uint32 containerID = InventoryItem::_Spawn(data);
-    if(containerID == 0)
-    {
-        return 0;
-    }
-
-    // nothing additional
-
-    return containerID;
 }
 
 bool CargoContainer::loadState()

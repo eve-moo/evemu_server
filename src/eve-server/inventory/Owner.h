@@ -52,48 +52,8 @@ public:
     static OwnerRef Spawn(ItemData &data);
 
 protected:
-    Owner(
-          uint32 _ownerID,
-          // InventoryItem stuff:
-          const InvTypeRef _type,
-          const ItemData &_data);
+    Owner(uint32 _ownerID, const ItemData &_data);
 
-    /*
-     * Member functions
-     */
-    // Template loader:
-
-    template<class _Ty>
-    static RefPtr<_Ty> _LoadItem(uint32 ownerID,
-                                 // InventoryItem stuff:
-                                 const InvTypeRef type, const ItemData &data)
-    {
-        // check it's an owner
-        if(type->getCategoryID() != EVEDB::invCategories::Owner)
-        {
-            SysLog::Error("Owner", "Trying to load %s as Owner.", type->getCategory()->categoryName.c_str());
-            return RefPtr<_Ty>();
-        }
-
-        // no additional stuff
-
-        return _Ty::template _LoadOwner<_Ty>(ownerID, type, data);
-    }
-
-    // Actual loading stuff:
-    template<class _Ty>
-    static RefPtr<_Ty> _LoadOwner(
-
-                                  uint32 ownerID,
-                                  // InventoryItem stuff:
-                                  const InvTypeRef type,
-                                  const ItemData &data
-                                  );
-
-    static uint32 _Spawn(
-                         // InventoryItem stuff:
-                         ItemData &data
-                         );
 };
 
 #endif /* !__OWNER__H__INCL__ */

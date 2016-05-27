@@ -21,7 +21,7 @@
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
     Author:     Zhur
-*/
+ */
 
 #include "eve-server.h"
 
@@ -34,6 +34,8 @@
 #include "station/Station.h"
 #include "system/Celestial.h"
 #include "system/Container.h"
+#include "system/SolarSystem.h"
+#include "pos/Structure.h"
 
 const int32 ITEM_DB_SAVE_TIMER_EXPIRY(10);
 
@@ -75,109 +77,109 @@ const std::map<EVEItemFlags, uint32 > InventoryItem::m_cargoFlagAttributeMap = {
  * ItemData
  */
 ItemData::ItemData(
-    const char *_name,
-    uint32 _typeID,
-    uint32 _ownerID,
-    uint32 _locationID,
-    EVEItemFlags _flag,
-    bool _contraband,
-    bool _singleton,
-    uint32 _quantity,
-    const Vector3D &_position,
-    const char *_customInfo)
+                   const char *_name,
+                   uint32 _typeID,
+                   uint32 _ownerID,
+                   uint32 _locationID,
+                   EVEItemFlags _flag,
+                   bool _contraband,
+                   bool _singleton,
+                   uint32 _quantity,
+                   const Vector3D &_position,
+                   const char *_customInfo)
 : name(_name),
-  typeID(_typeID),
-  ownerID(_ownerID),
-  locationID(_locationID),
-  flag(_flag),
-  contraband(_contraband),
-  singleton(_singleton),
-  quantity(_quantity),
-  position(_position),
-  customInfo(_customInfo)
-{
-}
+typeID(_typeID),
+ownerID(_ownerID),
+locationID(_locationID),
+flag(_flag),
+contraband(_contraband),
+singleton(_singleton),
+quantity(_quantity),
+position(_position),
+customInfo(_customInfo),
+type(InvType::getType(_typeID)) { }
 
 ItemData::ItemData(
-    uint32 _typeID,
-    uint32 _ownerID,
-    uint32 _locationID,
-    EVEItemFlags _flag,
-    uint32 _quantity,
-    const char *_customInfo,
-    bool _contraband)
+                   uint32 _typeID,
+                   uint32 _ownerID,
+                   uint32 _locationID,
+                   EVEItemFlags _flag,
+                   uint32 _quantity,
+                   const char *_customInfo,
+                   bool _contraband)
 : name(""),
-  typeID(_typeID),
-  ownerID(_ownerID),
-  locationID(_locationID),
-  flag(_flag),
-  contraband(_contraband),
-  singleton(false),
-  quantity(_quantity),
-  position(0, 0, 0),
-  customInfo(_customInfo)
-{
-}
+typeID(_typeID),
+ownerID(_ownerID),
+locationID(_locationID),
+flag(_flag),
+contraband(_contraband),
+singleton(false),
+quantity(_quantity),
+position(0, 0, 0),
+customInfo(_customInfo),
+type(InvType::getType(_typeID)) { }
 
 ItemData::ItemData(
-    uint32 _typeID,
-    uint32 _ownerID,
-    uint32 _locationID,
-    EVEItemFlags _flag,
-    const char *_name,
-    const Vector3D &_position,
-    const char *_customInfo,
-    bool _contraband)
+                   uint32 _typeID,
+                   uint32 _ownerID,
+                   uint32 _locationID,
+                   EVEItemFlags _flag,
+                   const char *_name,
+                   const Vector3D &_position,
+                   const char *_customInfo,
+                   bool _contraband)
 : name(_name),
-  typeID(_typeID),
-  ownerID(_ownerID),
-  locationID(_locationID),
-  flag(_flag),
-  contraband(_contraband),
-  singleton(true),
-  quantity(1),
-  position(_position),
-  customInfo(_customInfo)
+typeID(_typeID),
+ownerID(_ownerID),
+locationID(_locationID),
+flag(_flag),
+contraband(_contraband),
+singleton(true),
+quantity(1),
+position(_position),
+customInfo(_customInfo),
+type(InvType::getType(_typeID)) { }
+
+void ItemData::loadTypeAttributes()
 {
+    for(auto attr : type->m_attributes)
+    {
+        attributes[attr.first] = attr.second;
+    }
 }
 
 /*
  * InventoryItem
  */
-InventoryItem::InventoryItem(
-    uint32 _itemID,
-                             const InvTypeRef _type,
-    const ItemData &_data)
-: RefObject( 0 ),
-  //attributes( *this, true, true),
+InventoryItem::InventoryItem(uint32 _itemID, const ItemData &_data)
+: RefObject(0),
+//attributes( *this, true, true),
 m_AttributeMap(*this),
 m_DefaultAttributeMap(*this, true),
-  m_saveTimer(0,true),
-  m_itemID(_itemID),
-  m_itemName(_data.name),
-  m_type(_type),
-  m_ownerID(_data.ownerID),
-  m_locationID(_data.locationID),
-  m_flag(_data.flag),
-  m_contraband(_data.contraband),
-  m_singleton(_data.singleton),
-  m_quantity(_data.quantity),
-  m_position(_data.position),
-  m_customInfo(_data.customInfo)
-
+m_saveTimer(0, true),
+m_itemID(_itemID),
+m_itemName(_data.name),
+m_type(_data.type),
+m_ownerID(_data.ownerID),
+m_locationID(_data.locationID),
+m_flag(_data.flag),
+m_contraband(_data.contraband),
+m_singleton(_data.singleton),
+m_quantity(_data.quantity),
+m_position(_data.position),
+m_customInfo(_data.customInfo)
 {
     // assert for data consistency
-    assert(_data.typeID == _type->typeID);
+    assert(_data.typeID == m_type->typeID);
 
     //m_saveTimerExpiryTime = ITEM_DB_SAVE_TIMER_EXPIRY * 60 * 1000;      // 10 minutes in milliseconds
     //m_saveTimer.SetTimer(m_saveTimerExpiryTime);                        // set timer in milliseconds
-    m_saveTimer.Disable();                                              // disable timer by default
+    m_saveTimer.Disable(); // disable timer by default
 
     _log(ITEM__TRACE, "Created object %p for item %s (%u).", this, itemName().c_str(), itemID());
 }
 
-InventoryItem::~InventoryItem()
-{
+InventoryItem::~InventoryItem() {
     // Save this item's srvEntity_attributes info to the Database before it is destroyed
     //mAttributeMap.SaveAttributes();
 
@@ -187,21 +189,16 @@ InventoryItem::~InventoryItem()
 
 InventoryItemRef InventoryItem::Load(uint32 itemID)
 {
-    return InventoryItem::Load<InventoryItem>( itemID );
+    return InventoryItem::Load<InventoryItem>(itemID);
 }
 
-template<class _Ty>
-RefPtr<_Ty> InventoryItem::_LoadItem(uint32 itemID,
-    // InventoryItem stuff:
-                                     const InvTypeRef type, const ItemData &data)
+InventoryItem *InventoryItem::_LoadItem(uint32 itemID, const ItemData &data)
 {
-    uint32 groupID = type->groupID;
-    // See what to do next:
-    switch (type->getCategoryID())
+    uint32 groupID = data.type->groupID;
+    switch(data.type->getCategoryID())
     {
-        //! TODO not handled.
+            //! TODO not handled.
         case EVEDB::invCategories::_System:
-        case EVEDB::invCategories::Station:
         case EVEDB::invCategories::Material:
         case EVEDB::invCategories::Accessories:
         case EVEDB::invCategories::Module:
@@ -212,89 +209,162 @@ RefPtr<_Ty> InventoryItem::_LoadItem(uint32 itemID,
         case EVEDB::invCategories::Drone:
         case EVEDB::invCategories::Implant:
         case EVEDB::invCategories::Deployable:
-        case EVEDB::invCategories::Structure:
         case EVEDB::invCategories::Reaction:
         case EVEDB::invCategories::Asteroid:
-             break;
-        ///////////////////////////////////////
-        // Blueprint:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Blueprint: {
-            return Blueprint::_LoadItem<Blueprint>( itemID, type, data );
+            break;
+            ///////////////////////////////////////
+            // Blueprint:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Blueprint:
+        {
+            // Pull additional blueprint info
+            BlueprintData bpData;
+            if(!InventoryDB::GetBlueprint(itemID, bpData))
+            {
+                return nullptr;
+            }
+            return new Blueprint(itemID, data, bpData);
         }
 
-        ///////////////////////////////////////
-        // Entity:
-        ///////////////////////////////////////
+            ///////////////////////////////////////
+            // Entity:
+            ///////////////////////////////////////
         case EVEDB::invCategories::Entity:
         {
-            if ((groupID == EVEDB::invGroups::Spawn_Container))
-                return CargoContainerRef( new CargoContainer( itemID, type, data ) );
+            if((groupID == EVEDB::invGroups::Spawn_Container))
+            {
+                return new CargoContainer(itemID, data);
+            }
             else
-                if ((groupID >= EVEDB::invGroups::Asteroid_Angel_Cartel_Frigate
-                    && groupID <= EVEDB::invGroups::Deadspace_Serpentis_Frigate)
-                    || (groupID >= 755 /* Asteroid Rogue Drone BattleCruiser */
-                    && groupID <= 761 /* Asteroid Rogue Drone Swarm */)
-                    || (groupID >= 789 /* Asteroid Angel Cartel Commander Frigate */
-                    && groupID <= 814 /* Asteroid Serpentis Commander Frigate */)
-                    || (groupID >= 843 /* Asteroid Rogue Drone Commander BattleCruiser */
-                    && groupID <= 852 /* Asteroid Serpentis Commander Battleship */)
-                    || (groupID >= 959 /* Deadspace Sleeper Sleepless Sentinel */
-                    && groupID <= 987 /* Deadspace Sleeper Emergent Patroller */))
-					return InventoryItemRef( new InventoryItem(itemID, type, data) );
-				else
-					return CelestialObjectRef( new CelestialObject( itemID, type, data ) );
+            {
+                if((groupID >= EVEDB::invGroups::Asteroid_Angel_Cartel_Frigate
+                   && groupID <= EVEDB::invGroups::Deadspace_Serpentis_Frigate)
+                   || (groupID >= 755 /* Asteroid Rogue Drone BattleCruiser */
+                   && groupID <= 761 /* Asteroid Rogue Drone Swarm */)
+                   || (groupID >= 789 /* Asteroid Angel Cartel Commander Frigate */
+                   && groupID <= 814 /* Asteroid Serpentis Commander Frigate */)
+                   || (groupID >= 843 /* Asteroid Rogue Drone Commander BattleCruiser */
+                   && groupID <= 852 /* Asteroid Serpentis Commander Battleship */)
+                   || (groupID >= 959 /* Deadspace Sleeper Sleepless Sentinel */
+                   && groupID <= 987 /* Deadspace Sleeper Emergent Patroller */))
+                {
+                    return new InventoryItem(itemID, data);
+                }
+                else
+                {
+                    return new CelestialObject(itemID, data);
+                }
+            }
         }
 
-        ///////////////////////////////////////
-        // Celestial:
-        ///////////////////////////////////////
+            ///////////////////////////////////////
+            // Celestial:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Station:
         case EVEDB::invCategories::Celestial:
         {
-            if ((groupID == EVEDB::invGroups::Secure_Cargo_Container)
-                || (groupID == EVEDB::invGroups::Audit_Log_Secure_Container)
-                || (groupID == EVEDB::invGroups::Freight_Container)
-                || (groupID == EVEDB::invGroups::Cargo_Container)
-                || (groupID == EVEDB::invGroups::Wreck) )
-                return CargoContainerRef( new CargoContainer( itemID, type, data ) );
-            else
-                return CelestialObjectRef( new CelestialObject( itemID, type, data ) );
+            if((groupID == EVEDB::invGroups::Secure_Cargo_Container)
+               || (groupID == EVEDB::invGroups::Audit_Log_Secure_Container)
+               || (groupID == EVEDB::invGroups::Freight_Container)
+               || (groupID == EVEDB::invGroups::Spawn_Container)
+               || (groupID == EVEDB::invGroups::Cargo_Container)
+               || (groupID == EVEDB::invGroups::Wreck))
+            {
+                return new CargoContainer(itemID, data);
+            }
+            CelestialObjectData cData;
+            if(!InventoryDB::GetCelestialObject(itemID, cData))
+            {
+                return nullptr;
+            }
+
+            ///////////////////////////////////////
+            // Station:
+            ///////////////////////////////////////
+            if(data.type->groupID == EVEDB::invGroups::Station)
+            {
+                StationData stData;
+                if(!InventoryDB::GetStation(itemID, stData))
+                {
+                    return nullptr;
+                }
+
+                // ready to create
+                return new Station(itemID, data, cData, stData);
+            }
+            ///////////////////////////////////////
+            // Solar system:
+            ///////////////////////////////////////
+            if(data.type->groupID == EVEDB::invGroups::Solar_System)
+            {
+                // load solar system data
+                SolarSystemData ssData;
+                if(!InventoryDB::GetSolarSystem(itemID, ssData))
+                {
+                    return nullptr;
+                }
+                // get sun type
+                const InvTypeRef sunType = InvType::getType(ssData.sunTypeID);
+                if(sunType.get() == nullptr)
+                {
+                    return nullptr;
+                }
+                return new SolarSystem(itemID, data, cData, sunType, ssData);
+            }
+            // Create a generic one:
+            return new CelestialObject(itemID, data, cData);
         }
 
-        ///////////////////////////////////////
-        // Ship:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Ship: {
-            return Ship::_LoadItem<Ship>( itemID, type, data );
+            ///////////////////////////////////////
+            // Ship:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Ship:
+        {
+            return new Ship(itemID, data);
         }
 
-        ///////////////////////////////////////
-        // Skill:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Skill: {
-            return Skill::_LoadItem<Skill>( itemID, type, data );
+            ///////////////////////////////////////
+            // Skill:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Skill:
+        {
+            return new Skill(itemID, data);
         }
 
-        ///////////////////////////////////////
-        // Owner:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Owner: {
-            return Owner::_LoadItem<Owner>( itemID, type, data );
+            ///////////////////////////////////////
+            // Owner:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Owner:
+        {
+            if(data.type->groupID == EVEDB::invGroups::Character)
+            {
+                CharacterData charData;
+                if(!InventoryDB::GetCharacter(itemID, charData))
+                {
+                    return nullptr;
+                }
+                CorpMemberInfo corpData;
+                if(!InventoryDB::GetCorpMemberInfo(itemID, corpData))
+                {
+                    return nullptr;
+                }
+                return new Character(itemID, data, charData, corpData);
+            }
+            return new Owner(itemID, data);
         }
-    }
 
-    // ItemCategory didn't do it, try ItemGroup:
-    switch( groupID ) {
-        ///////////////////////////////////////
-        // Station:
-        ///////////////////////////////////////
-        case EVEDB::invGroups::Station: {
-            return Station::_LoadItem<Station>( itemID, type, data );
+            ///////////////////////////////////////
+            // Structure:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Structure:
+        {
+            return new Structure(itemID, data);
         }
+
     }
 
     // Generic item, create one:
-    return InventoryItemRef( new InventoryItem( itemID, type, data ) );
+    return new InventoryItem(itemID, data);
 }
 
 bool InventoryItem::loadState()
@@ -303,12 +373,12 @@ bool InventoryItem::loadState()
     m_AttributeMap.Load();
     m_DefaultAttributeMap.Load();
 
-	// fill basic cargo hold data:
+    // fill basic cargo hold data:
     m_cargoHoldsUsedVolumeByFlag.insert(std::pair<EVEItemFlags, double>(flagCargoHold, m_AttributeMap.GetAttribute(AttrCapacity).get_float()));
 
     // update inventory
     Inventory *inventory = ItemFactory::GetInventory(locationID(), false);
-    if(inventory != NULL)
+    if(inventory != nullptr)
     {
         inventory->AddItem(InventoryItemRef(this));
     }
@@ -319,18 +389,17 @@ bool InventoryItem::loadState()
 InventoryItemRef InventoryItem::Spawn(ItemData &data)
 {
     // obtain type of new item
-    const InvTypeRef type = InvType::getType(data.typeID);
-    if(type.get() == nullptr)
+    if(data.type.get() == nullptr)
     {
         return InventoryItemRef();
     }
 
+    bool defaultAttr = true;
     // See what to do next:
-    switch(type->getCategoryID())
+    switch(data.type->getCategoryID())
     {
-        //! TODO not handled.
+            //! TODO not handled.
         case EVEDB::invCategories::_System:
-        case EVEDB::invCategories::Station:
         case EVEDB::invCategories::Material:
         case EVEDB::invCategories::Accessories:
         case EVEDB::invCategories::Trading:
@@ -338,43 +407,43 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         case EVEDB::invCategories::Commodity:
         case EVEDB::invCategories::Implant:
         case EVEDB::invCategories::Reaction:
-             break;
+        case EVEDB::invCategories::Charge:
+        case EVEDB::invCategories::Module:
+            break;
 
-		///////////////////////////////////////
-        // Entity:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Entity: {
-			uint32 itemID = InventoryItem::_Spawn( data );
-            if(itemID == 0)
-            {
-                return InventoryItemRef();
-            }
-			InventoryItemRef itemRef = InventoryItem::Load( itemID );
-			return itemRef;
-		}
+            ///////////////////////////////////////
+            // Entity:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Entity:
+        {
+            defaultAttr = false;
+            // Go to default spawn.
+            break;
+        }
 
-		///////////////////////////////////////
-        // Blueprint:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Blueprint: {
+            ///////////////////////////////////////
+            // Blueprint:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Blueprint:
+        {
             BlueprintData bdata; // use default blueprint attributes
             return Blueprint::Spawn(data, bdata);
         }
 
-        ///////////////////////////////////////
-        // Celestial:
-        // (used for Cargo Containers, Rings, and Biomasses, Wrecks, Large Collidable Objects, Clouds,
-        //  Cosmic Signatures, Mobile Sentry Guns, Global Warp Disruptors, Agents in Space, Cosmic Anomaly, Beacons, Wormholes,
-        //  and other celestial static objects such as NPC stations, stars, moons, planets, and stargates)
-        ///////////////////////////////////////
+            ///////////////////////////////////////
+            // Celestial:
+            // (used for Cargo Containers, Rings, and Biomasses, Wrecks, Large Collidable Objects, Clouds,
+            //  Cosmic Signatures, Mobile Sentry Guns, Global Warp Disruptors, Agents in Space, Cosmic Anomaly, Beacons, Wormholes,
+            //  and other celestial static objects such as NPC stations, stars, moons, planets, and stargates)
+            ///////////////////////////////////////
         case EVEDB::invCategories::Celestial:
         {
-            if((type->groupID == EVEDB::invGroups::Secure_Cargo_Container)
-               || (type->groupID == EVEDB::invGroups::Cargo_Container)
-               || (type->groupID == EVEDB::invGroups::Freight_Container)
-               || (type->groupID == EVEDB::invGroups::Audit_Log_Secure_Container)
-               || (type->groupID == EVEDB::invGroups::Spawn_Container)
-               || (type->groupID == EVEDB::invGroups::Wreck))
+            if((data.type->groupID == EVEDB::invGroups::Secure_Cargo_Container)
+               || (data.type->groupID == EVEDB::invGroups::Cargo_Container)
+               || (data.type->groupID == EVEDB::invGroups::Freight_Container)
+               || (data.type->groupID == EVEDB::invGroups::Audit_Log_Secure_Container)
+               || (data.type->groupID == EVEDB::invGroups::Spawn_Container)
+               || (data.type->groupID == EVEDB::invGroups::Wreck))
             {
                 // Spawn new Cargo Container
                 return CargoContainer::Spawn(data);
@@ -386,197 +455,97 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
             }
         }
 
-        ///////////////////////////////////////
-        // Ship:
-        ///////////////////////////////////////
+            ///////////////////////////////////////
+            // Station:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Station:
+        {
+            if(data.type->groupID == EVEDB::invGroups::Station)
+            {
+                return Station::Spawn(data);
+            }
+            break;
+        }
+
+            ///////////////////////////////////////
+            // Ship:
+            ///////////////////////////////////////
         case EVEDB::invCategories::Ship:
         {
             return Ship::Spawn(data);
         }
 
-        ///////////////////////////////////////
-        // Skill:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Skill: {
-            return Skill::Spawn( data );
+            ///////////////////////////////////////
+            // Skill:
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Skill:
+        {
+            return Skill::Spawn(data);
         }
 
-        ///////////////////////////////////////
-        // Owner:
-        ///////////////////////////////////////
+            ///////////////////////////////////////
+            // Owner:
+            ///////////////////////////////////////
         case EVEDB::invCategories::Owner:
         {
-            return Owner::Spawn( data );
+            return Owner::Spawn(data);
         }
 
-        ///////////////////////////////////////
-        // Charge:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Charge:
-        {
-            // THESE SHOULD BE MOVED INTO A Charge::Spawn() function that does not exist yet
-            // Create default dynamic attributes in the AttributeMap:
-            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
-            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
-            data.attributes[AttrMass] = type->mass; // Mass
-            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
-            data.attributes[AttrVolume] = type->volume; // Volume
-            data.attributes[AttrCapacity] = type->capacity; // Capacity
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if(itemID == 0)
-            {
-                return InventoryItemRef();
-            }
-
-            return InventoryItem::Load(itemID);
-		}
-
-		///////////////////////////////////////
-        // Module:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Module:
-        {
-            // THESE SHOULD BE MOVED INTO A Module::Spawn() function that does not exist yet
-            // Create default dynamic attributes in the AttributeMap:
-            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
-            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
-            data.attributes[AttrMass] = type->mass; // Mass
-            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
-            data.attributes[AttrVolume] = type->volume; // Volume
-            data.attributes[AttrCapacity] = type->capacity; // Capacity
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if(itemID == 0)
-            {
-                return InventoryItemRef();
-            }
-
-            return InventoryItem::Load(itemID);
-        }
-
-        ///////////////////////////////////////
-        // Drone:
-        ///////////////////////////////////////
-        case EVEDB::invCategories::Drone:
-        {
-            // THESE SHOULD BE MOVED INTO A Drone::Spawn() function that does not exist yet
-            // Create default dynamic attributes in the AttributeMap:
-            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
-            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
-            data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
-            data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
-            data.attributes[AttrMass] = type->mass; // Mass
-            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
-            data.attributes[AttrVolume] = type->volume; // Volume
-            data.attributes[AttrCapacity] = type->capacity; // Capacity
-
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if(itemID == 0)
-            {
-                return InventoryItemRef();
-            }
-
-            return InventoryItem::Load(itemID);
-        }
-
-        ///////////////////////////////////////
-        // Deployable:
-        ///////////////////////////////////////
+            ///////////////////////////////////////
+            // Deployable:
+            ///////////////////////////////////////
         case EVEDB::invCategories::Deployable:
         {
-            // THESE SHOULD BE MOVED INTO A Deployable::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
-            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
             //itemRef->SetAttribute(AttrShieldCharge,   itemRef->GetAttribute(AttrShieldCapacity));       // Shield Charge
             //itemRef->SetAttribute(AttrArmorDamage,    0.0);                                        // Armor Damage
-            data.attributes[AttrMass] = type->mass; // Mass
-            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
-            data.attributes[AttrVolume] = type->volume; // Volume
-            data.attributes[AttrCapacity] = type->capacity; // Capacity
-
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if(itemID == 0)
-            {
-                return InventoryItemRef();
-            }
-
-            return InventoryItem::Load(itemID);
+            // Go to default spawn.
+            break;
         }
 
-        ///////////////////////////////////////
-        // Asteroid:
-        ///////////////////////////////////////
+            ///////////////////////////////////////
+            // Asteroid:
+            ///////////////////////////////////////
         case EVEDB::invCategories::Asteroid:
         {
-            // THESE SHOULD BE MOVED INTO AN Asteroid::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
             data.attributes[AttrRadius] = EvilNumber(500.0); // Radius
             data.attributes[AttrMass] = EvilNumber(1000000.0); // Mass
-            data.attributes[AttrVolume] = type->volume; // Volume
-            data.attributes[AttrQuantity] = EvilNumber(5000.0); // Quantity
+            data.attributes[AttrVolume] = data.type->volume; // Volume
+            data.attributes[AttrQuantity] = data.quantity; // Quantity
+            defaultAttr = false;
 
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if(itemID == 0)
-            {
-                return InventoryItemRef();
-            }
-
-            return InventoryItem::Load(itemID);
+            // Go to default spawn.
+            break;
         }
 
-        ///////////////////////////////////////
-        // Structure:
-        ///////////////////////////////////////
+            ///////////////////////////////////////
+            // :
+            ///////////////////////////////////////
+        case EVEDB::invCategories::Drone:
         case EVEDB::invCategories::Structure:
         {
-            // THESE SHOULD BE MOVED INTO A Structure::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
-            data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
-            data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
+            data.attributes[AttrShieldCharge] = data.type->getAttribute(AttrShieldCapacity); // Shield Charge
             data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
-            data.attributes[AttrMass] = type->mass; // Mass
-            data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
-            data.attributes[AttrVolume] = type->volume; // Volume
-            data.attributes[AttrCapacity] = type->capacity; // Capacity
-
-            // Spawn generic item:
-            uint32 itemID = InventoryItem::_Spawn( data );
-            if(itemID == 0)
-            {
-                return InventoryItemRef();
-            }
-
-            return InventoryItem::Load(itemID);
+            // Go to default spawn.
+            break;
         }
     }
 
-    switch(type->groupID)
+    if(defaultAttr)
     {
-        ///////////////////////////////////////
-        // Station:
-        ///////////////////////////////////////
-        case EVEDB::invGroups::Station:
-        {
-            return Station::Spawn(data);
-        }
+        // Create some basic attributes that are NOT found in dgmTypeAttributes for most items, yet most items DO need:
+        data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
+        data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
+        data.attributes[AttrMass] = data.type->mass; // Mass
+        data.attributes[AttrRadius] = data.type->getAttribute(AttrRadius); // Radius
+        data.attributes[AttrVolume] = data.type->volume; // Volume
+        data.attributes[AttrCapacity] = data.type->capacity; // Capacity
     }
-
-    // Create some basic attributes that are NOT found in dgmTypeAttributes for most items, yet most items DO need:
-    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
-    data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
-    data.attributes[AttrMass] = type->mass; // Mass
-    data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
-    data.attributes[AttrVolume] = type->volume; // Volume
-    data.attributes[AttrCapacity] = type->capacity; // Capacity
 
     // Spawn generic item:
-    uint32 itemID = InventoryItem::_Spawn( data );
+    uint32 itemID = InventoryItem::_Spawn(data);
     if(itemID == 0)
     {
         return InventoryItemRef();
@@ -585,13 +554,14 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
 }
 
 uint32 InventoryItem::_Spawn(
-    // InventoryItem stuff:
-    ItemData &data
-) {
+                             // InventoryItem stuff:
+                             ItemData &data
+                             )
+{
     // obtain type of new item
     // this also checks that the type is valid
     const InvTypeRef t = InvType::getType(data.typeID);
-    if (t.get() == nullptr)
+    if(t.get() == nullptr)
     {
         return 0;
     }
@@ -636,19 +606,17 @@ uint32 InventoryItem::_Spawn(
         if(values.length() > 0)
         {
             DBerror err;
-            bool success = DBcore::RunQuery(err,
-                                            "INSERT INTO srvEntity_default_attributes (itemID, attributeID, valueInt, valueFloat) VALUES %s",
-                                            values.c_str());
-            if(!success)
+            if(!DBcore::RunQuery(err,
+                                 "REPLACE INTO srvEntity_default_attributes (itemID, attributeID, valueInt, valueFloat) VALUES %s",
+                                 values.c_str()))
             {
                 SysLog::Error("InventoryItem", "Unable to create default attributes for item %u", itemID);
             }
-            success = DBcore::RunQuery(err,
-                                       "INSERT INTO srvEntity_attributes (itemID, attributeID, valueInt, valueFloat) VALUES %s",
-                                       values.c_str());
-            if(!success)
+            if(!DBcore::RunQuery(err,
+                                 "REPLACE INTO srvEntity_attributes (itemID, attributeID, valueInt, valueFloat) VALUES %s",
+                                 values.c_str()))
             {
-            SysLog::Error("InventoryItem", "Unable to create attributes for item %u", itemID);
+                SysLog::Error("InventoryItem", "Unable to create attributes for item %u", itemID);
             }
         }
     }
@@ -659,7 +627,7 @@ void InventoryItem::Delete(bool notify)
 {
     // Remove us from our inventory.
     Inventory *inventory = ItemFactory::GetInventory(m_locationID, false);
-    if (inventory != nullptr)
+    if(inventory != nullptr)
     {
         inventory->RemoveItem(InventoryItemRef(this));
     }
@@ -676,10 +644,10 @@ void InventoryItem::Delete(bool notify)
 
     //take ourself out of the DB
     DBerror err;
-    if (!DBcore::RunQueryMulti(err, "DELETE FROM srvEntity WHERE itemID=%u;"
-                          "DELETE FROM srvEntity_default_attributes WHERE itemID=%u;"
-                          "DELETE FROM srvEntity_attributes WHERE itemID=%u;",
-                          m_itemID, m_itemID, m_itemID))
+    if(!DBcore::RunQueryMulti(err, "DELETE FROM srvEntity WHERE itemID=%u;"
+                              "DELETE FROM srvEntity_default_attributes WHERE itemID=%u;"
+                              "DELETE FROM srvEntity_attributes WHERE itemID=%u;",
+                              m_itemID, m_itemID, m_itemID))
     {
         codelog(DATABASE__ERROR, "Failed to delete item %u: %s", m_itemID, err.c_str());
     }
@@ -691,25 +659,25 @@ void InventoryItem::Delete(bool notify)
 PyPackedRow* InventoryItem::GetItemStatusRow() const
 {
     DBRowDescriptor* header = new DBRowDescriptor;
-    header->AddColumn( "instanceID",    DBTYPE_I8 );
-    header->AddColumn( "online",        DBTYPE_BOOL );
-    header->AddColumn( "damage",        DBTYPE_R8 );
-    header->AddColumn( "charge",        DBTYPE_R8 );
-    header->AddColumn( "skillPoints",   DBTYPE_I4 );
-    header->AddColumn( "armorDamage",   DBTYPE_R8 );
-    header->AddColumn( "shieldCharge",  DBTYPE_R8 );
-    header->AddColumn( "incapacitated", DBTYPE_BOOL );
+    header->AddColumn("instanceID", DBTYPE_I8);
+    header->AddColumn("online", DBTYPE_BOOL);
+    header->AddColumn("damage", DBTYPE_R8);
+    header->AddColumn("charge", DBTYPE_R8);
+    header->AddColumn("skillPoints", DBTYPE_I4);
+    header->AddColumn("armorDamage", DBTYPE_R8);
+    header->AddColumn("shieldCharge", DBTYPE_R8);
+    header->AddColumn("incapacitated", DBTYPE_BOOL);
 
-    PyPackedRow* row = new PyPackedRow( header );
-    GetItemStatusRow( row );
+    PyPackedRow* row = new PyPackedRow(header);
+    GetItemStatusRow(row);
 
     return row;
 }
 
-void InventoryItem::GetItemStatusRow( PyPackedRow* into ) const
+void InventoryItem::GetItemStatusRow(PyPackedRow* into) const
 {
     EvilNumber value;
-    into->SetField( "instanceID",    new PyLong( itemID() ) );
+    into->SetField("instanceID", new PyLong(itemID()));
     into->SetField("online", new PyBool((m_AttributeMap.fetchAttribute(AttrIsOnline, value) ? value.get_int() != 0 : false)));
     into->SetField("damage", new PyFloat((m_AttributeMap.fetchAttribute(AttrDamage, value) ? value.get_float() : 0)));
     into->SetField("charge", new PyFloat((m_AttributeMap.fetchAttribute(AttrCharge, value) ? value.get_float() : 0)));
@@ -725,18 +693,18 @@ bool InventoryItem::Populate(Rsp_CommonGetInfo_Entry& result)
     result.itemID = itemID();
 
     //invItem:
-    PySafeDecRef( result.invItem );
+    PySafeDecRef(result.invItem);
     result.invItem = getPackedRow();
 
     //hacky, but it doesn't really hurt anything.
-    if (getAttribute(AttrIsOnline).get_int() != 0)
+    if(getAttribute(AttrIsOnline).get_int() != 0)
     {
         //there is an effect that goes along with this. We should
         //probably be properly tracking the effect due to some
         // timer things, but for now, were hacking it.
         EntityEffectState es;
         es.env_itemID = itemID();
-        es.env_charID = ownerID();  //may not be quite right...
+        es.env_charID = ownerID(); //may not be quite right...
         es.env_shipID = locationID();
         es.env_target = new PyNone(); //this is what they do.
         es.env_other = new PyNone();
@@ -756,7 +724,8 @@ bool InventoryItem::Populate(Rsp_CommonGetInfo_Entry& result)
     //attributes:
     AttributeMap::AttrMapItr itr = m_AttributeMap.begin();
     AttributeMap::AttrMapItr itr_end = m_AttributeMap.end();
-    for (; itr != itr_end; itr++) {
+    for(; itr != itr_end; itr++)
+    {
         result.attributes[(*itr).first] = (*itr).second.GetPyObject();
     }
 
@@ -772,14 +741,16 @@ PyObject * InventoryItem::ItemGetInfo()
     Rsp_ItemGetInfo result;
 
     if(!Populate(result.entry))
-        return NULL;    //print already done.
+    {
+        return nullptr; //print already done.
+    }
 
-    return(result.Encode());
+    return (result.Encode());
 }
 
 void InventoryItem::Rename(const char *to)
 {
-    if (IsStaticMapItem(m_itemID))
+    if(IsStaticMapItem(m_itemID))
     {
         _log(DATABASE__ERROR, "Refusing to modify static map object %u.", m_itemID);
         return;
@@ -790,22 +761,23 @@ void InventoryItem::Rename(const char *to)
     DBcore::DoEscapeString(nameEsc, m_itemName);
 
     DBerror err;
-    if (!DBcore::RunQuery(err,
-                          "UPDATE srvEntity SET itemName = '%s' WHERE itemID = %u",
-                          nameEsc.c_str(), m_itemID))
+    if(!DBcore::RunQuery(err,
+                         "UPDATE srvEntity SET itemName = '%s' WHERE itemID = %u",
+                         nameEsc.c_str(), m_itemID))
     {
         _log(DATABASE__ERROR, "Error in query: %s.", err.c_str());
         return;
     }
 }
 
-void InventoryItem::MoveInto(Inventory &new_home, EVEItemFlags _flag, bool notify) {
-    Move( new_home.inventoryID(), _flag, notify );
+void InventoryItem::MoveInto(Inventory &new_home, EVEItemFlags _flag, bool notify)
+{
+    Move(new_home.inventoryID(), _flag, notify);
 }
 
 void InventoryItem::Move(uint32 new_location, EVEItemFlags new_flag, bool notify)
 {
-    if (IsStaticMapItem(m_itemID))
+    if(IsStaticMapItem(m_itemID))
     {
         _log(DATABASE__ERROR, "Refusing to modify static map object %u.", m_itemID);
         return;
@@ -814,62 +786,73 @@ void InventoryItem::Move(uint32 new_location, EVEItemFlags new_flag, bool notify
     uint32 old_location = locationID();
     EVEItemFlags old_flag = flag();
 
-    if( new_location == old_location && new_flag == old_flag )
+    if(new_location == old_location && new_flag == old_flag)
+    {
         return; //nothing to do...
+    }
 
     //first, take myself out of my old inventory, if its loaded.
     Inventory *old_inventory = ItemFactory::GetInventory(old_location, false);
-    if(old_inventory != NULL)
-        old_inventory->RemoveItem( InventoryItemRef( this ) );  //releases its ref
+    if(old_inventory != nullptr)
+    {
+        old_inventory->RemoveItem(InventoryItemRef(this)); //releases its ref
+    }
 
     m_locationID = new_location;
     m_flag = new_flag;
 
     //then make sure that my new inventory is updated, if its loaded.
     Inventory *new_inventory = ItemFactory::GetInventory(new_location, false);
-    if( new_inventory != NULL )
-        new_inventory->AddItem( InventoryItemRef( this ) ); //makes a new ref
+    if(new_inventory != nullptr)
+    {
+        new_inventory->AddItem(InventoryItemRef(this)); //makes a new ref
+    }
 
     DBerror err;
-    if (!DBcore::RunQuery(err,
-                          "UPDATE srvEntity SET locationID = %u, flag = %u WHERE itemID = %u",
-                          m_locationID, uint32(m_flag), m_itemID))
+    if(!DBcore::RunQuery(err,
+                         "UPDATE srvEntity SET locationID = %u, flag = %u WHERE itemID = %u",
+                         m_locationID, uint32(m_flag), m_itemID))
     {
         _log(DATABASE__ERROR, "Error in query: %s.", err.c_str());
         return;
     }
 
     //notify about the changes.
-    if( notify )
+    if(notify)
     {
         sendItemChangeNotice(EntityList::FindCharacter(m_ownerID));
     }
 }
 
-bool InventoryItem::AlterQuantity(int32 qty_change, bool notify) {
+bool InventoryItem::AlterQuantity(int32 qty_change, bool notify)
+{
     if(qty_change == 0)
+    {
         return true;
+    }
 
     int32 new_qty = m_quantity + qty_change;
 
-    if(new_qty < 0) {
+    if(new_qty < 0)
+    {
         codelog(ITEM__ERROR, "%s (%u): Tried to remove %d quantity from stack of %u", m_itemName.c_str(), m_itemID, -qty_change, m_quantity);
         return false;
     }
 
-    return(SetQuantity(new_qty, notify));
+    return (SetQuantity(new_qty, notify));
 }
 
 bool InventoryItem::SetQuantity(uint32 qty_new, bool notify)
 {
-    if (IsStaticMapItem(m_itemID))
+    if(IsStaticMapItem(m_itemID))
     {
         _log(DATABASE__ERROR, "Refusing to modify static map object %u.", m_itemID);
         return false;
     }
 
     //if an object has its singleton set then it shouldn't be able to add/remove qty
-    if(m_singleton) {
+    if(m_singleton)
+    {
         //Print error
         codelog(ITEM__ERROR, "%s (%u): Failed to set quantity %u , the items singleton bit is set", m_itemName.c_str(), m_itemID, qty_new);
         //return false
@@ -904,9 +887,10 @@ bool InventoryItem::SetQuantity(uint32 qty_new, bool notify)
 
     return true;
 }
+
 bool InventoryItem::SetFlag(EVEItemFlags new_flag, bool notify)
 {
-    if (IsStaticMapItem(m_itemID))
+    if(IsStaticMapItem(m_itemID))
     {
         _log(DATABASE__ERROR, "Refusing to modify static map object %u.", m_itemID);
         return false;
@@ -916,9 +900,9 @@ bool InventoryItem::SetFlag(EVEItemFlags new_flag, bool notify)
     m_flag = new_flag;
 
     DBerror err;
-    if (!DBcore::RunQuery(err,
-                          "UPDATE srvEntity SET flag = %u WHERE itemID = %u",
-                          uint32(m_flag), m_itemID))
+    if(!DBcore::RunQuery(err,
+                         "UPDATE srvEntity SET flag = %u WHERE itemID = %u",
+                         uint32(m_flag), m_itemID))
     {
         _log(DATABASE__ERROR, "Error in query: %s.", err.c_str());
         return false;
@@ -931,54 +915,69 @@ bool InventoryItem::SetFlag(EVEItemFlags new_flag, bool notify)
     return true;
 }
 
-InventoryItemRef InventoryItem::Split(int32 qty_to_take, bool notify) {
-    if(qty_to_take <= 0) {
+InventoryItemRef InventoryItem::Split(int32 qty_to_take, bool notify)
+{
+    if(qty_to_take <= 0)
+    {
         _log(ITEM__ERROR, "%s (%u): Asked to split into a chunk of %d", itemName().c_str(), itemID(), qty_to_take);
         return InventoryItemRef();
     }
-    if(!AlterQuantity(-qty_to_take, notify)) {
+    if(!AlterQuantity(-qty_to_take, notify))
+    {
         _log(ITEM__ERROR, "%s (%u): Failed to remove quantity %d during split.", itemName().c_str(), itemID(), qty_to_take);
         return InventoryItemRef();
     }
 
     ItemData idata(
-        typeID(),
-        ownerID(),
-        (notify ? 1 : locationID()), //temp location to cause the spawn via update
-        flag(),
-        qty_to_take
-    );
+                   typeID(),
+                   ownerID(),
+                   (notify ? 1 : locationID()), //temp location to cause the spawn via update
+                   flag(),
+                   qty_to_take
+                   );
 
     InventoryItemRef res = ItemFactory::SpawnItem(idata);
     if(notify)
-        res->Move( locationID(), flag() );
+    {
+        res->Move(locationID(), flag());
+    }
 
-    return( res );
+    return ( res);
 }
 
-bool InventoryItem::Merge(InventoryItemRef to_merge, int32 qty, bool notify) {
-    if(typeID() != to_merge->typeID()) {
+bool InventoryItem::Merge(InventoryItemRef to_merge, int32 qty, bool notify)
+{
+    if(typeID() != to_merge->typeID())
+    {
         _log(ITEM__ERROR, "%s (%u): Asked to merge with %s (%u).", itemName().c_str(), itemID(), to_merge->itemName().c_str(), to_merge->itemID());
         return false;
     }
-    if(locationID() != to_merge->locationID() || flag() != to_merge->flag()) {
+    if(locationID() != to_merge->locationID() || flag() != to_merge->flag())
+    {
         _log(ITEM__ERROR, "%s (%u) in location %u, flag %u: Asked to merge with item %u in location %u, flag %u.", itemName().c_str(), itemID(), locationID(), flag(), to_merge->itemID(), to_merge->locationID(), to_merge->flag());
         return false;
     }
     if(qty == 0)
+    {
         qty = to_merge->quantity();
-    if(qty <= 0) {
+    }
+    if(qty <= 0)
+    {
         _log(ITEM__ERROR, "%s (%u): Asked to merge with %d units of item %u.", itemName().c_str(), itemID(), qty, to_merge->itemID());
         return false;
     }
-    if(!AlterQuantity(qty, notify)) {
+    if(!AlterQuantity(qty, notify))
+    {
         _log(ITEM__ERROR, "%s (%u): Failed to add quantity %d.", itemName().c_str(), itemID(), qty);
         return false;
     }
 
-    if(qty == to_merge->quantity()) {
+    if(qty == to_merge->quantity())
+    {
         to_merge->Delete();
-    } else if(!to_merge->AlterQuantity(-qty, notify)) {
+    }
+    else if(!to_merge->AlterQuantity(-qty, notify))
+    {
         _log(ITEM__ERROR, "%s (%u): Failed to remove quantity %d.", to_merge->itemName().c_str(), to_merge->itemID(), qty);
         return false;
     }
@@ -988,23 +987,23 @@ bool InventoryItem::Merge(InventoryItemRef to_merge, int32 qty, bool notify) {
 
 bool InventoryItem::ChangeSingleton(bool new_singleton, bool notify)
 {
-    if (IsStaticMapItem(m_itemID))
+    if(IsStaticMapItem(m_itemID))
     {
         _log(DATABASE__ERROR, "Refusing to modify static map object %u.", m_itemID);
         return false;
     }
 
-    bool old_singleton = m_singleton;
-
-    if(new_singleton == old_singleton)
-        return true;    //nothing to do...
+    if(new_singleton == m_singleton)
+    {
+        return true; //nothing to do...
+    }
 
     m_singleton = new_singleton;
 
     DBerror err;
-    if (!DBcore::RunQuery(err,
-                          "UPDATE srvEntity SET singleton = %u WHERE itemID = %u",
-                          uint32(m_singleton), m_itemID))
+    if(!DBcore::RunQuery(err,
+                         "UPDATE srvEntity SET singleton = %u WHERE itemID = %u",
+                         uint32(m_singleton), m_itemID))
     {
         _log(DATABASE__ERROR, "Error in query: %s.", err.c_str());
         return false;
@@ -1021,23 +1020,23 @@ bool InventoryItem::ChangeSingleton(bool new_singleton, bool notify)
 
 void InventoryItem::ChangeOwner(uint32 new_owner, bool notify)
 {
-    if (IsStaticMapItem(m_itemID))
+    if(IsStaticMapItem(m_itemID))
     {
         _log(DATABASE__ERROR, "Refusing to modify static map object %u.", m_itemID);
         return;
     }
 
-    uint32 old_owner = m_ownerID;
-
-    if(new_owner == old_owner)
+    if(new_owner == m_ownerID)
+    {
         return; //nothing to do...
+    }
 
     m_ownerID = new_owner;
 
     DBerror err;
-    if (!DBcore::RunQuery(err,
-                          "UPDATE srvEntity SET ownerID = %u WHERE itemID = %u",
-                          m_ownerID, m_itemID))
+    if(!DBcore::RunQuery(err,
+                         "UPDATE srvEntity SET ownerID = %u WHERE itemID = %u",
+                         m_ownerID, m_itemID))
     {
         _log(DATABASE__ERROR, "Error in query: %s.", err.c_str());
         return;
@@ -1093,7 +1092,7 @@ void InventoryItem::getPackedRow(PyPackedRow* into) const
 
 void InventoryItem::sendItemChangeNotice(Client *client)
 {
-    if(client != NULL)
+    if(client != nullptr)
     {
         PyList *items = new PyList();
         items->AddItem(getPackedRow());
@@ -1112,20 +1111,20 @@ void InventoryItem::SaveItem()
     SaveAttributes();
 
     InventoryDB::SaveItem(
-        itemID(),
-        ItemData(
-            itemName().c_str(),
-            typeID(),
-            ownerID(),
-            locationID(),
-            flag(),
-            contraband(),
-            singleton(),
-            quantity(),
-            position(),
-            customInfo().c_str()
-        )
-    );
+                          itemID(),
+                          ItemData(
+                                   itemName().c_str(),
+                                   typeID(),
+                                   ownerID(),
+                                   locationID(),
+                                   flag(),
+                                   contraband(),
+                                   singleton(),
+                                   quantity(),
+                                   position(),
+                                   customInfo().c_str()
+                                   )
+                          );
 }
 
 /*typedef enum {
@@ -1144,7 +1143,7 @@ void InventoryItem::SetOnline(bool online)
     setAttribute(AttrIsOnline, int(online));
 
     Client *c = EntityList::FindCharacter(m_ownerID);
-    if(c == NULL)
+    if(c == nullptr)
     {
         SysLog::Error("InventoryItem", "unable to set ourselfs online//offline because we can't find the client");
         return;
@@ -1154,94 +1153,98 @@ void InventoryItem::SetOnline(bool online)
     ogf.itemID = m_itemID;
     ogf.effectID = effectOnline;
     ogf.when = Win32TimeNow();
-    ogf.start = online?1:0;
-    ogf.active = online?1:0;
+    ogf.start = online ? 1 : 0;
+    ogf.active = online ? 1 : 0;
 
-	PyList *environment = new PyList;
-	environment->AddItem(new PyInt(ogf.itemID));
-	environment->AddItem(new PyInt(m_ownerID));
-	environment->AddItem(new PyInt(m_locationID));
-	environment->AddItem(new PyNone);
-	environment->AddItem(new PyNone);
-	environment->AddItem(new PyNone);
-	environment->AddItem(new PyInt(ogf.effectID));
+    PyList *environment = new PyList;
+    environment->AddItem(new PyInt(ogf.itemID));
+    environment->AddItem(new PyInt(m_ownerID));
+    environment->AddItem(new PyInt(m_locationID));
+    environment->AddItem(new PyNone);
+    environment->AddItem(new PyNone);
+    environment->AddItem(new PyNone);
+    environment->AddItem(new PyInt(ogf.effectID));
 
-	ogf.environment = environment;
-	ogf.startTime = ogf.when;
-	ogf.duration = 10000;
-	ogf.repeat = online?new PyInt(1000):new PyInt(0);
+    ogf.environment = environment;
+    ogf.startTime = ogf.when;
+    ogf.duration = 10000;
+    ogf.repeat = online ? new PyInt(1000) : new PyInt(0);
     ogf.randomSeed = new PyNone();
     ogf.error = new PyNone();
 
     Notify_OnMultiEvent multi;
     multi.events = new PyList;
-    multi.events->AddItem( ogf.Encode() );
+    multi.events->AddItem(ogf.Encode());
 
-    PyTuple* tmp = multi.Encode();   //this is consumed below
+    PyTuple* tmp = multi.Encode(); //this is consumed below
     c->SendNotification("OnMultiEvent", "clientID", &tmp);
 }
 
 void InventoryItem::SetActive(bool active, uint32 effectID, double duration, bool repeat)
 {
-	Client* c = EntityList::FindCharacter(m_ownerID);
-    if(c == NULL)
+    Client* c = EntityList::FindCharacter(m_ownerID);
+    if(c == nullptr)
     {
         SysLog::Error("InventoryItem", "unable to set ourselfs online//offline because we can't find the client");
         return;
     }
 
-	Notify_OnGodmaShipEffect shipEffect;
+    Notify_OnGodmaShipEffect shipEffect;
 
-	shipEffect.itemID = m_itemID;
-	shipEffect.effectID = effectID;
-	shipEffect.when = Win32TimeNow();
-	shipEffect.start = active?1:0;
-	shipEffect.active = active?1:0;
+    shipEffect.itemID = m_itemID;
+    shipEffect.effectID = effectID;
+    shipEffect.when = Win32TimeNow();
+    shipEffect.start = active ? 1 : 0;
+    shipEffect.active = active ? 1 : 0;
 
-	PyList* env = new PyList;
-	env->AddItem(new PyInt(m_itemID));
-	env->AddItem(new PyInt(ownerID()));
-	env->AddItem(new PyInt(m_locationID));
-	env->AddItem(new PyNone);				//targetID
-	env->AddItem(new PyNone);				//otherID
-	env->AddItem(new PyNone);				//area
-	env->AddItem(new PyInt(effectID));
+    PyList* env = new PyList;
+    env->AddItem(new PyInt(m_itemID));
+    env->AddItem(new PyInt(ownerID()));
+    env->AddItem(new PyInt(m_locationID));
+    env->AddItem(new PyNone); //targetID
+    env->AddItem(new PyNone); //otherID
+    env->AddItem(new PyNone); //area
+    env->AddItem(new PyInt(effectID));
 
-	shipEffect.environment = env;
-	shipEffect.startTime = shipEffect.when;
-	shipEffect.duration = duration;
-	shipEffect.repeat = repeat?new PyInt(1000):new PyInt(0);
-	shipEffect.randomSeed = new PyNone;
-	shipEffect.error = new PyNone;
+    shipEffect.environment = env;
+    shipEffect.startTime = shipEffect.when;
+    shipEffect.duration = duration;
+    shipEffect.repeat = repeat ? new PyInt(1000) : new PyInt(0);
+    shipEffect.randomSeed = new PyNone;
+    shipEffect.error = new PyNone;
 
-	Notify_OnMultiEvent multi;
+    Notify_OnMultiEvent multi;
     multi.events = new PyList;
     multi.events->AddItem(shipEffect.Encode());
 
-    PyTuple* tmp = multi.Encode();   //this is consumed below
+    PyTuple* tmp = multi.Encode(); //this is consumed below
     c->SendNotification("OnMultiEvent", "clientID", &tmp);
 }
 
 void InventoryItem::SetCustomInfo(const char *ci)
 {
-    if (IsStaticMapItem(m_itemID))
+    if(IsStaticMapItem(m_itemID))
     {
         _log(DATABASE__ERROR, "Refusing to modify static map object %u.", m_itemID);
         return;
     }
 
-    if (ci == NULL)
+    if(ci == nullptr)
+    {
         m_customInfo = "";
+    }
     else
+    {
         m_customInfo = ci;
+    }
 
     std::string customInfoEsc;
     DBcore::DoEscapeString(customInfoEsc, m_customInfo);
 
     DBerror err;
-    if (!DBcore::RunQuery(err,
-                          "UPDATE srvEntity SET customInfo = '%s' WHERE itemID = %u",
-                          customInfoEsc.c_str(), m_itemID))
+    if(!DBcore::RunQuery(err,
+                         "UPDATE srvEntity SET customInfo = '%s' WHERE itemID = %u",
+                         customInfoEsc.c_str(), m_itemID))
     {
         _log(DATABASE__ERROR, "Error in query: %s.", err.c_str());
         return;
@@ -1250,21 +1253,23 @@ void InventoryItem::SetCustomInfo(const char *ci)
 
 void InventoryItem::Relocate(const Vector3D &pos)
 {
-    if (IsStaticMapItem(m_itemID))
+    if(IsStaticMapItem(m_itemID))
     {
         _log(DATABASE__ERROR, "Refusing to modify static map object %u.", m_itemID);
         return;
     }
 
-    if (m_position == pos)
+    if(m_position == pos)
+    {
         return;
+    }
 
     m_position = pos;
 
     DBerror err;
-    if (!DBcore::RunQuery(err,
-                          "UPDATE srvEntity SET x = %f, y = %f, z = %f WHERE itemID = %u",
-                          m_position.x, m_position.y, m_position.z, m_itemID))
+    if(!DBcore::RunQuery(err,
+                         "UPDATE srvEntity SET x = %f, y = %f, z = %f WHERE itemID = %u",
+                         m_position.x, m_position.y, m_position.z, m_itemID))
     {
         _log(DATABASE__ERROR, "Error in query: %s.", err.c_str());
         return;
@@ -1275,59 +1280,71 @@ bool InventoryItem::setAttribute(uint32 attributeID, int64 num, bool notify /* t
 {
     EvilNumber devil_number(num);
     bool status = m_AttributeMap.SetAttribute(attributeID, devil_number, notify);
-	if(shadow_copy_to_default_set)
+    if(shadow_copy_to_default_set)
+    {
         status = status && m_DefaultAttributeMap.SetAttribute(attributeID, devil_number, notify);
+    }
 
-	return status;
+    return status;
 }
 
 bool InventoryItem::setAttribute(uint32 attributeID, double num, bool notify /* true */, bool shadow_copy_to_default_set /* false */)
 {
     EvilNumber devil_number(num);
     bool status = m_AttributeMap.SetAttribute(attributeID, devil_number, notify);
-	if(shadow_copy_to_default_set)
+    if(shadow_copy_to_default_set)
+    {
         status = status && m_DefaultAttributeMap.SetAttribute(attributeID, devil_number, notify);
+    }
 
-	return status;
+    return status;
 }
 
 bool InventoryItem::setAttribute(uint32 attributeID, EvilNumber num, bool notify /* true */, bool shadow_copy_to_default_set /* false */)
 {
     bool status = m_AttributeMap.SetAttribute(attributeID, num, notify);
-	if(shadow_copy_to_default_set)
+    if(shadow_copy_to_default_set)
+    {
         status = status && m_DefaultAttributeMap.SetAttribute(attributeID, num, notify);
+    }
 
-	return status;
+    return status;
 }
 
 bool InventoryItem::setAttribute(uint32 attributeID, int num, bool notify /* true */, bool shadow_copy_to_default_set /* false */)
 {
     EvilNumber devil_number(num);
     bool status = m_AttributeMap.SetAttribute(attributeID, devil_number, notify);
-	if(shadow_copy_to_default_set)
+    if(shadow_copy_to_default_set)
+    {
         status = status && m_DefaultAttributeMap.SetAttribute(attributeID, devil_number, notify);
+    }
 
-	return status;
+    return status;
 }
 
 bool InventoryItem::setAttribute(uint32 attributeID, uint64 num, bool notify /* true */, bool shadow_copy_to_default_set /* false */)
 {
-    EvilNumber devil_number(*((int64*)&num));
+    EvilNumber devil_number(*((int64*) & num));
     bool status = m_AttributeMap.SetAttribute(attributeID, devil_number, notify);
-	if(shadow_copy_to_default_set)
+    if(shadow_copy_to_default_set)
+    {
         status = status && m_DefaultAttributeMap.SetAttribute(attributeID, devil_number, notify);
+    }
 
-	return status;
+    return status;
 }
 
 bool InventoryItem::setAttribute(uint32 attributeID, uint32 num, bool notify /* true */, bool shadow_copy_to_default_set /* false */)
 {
-    EvilNumber devil_number((int64)num);
+    EvilNumber devil_number((int64) num);
     bool status = m_AttributeMap.SetAttribute(attributeID, devil_number, notify);
-	if(shadow_copy_to_default_set)
+    if(shadow_copy_to_default_set)
+    {
         status = status && m_DefaultAttributeMap.SetAttribute(attributeID, devil_number, notify);
+    }
 
-	return status;
+    return status;
 }
 
 EvilNumber InventoryItem::getDefaultAttribute(const uint32 attributeID) const
@@ -1387,7 +1404,7 @@ bool InventoryItem::SaveAttributes()
 
 bool InventoryItem::ResetAttribute(uint32 attrID, bool notify)
 {
-    if (attrID >= 10000)
+    if(attrID >= 10000)
     {
         // These are out of range attributes that the client does not like!
         return true;
@@ -1398,16 +1415,16 @@ bool InventoryItem::ResetAttribute(uint32 attrID, bool notify)
     double amount = 0;
     AttributeModifierSource::FactorList factors;
     AttributeModifierSource::FactorList stackedfactors;
-    for (auto src : m_attributeModifiers)
+    for(auto src : m_attributeModifiers)
     {
-        if (src.get() == NULL)
+        if(src.get() == nullptr)
         {
             continue;
         }
         src->getModification(attrID, amount, factors, stackedfactors);
     }
     double value = AttributeModifierSource::finalizeModification(nVal.get_float(), amount, factors, stackedfactors);
-    if (nVal.get_type() == EVIL_NUMBER_TYPE::evil_number_int)
+    if(nVal.get_type() == EVIL_NUMBER_TYPE::evil_number_int)
     {
         nVal = EvilNumber((int64) value);
     }
@@ -1420,9 +1437,11 @@ bool InventoryItem::ResetAttribute(uint32 attrID, bool notify)
 
 void InventoryItem::AddAttributeModifier(AttributeModifierSourceRef modifier)
 {
-    if (modifier.get() == NULL)
+    if(modifier.get() == nullptr)
+    {
         return;
-    if (std::find(m_attributeModifiers.begin(), m_attributeModifiers.end(), modifier) == m_attributeModifiers.end())
+    }
+    if(std::find(m_attributeModifiers.begin(), m_attributeModifiers.end(), modifier) == m_attributeModifiers.end())
     {
         m_attributeModifiers.push_back(modifier);
         modifier->updateModifiers(this, true);
@@ -1432,7 +1451,7 @@ void InventoryItem::AddAttributeModifier(AttributeModifierSourceRef modifier)
 void InventoryItem::RemoveAttributeModifier(AttributeModifierSourceRef modifier)
 {
     std::vector<AttributeModifierSourceRef>::iterator itr = std::find(m_attributeModifiers.begin(), m_attributeModifiers.end(), modifier);
-    if (itr != m_attributeModifiers.end())
+    if(itr != m_attributeModifiers.end())
     {
         AttributeModifierSourceRef src = *itr;
         m_attributeModifiers.erase(itr);

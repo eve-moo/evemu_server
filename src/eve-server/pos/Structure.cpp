@@ -33,12 +33,8 @@
 /*
  * Structure
  */
-Structure::Structure(
-    uint32 _structureID,
-    // InventoryItem stuff:
-    const InvTypeRef _itemType,
-    const ItemData &_data)
-: InventoryItem(_structureID, _itemType, _data) {}
+Structure::Structure(uint32 _structureID, const ItemData &_data)
+: InventoryItem(_structureID, _data) {}
 
 StructureRef Structure::Load(uint32 structureID)
 {
@@ -47,31 +43,18 @@ StructureRef Structure::Load(uint32 structureID)
 
 StructureRef Structure::Spawn(ItemData &data)
 {
-    uint32 structureID = Structure::_Spawn( data );
+    uint32 structureID = 0;
+    // make sure it's a Structure
+    if(data.type.get() != nullptr)
+    {
+        // store item data
+        structureID = InventoryItem::_Spawn(data);
+    }
     if(structureID == 0)
     {
         return StructureRef();
     }
     return Structure::Load( structureID );
-}
-
-uint32 Structure::_Spawn(ItemData &data)
-{
-    // make sure it's a Structure
-    const InvTypeRef st = InvType::getType(data.typeID);
-    if (st.get() == nullptr)
-    {
-        return 0;
-    }
-
-    // store item data
-    uint32 structureID = InventoryItem::_Spawn(data);
-    if(structureID == 0)
-    {
-        return 0;
-    }
-
-    return structureID;
 }
 
 bool Structure::loadState()

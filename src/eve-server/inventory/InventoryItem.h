@@ -65,6 +65,8 @@ public:
     ItemData( uint32 _typeID, uint32 _ownerID, uint32 _locationID, EVEItemFlags _flag, const char *_name = "",
         const Vector3D &_position = Vector3D(0, 0, 0), const char *_customInfo = "", bool _contraband = false);
 
+    void loadTypeAttributes();
+    
     // Content:
     std::string     name;
     uint32          typeID;
@@ -76,6 +78,7 @@ public:
     uint32          quantity;
     Vector3D          position;
     std::string customInfo;
+    InvTypeRef type;
     std::map<uint32, EvilNumber> attributes;
 };
 
@@ -316,11 +319,7 @@ public:
     void RemoveAttributeModifier(AttributeModifierSourceRef modifier);
 
 protected:
-    InventoryItem(
-        uint32 _itemID,
-        // InventoryItem stuff:
-                  const InvTypeRef _type,
-        const ItemData &_data);
+    InventoryItem(uint32 _itemID, const ItemData &_data);
     virtual ~InventoryItem();
 
     /*
@@ -330,26 +329,6 @@ protected:
     template<class _Ty>
     static RefPtr<_Ty> Load(uint32 itemID)
     {
-        // static load
-        RefPtr<_Ty> i = _Ty::template _Load<_Ty>( itemID );
-        if(!i)
-        {
-            return RefPtr<_Ty>();
-        }
-
-        // dynamic load
-        if(!i->loadState())
-        {
-            return RefPtr<_Ty>();
-        }
-
-        return i;
-    }
-
-    // Template loader:
-    template<class _Ty>
-    static RefPtr<_Ty> _Load(uint32 itemID)
-    {
         // pull the item info
         ItemData data;
         if(!InventoryDB::GetItem(itemID, data))
@@ -357,22 +336,21 @@ protected:
             return RefPtr<_Ty>();
         }
 
-        // obtain type
-        const InvTypeRef type = InvType::getType(data.typeID);
-        if (type == NULL)
+        InventoryItem *item = _LoadItem(itemID, data);
+        if(item != nullptr)
         {
-            return RefPtr<_Ty>();
+            // dynamic load
+            if(item->loadState())
+            {
+                return RefPtr<_Ty>::StaticCast(InventoryItemRef(item));
+            }
+            delete item;
         }
-
-        return _Ty::template _LoadItem<_Ty>( itemID, type, data );
+        return RefPtr<_Ty>();
     }
 
     // Actual loading stuff:
-    template<class _Ty>
-    static RefPtr<_Ty> _LoadItem(uint32 itemID,
-        // InventoryItem stuff:
-                                 const InvTypeRef type, const ItemData &data
-    );
+    static InventoryItem *_LoadItem(uint32 itemID, const ItemData &data);
 
     virtual bool loadState();
 
