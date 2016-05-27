@@ -73,12 +73,44 @@ public:
      */
 
 protected:
-    CargoContainer(uint32 _containerID, const ItemData &_data);
+    CargoContainer(
+        uint32 _containerID,
+        // InventoryItem stuff:
+        const InvTypeRef _containerType,
+        const ItemData &_data
+    );
 
     /*
      * Member functions
      */
+    // Template loader:
+    template<class _Ty>
+    static RefPtr<_Ty> _LoadItem(uint32 containerID,
+        // InventoryItem stuff:
+        const InvTypeRef type, const ItemData &data)
+    {
+        // check if it's a cargo container
+        if ((type->groupID != EVEDB::invGroups::Cargo_Container)
+            && (type->groupID != EVEDB::invGroups::Audit_Log_Secure_Container)
+            && (type->groupID != EVEDB::invGroups::Freight_Container)
+            && (type->groupID != EVEDB::invGroups::Secure_Cargo_Container)
+            && (type->groupID != EVEDB::invGroups::Spawn_Container)
+            && (type->groupID != EVEDB::invGroups::Wreck))
+        {
+            _log(ITEM__ERROR, "Trying to load category=%s, group=%s as CargoContainer.", type->getCategory()->categoryName.c_str(), type->getGroup()->groupName.c_str());
+            return RefPtr<_Ty>();
+        }
+
+        // we don't need any additional stuff
+        return CargoContainerRef(new CargoContainer(containerID, type, data));
+    }
+
     virtual bool loadState();
+
+    static uint32 _Spawn(
+        // InventoryItem stuff:
+        ItemData &data
+    );
 
     uint32 inventoryID() const { return itemID();
     }

@@ -194,12 +194,6 @@ bool InventoryDB::GetItem(uint32 itemID, ItemData &into) {
     into.position.z = row.GetDouble(10);
 
     into.customInfo = (row.IsNull(11) ? "" : row.GetText(11));
-    into.attributes.clear();
-    into.type = InvType::getType(into.typeID);
-    if(into.type.get() == nullptr)
-    {
-        return false;
-    }
 
     return true;
 }

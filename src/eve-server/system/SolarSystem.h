@@ -118,6 +118,8 @@ public:
 protected:
     SolarSystem(
         uint32 _solarSystemID,
+        // InventoryItem stuff:
+        const InvTypeRef _type,
         const ItemData &_data,
         // CelestialObject stuff:
         const CelestialObjectData &_cData,
@@ -140,14 +142,15 @@ protected:
 
     template<class _Ty>
     static RefPtr<_Ty> _LoadCelestialObject(uint32 solarSystemID,
-                                            const ItemData &data,
+                                            // InventoryItem stuff:
+                                            const InvTypeRef type, const ItemData &data,
                                             // CelestialObject stuff:
                                             const CelestialObjectData &cData)
     {
         // check it's a solar system
-        if(data.type->groupID != EVEDB::invGroups::Solar_System)
+        if(type->groupID != EVEDB::invGroups::Solar_System)
         {
-            _log(ITEM__ERROR, "Trying to load %s %u as Solar system.", data.type->typeName.c_str(), solarSystemID);
+            _log(ITEM__ERROR, "Trying to load %s %u as Solar system.", type->typeName.c_str(), solarSystemID);
             return RefPtr<_Ty>();
         }
 
@@ -163,9 +166,19 @@ protected:
             return RefPtr<_Ty>();
         }
 
-        // we have it all
-        return SolarSystemRef(new SolarSystem(solarSystemID, data, cData, sunType, ssData));
+        return _Ty::template _LoadSolarSystem<_Ty>(solarSystemID, type, data, cData, sunType, ssData);
     }
+
+    // Actual loading stuff:
+    template<class _Ty>
+    static RefPtr<_Ty> _LoadSolarSystem(uint32 solarSystemID,
+                                        // InventoryItem stuff:
+                                        const InvTypeRef type, const ItemData &data,
+                                        // CelestialObject stuff:
+                                        const CelestialObjectData &cData,
+                                        // SolarSystem stuff:
+                                        const InvTypeRef sunType, const SolarSystemData &ssData
+                                        );
 
     /*
      * Data members:

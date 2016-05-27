@@ -73,12 +73,39 @@ public:
     const InvTypeRef     type() const { return static_cast<const InvTypeRef >(InventoryItem::type()); }
 
 protected:
-    Structure(uint32 _structureID, const ItemData &_data);
+    Structure(
+        uint32 _structureID,
+        // InventoryItem stuff:
+        const InvTypeRef _itemType,
+        const ItemData &_data
+    );
 
     /*
      * Member functions
      */
+    // Template loader:
+    template<class _Ty>
+    static RefPtr<_Ty> _LoadItem(uint32 structureID,
+        // InventoryItem stuff:
+        const InvTypeRef type, const ItemData &data)
+    {
+        // check if it's a structure
+        if (type->getCategoryID() != EVEDB::invCategories::Structure)
+        {
+            _log(ITEM__ERROR, "Trying to load %s as Structure.", type->getCategory()->categoryName.c_str());
+            return RefPtr<_Ty>();
+        }
+
+        // we don't need any additional stuff
+        return StructureRef(new Structure(structureID, type, data));
+    }
+
     virtual bool loadState();
+
+    static uint32 _Spawn(
+        // InventoryItem stuff:
+        ItemData &data
+    );
 
     uint32 inventoryID() const { return itemID();
     }

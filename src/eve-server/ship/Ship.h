@@ -142,12 +142,39 @@ public:
     int32 RemoveRemoteEffect() { assert(true); }    // DO NOT CALL THIS YET!!!  This function needs to call down to ModuleManager::RemoveRemoteEffect with the proper argument list.
 
 protected:
-    Ship(uint32 _shipID, const ItemData &_data);
+    Ship(
+        uint32 _shipID,
+        // InventoryItem stuff:
+         const InvTypeRef _shipType,
+        const ItemData &_data
+    );
 
     /*
      * Member functions
      */
+    // Template loader:
+    template<class _Ty>
+    static RefPtr<_Ty> _LoadItem(uint32 shipID,
+        // InventoryItem stuff:
+                                 const InvTypeRef type, const ItemData &data)
+    {
+        // check it's a ship
+        if (type->getCategoryID() != EVEDB::invCategories::Ship)
+        {
+            _log(ITEM__ERROR, "Trying to load %s as Ship.", type->getCategory()->categoryName.c_str());
+            return RefPtr<_Ty>();
+        }
+
+        // we don't need any additional stuff
+        return ShipRef(new Ship(shipID, type, data));
+    }
+
     virtual bool loadState();
+
+    static uint32 _Spawn(
+        // InventoryItem stuff:
+        ItemData &data
+    );
 
     uint32 inventoryID() const { return itemID();
     }

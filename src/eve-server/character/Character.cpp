@@ -240,11 +240,13 @@ fleetJob(_fleetJob)
  */
 Character::Character(
                      uint32 _characterID,
+                     // InventoryItem stuff:
+                     const InvTypeRef _charType,
                      const ItemData &_data,
                      // Character stuff:
                      const CharacterData &_charData,
                      const CorpMemberInfo &_corpData)
-: Owner(_characterID, _data),
+: Owner(_characterID, _charType, _data),
 m_accountID(_charData.accountID),
 m_title(_charData.title),
 m_description(_charData.description),
@@ -299,31 +301,9 @@ CharacterRef Character::Spawn(
     // Character stuff:
     CharacterData &charData, CorpMemberInfo &corpData)
 {
-    uint32 characterID = 0;
-    // make sure it's a character
-    if(charData.bloodline.get() != nullptr)
-    {
-        // make sure it's a singleton with qty 1
-        if(data.singleton && data.quantity == 1)
-        {
-            // first the item
-            uint32 characterID = Owner::_Spawn(data);
-            if(characterID != 0)
-            {
-                // then character
-                if(!InventoryDB::NewCharacter(characterID, charData, corpData))
-                {
-                    // delete the item
-                    InventoryDB::DeleteItem(characterID);
-                    characterID = 0;
-                }
-            }
-        }
-    }
-    if(characterID == 0)
-    {
+    uint32 characterID = Character::_Spawn( data, charData, corpData );
+    if( characterID == 0 )
         return CharacterRef();
-    }
 
     CharacterRef charRef = Character::Load( characterID );
 
@@ -331,6 +311,43 @@ CharacterRef Character::Spawn(
     charRef.get()->setAttribute(AttrIsOnline, 1); // Is Online
 
     return charRef;
+}
+
+uint32 Character::_Spawn(
+    // InventoryItem stuff:
+    ItemData &data,
+    // Character stuff:
+    CharacterData &charData, CorpMemberInfo &corpData)
+{
+    // make sure it's a character
+    if (charData.bloodline.get() == nullptr)
+    {
+        return 0;
+    }
+
+    // make sure it's a singleton with qty 1
+    if(!data.singleton || data.quantity != 1)
+    {
+        _log(ITEM__ERROR, "Tried to create non-singleton character %s.", data.name.c_str());
+        return 0;
+    }
+
+    // first the item
+    uint32 characterID = Owner::_Spawn(data);
+    if(characterID == 0)
+    {
+        return 0;
+    }
+
+    // then character
+    if(!InventoryDB::NewCharacter(characterID, charData, corpData)) {
+        // delete the item
+        InventoryDB::DeleteItem(characterID);
+
+        return 0;
+    }
+
+    return characterID;
 }
 
 bool Character::loadState()

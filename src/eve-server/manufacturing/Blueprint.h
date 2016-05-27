@@ -160,11 +160,49 @@ public:
     PyDict *GetBlueprintAttributes() const;
 
 protected:
-    Blueprint(uint32 _blueprintID, const ItemData &_data, const BlueprintData &_bpData);
+    Blueprint(
+        uint32 _blueprintID,
+        // InventoryItem stuff:
+              const InvTypeRef _bpType,
+        const ItemData &_data,
+        // Blueprint stuff:
+        const BlueprintData &_bpData
+    );
 
     /*
      * Member functions
      */
+    // Template loader:
+    template<class _Ty>
+    static RefPtr<_Ty> _LoadItem(uint32 blueprintID,
+        // InventoryItem stuff:
+                                 const InvTypeRef bpType, const ItemData &data)
+    {
+        // check it's blueprint type
+        if (bpType->getCategoryID() != EVEDB::invCategories::Blueprint)
+        {
+            SysLog::Error("Blueprint", "Trying to load %s as Blueprint.", bpType->getCategory()->categoryName.c_str());
+            return RefPtr<_Ty>();
+        }
+
+        // we are blueprint; pull additional blueprint info
+        BlueprintData bpData;
+        if(!InventoryDB::GetBlueprint(blueprintID, bpData))
+        {
+            return RefPtr<_Ty>();
+        }
+
+        // we have enough data, construct the item
+        return BlueprintRef(new Blueprint(blueprintID, bpType, data, bpData));
+    }
+
+    static uint32 _Spawn(
+        // InventoryItem stuff:
+        ItemData &data,
+        // Blueprint stuff:
+        BlueprintData &bpData
+    );
+
     void SaveBlueprint() const;
 
     /*

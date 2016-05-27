@@ -28,23 +28,50 @@
 #include "character/Character.h"
 #include "inventory/Owner.h"
 
-Owner::Owner(uint32 _ownerID, const ItemData &_data)
-: InventoryItem(_ownerID, _data) { }
+Owner::Owner(
+             uint32 _ownerID,
+             // InventoryItem stuff:
+             const InvTypeRef _type,
+             const ItemData &_data)
+: InventoryItem(_ownerID, _type, _data) { }
 
 OwnerRef Owner::Load(uint32 ownerID)
 {
     return InventoryItem::Load<Owner>(ownerID);
 }
 
+template<class _Ty>
+RefPtr<_Ty> Owner::_LoadOwner(uint32 ownerID,
+                              // InventoryItem stuff:
+                              const InvTypeRef type, const ItemData &data)
+{
+    // decide what to do next:
+    switch(type->groupID)
+    {
+            ///////////////////////////////////////
+            // Character:
+            ///////////////////////////////////////
+        case EVEDB::invGroups::Character:
+        {
+            // create character
+            return Character::_LoadOwner<Character>(ownerID, type, data);
+        }
+    }
+
+    // fallback to default:
+    return OwnerRef(new Owner(ownerID, type, data));
+}
+
 OwnerRef Owner::Spawn(ItemData &data)
 {
     // obtain type of new item
-    if(data.type.get() == nullptr)
+    const InvTypeRef t = InvType::getType(data.typeID);
+    if(t.get() == nullptr)
     {
         return OwnerRef();
     }
 
-    switch(data.type->groupID)
+    switch(t->groupID)
     {
             ///////////////////////////////////////
             // Character:
@@ -59,10 +86,19 @@ OwnerRef Owner::Spawn(ItemData &data)
     }
 
     // fallback to default:
-    uint32 ownerID = InventoryItem::_Spawn(data);
+    uint32 ownerID = Owner::_Spawn(data);
     if(ownerID == 0)
     {
         return OwnerRef();
     }
     return Owner::Load(ownerID);
 }
+
+uint32 Owner::_Spawn(
+                     // InventoryItem stuff:
+                     ItemData &data)
+{
+    // no additional stuff
+    return InventoryItem::_Spawn(data);
+}
+

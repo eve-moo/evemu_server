@@ -56,8 +56,19 @@ class CelestialObject
 {
     friend class InventoryItem; // to let it construct us
 public:
-    CelestialObject(uint32 _celestialID, const ItemData &_data);
-    CelestialObject(uint32 _celestialID, const ItemData &_data, const CelestialObjectData &_cData);
+    CelestialObject(
+        uint32 _celestialID,
+                    const InvTypeRef _type,
+        const ItemData &_data);
+
+    CelestialObject(
+        uint32 _celestialID,
+        // InventoryItem stuff:
+                    const InvTypeRef _type,
+        const ItemData &_data,
+        // CelestialObject stuff:
+        const CelestialObjectData &_cData
+    );
 
     /**
      * Loads celestial object.
@@ -88,9 +99,49 @@ public:
     uint8       orbitIndex() const { return m_orbitIndex; }
 
 protected:
-    uint32 inventoryID() const
+    /*
+     * Member functions:
+     */
+    // Template loader:
+    template<class _Ty>
+    static RefPtr<_Ty> _LoadItem(uint32 celestialID,
+        // InventoryItem stuff:
+                                 const InvTypeRef type, const ItemData &data)
     {
-        return itemID();
+        // make sure it's celestial object, entity object or station
+        if (type->getCategoryID() != EVEDB::invCategories::Celestial
+            && type->getCategoryID() != EVEDB::invCategories::Entity
+            && type->groupID != EVEDB::invGroups::Station)
+        {
+            _log(ITEM__ERROR, "Trying to load %s as Celestial.", type->getCategory()->categoryName.c_str());
+            return RefPtr<_Ty>();
+        }
+
+        // load celestial data
+        CelestialObjectData cData;
+        if(!InventoryDB::GetCelestialObject(celestialID, cData))
+        {
+            return RefPtr<_Ty>();
+        }
+
+        return _Ty::template _LoadCelestialObject<_Ty>( celestialID, type, data, cData );
+    }
+
+    // Actual loading stuff:
+    template<class _Ty>
+    static RefPtr<_Ty> _LoadCelestialObject(uint32 celestialID,
+        // InventoryItem stuff:
+                                            const InvTypeRef type, const ItemData &data,
+        // CelestialObject stuff:
+        const CelestialObjectData &cData
+    );
+
+    static uint32 _Spawn(
+        // InventoryItem stuff:
+        ItemData &data
+    );
+
+    uint32 inventoryID() const { return itemID();
     }
 
     PyRep *GetItem() 

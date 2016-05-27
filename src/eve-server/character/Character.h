@@ -634,6 +634,8 @@ public:
 protected:
     Character(
               uint32 _characterID,
+              // InventoryItem stuff:
+              const InvTypeRef _charType,
               const ItemData &_data,
               // Character stuff:
               const CharacterData &_charData,
@@ -643,7 +645,39 @@ protected:
     /*
      * Member functions:
      */
+    // Template loader:
+
+    template<class _Ty>
+    static RefPtr<_Ty> _LoadOwner(uint32 characterID,
+                                  // InventoryItem stuff:
+                                  const InvTypeRef charType, const ItemData &data)
+    {
+        // check it's a character
+        if(charType->groupID != EVEDB::invGroups::Character)
+        {
+            SysLog::Error("Character", "Trying to load %s as Character.", charType->getGroup()->groupName.c_str());
+            return RefPtr<_Ty>();
+        }
+
+        CharacterData charData;
+        if(!InventoryDB::GetCharacter(characterID, charData))
+            return RefPtr<_Ty>();
+
+        CorpMemberInfo corpData;
+        if(!InventoryDB::GetCorpMemberInfo(characterID, corpData))
+            return RefPtr<_Ty>();
+
+        // construct the item
+        return CharacterRef(new Character(characterID, charType, data, charData, corpData));
+    }
+
     virtual bool loadState();
+
+    static uint32 _Spawn(
+                         // InventoryItem stuff:
+                         ItemData &data,
+                         // Character stuff:
+                         CharacterData &charData, CorpMemberInfo &corpData);
 
     uint32 inventoryID() const
     {
