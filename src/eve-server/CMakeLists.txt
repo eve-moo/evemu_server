@@ -472,13 +472,19 @@ SET(services_INCLUDE
         "${TARGET_INCLUDE_DIR}/services/eventLog/EventLogService.h"
         "${TARGET_INCLUDE_DIR}/services/crestAPI/CrestAPIService.h"
         "${TARGET_INCLUDE_DIR}/services/bounty/BountyProxy.h"
-        )
+        "${TARGET_INCLUDE_DIR}/services/jumpTimers/jumpTimers.h"
+        "${TARGET_INCLUDE_DIR}/services/shipSkinMgr/ShipSkinMgr.h"
+        "${TARGET_INCLUDE_DIR}/services/shipKillCounter/ShipKillCounter.h"
+		)
 SET(services_SOURCE
         "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
         "${TARGET_SOURCE_DIR}/services/eventLog/EventLogService.cpp"
         "${TARGET_SOURCE_DIR}/services/crestAPI/CrestAPIService.cpp"
         "${TARGET_SOURCE_DIR}/services/bounty/BountyProxy.cpp"
-        )
+        "${TARGET_SOURCE_DIR}/services/jumpTimers/JumpTimers.cpp"
+		"${TARGET_SOURCE_DIR}/services/shipSkinMgr/ShipSkinMgr.cpp"
+        "${TARGET_SOURCE_DIR}/services/shipKillCounter/ShipKillCounter.cpp"
+		)
 
 ########################
 # Setup the executable #
