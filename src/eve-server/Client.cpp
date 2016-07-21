@@ -644,6 +644,8 @@ void Client::_UpdateSession2( uint32 characterID )
     uint32 rolesAtOther = 0;
     uint32 locationID = 0;
     uint32 shipID = 0;
+    uint32 raceID = 0;
+    uint32 bloodlineID = 0;
 
     ((CharUnboundMgrService *) (PyServiceMgr::LookupService("charUnboundMgr")))->GetCharacterData(characterID, characterDataMap);
 
@@ -667,6 +669,8 @@ void Client::_UpdateSession2( uint32 characterID )
     rolesAtOther = characterDataMap["rolesAtOther"];
     locationID = characterDataMap["locationID"];
     shipID = characterDataMap["shipID"];
+    raceID = characterDataMap["raceID"];
+    bloodlineID = characterDataMap["bloodlineID"];
 
 	mSession.SetInt( "genderID", gender );
     mSession.SetInt( "charid", characterID );
@@ -705,6 +709,8 @@ void Client::_UpdateSession2( uint32 characterID )
         m_char->SetActiveShip(m_shipId);
     if (IsInSpace())
         mSession.SetInt( "shipid", shipID );
+    mSession.SetInt( "raceID", raceID );
+    mSession.SetInt( "bloodlineID", bloodlineID );
 }
 
 void Client::_SendCallReturn( const PyAddress& source, uint64 callID, PyRep** return_value, const char* channel )
@@ -768,7 +774,7 @@ void Client::_SendSessionChange()
     SessionChangeNotification scn;
     scn.changes = new PyDict;
     // TO-DO: This should be a unique value for each login.
-    scn.sessionID = GetAccountID();
+    scn.sessionID = GetSessionID();
 
     mSession.EncodeChanges( scn.changes );
     if( scn.changes->empty() )
@@ -1723,6 +1729,7 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     mSession.SetInt( "userType", 20); // That was old, 1 is not defined by the client, 20 is userTypePBC //1 );
     mSession.SetInt( "userid", account_info.id );
     mSession.SetLong( "role", account_info.role );
+    mSession.SetLong( "sessionID", MakeRandomInt(0, UINT64_MAX-1)); // defined in client in basesession.py:GetNewSid(): return random.getrandbits(63)
 
     return true;
 
@@ -1743,9 +1750,8 @@ bool Client::_VerifyFuncResult( CryptoHandshakeResult& result )
     CryptoHandshakeAck ack;
     ack.access_token = new PyNone;
     ack.client_hash = new PyNone;
-    ack.sessionID = 123456789; // TODO: Generate random sessionID for every client.
-    // TO-DO: This should be (incrementingOffset * 10000000000L + nodeID)
-    ack.user_clientid = GetAccountID();
+    ack.sessionID = GetSessionID();
+    ack.user_clientid = GetNextClientSessionID();
     ack.live_updates = new PyList(0);       // No, we will never update the client with this method.
     ack.languageID = GetLanguageID();
     ack.userid = GetAccountID();
@@ -1884,3 +1890,7 @@ void Client::UpdateSession(const char *sessionType, int value)
     mSession.SetInt(sessionType, value);
 }
 
+int64 GetNextClientSessionID()
+{
+    return ++EntityList::clientIDOffset * 10000000000 + PyServiceMgr::GetNodeID();
+}

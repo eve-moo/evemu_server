@@ -101,6 +101,7 @@ public:
 
     uint32 GetAccountType() const                   { return mSession.GetCurrentInt( "userType" ); }
     uint32 GetAccountID() const                     { return mSession.GetCurrentInt( "userid" ); }
+    uint64 GetSessionID() const                     { return mSession.GetCurrentLong( "sessionID" ); }
     uint64 GetAccountRole() const                   { return mSession.GetCurrentLong( "role" ); }
 
     uint32 GetCharacterID() const                   { return mSession.GetCurrentInt( "charid" ); }
@@ -338,5 +339,12 @@ private:
     bool DoDestinyUpdate();
     std::list<PyTuple*> mDogmaMessages;
 };
+
+/**
+ * @brief Generates the next user_clientid.
+ *
+ * @return Next user_clientid.
+ */
+int64 GetNextClientSessionID();
 
 #endif
