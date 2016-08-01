@@ -721,6 +721,10 @@ void PyDict::SetItem( const char* key, const char* value )
     SetItem(key, (PyRep*)new PyString(value));
 }
 
+void PyDict::SetItem( uint32 key, PyRep *value)
+{
+    SetItem(new PyInt(key), value);
+}
 
 void PyDict::SetItem( const char* key, PyRep* value )
 {
@@ -1229,5 +1233,19 @@ PyDict *new_dict(PyRep *key1, PyRep *value1, PyRep *key2, PyRep *value2)
     PyDict *rtn = new PyDict();
     rtn->SetItem(key1, value1);
     rtn->SetItem(key2, value2);
+    return rtn;
+}
+
+PyList *new_list(PyRep *arg1, PyRep *arg2)
+{
+    PyList *rtn = new PyList();
+    rtn->AddItem(arg1);
+    rtn->AddItem(arg2);
+    return rtn;
+}
+PyList *new_list(PyRep *arg1)
+{
+    PyList *rtn = new PyList();
+    rtn->AddItem(arg1);
     return rtn;
 }
