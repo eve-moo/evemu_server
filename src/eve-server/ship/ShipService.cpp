@@ -59,6 +59,7 @@ public:
         PyCallable_REG_CALL(ShipBound, ActivateShip)
         PyCallable_REG_CALL(ShipBound, GetShipConfiguration)
         PyCallable_REG_CALL(ShipBound, SelfDestruct)
+        PyCallable_REG_CALL(ShipBound, GetDirtTimestamp)
     }
 
     virtual ~ShipBound() {}
@@ -79,6 +80,7 @@ public:
     PyCallable_DECL_CALL(ActivateShip)
     PyCallable_DECL_CALL(GetShipConfiguration)
     PyCallable_DECL_CALL(SelfDestruct)
+    PyCallable_DECL_CALL(GetDirtTimestamp)
 
 protected:
 
@@ -1173,4 +1175,8 @@ PyResult ShipBound::Handle_GetShipConfiguration(PyCallArgs &call) {
 PyResult ShipBound::Handle_SelfDestruct(PyCallArgs &call) {
     PyRep *result = NULL;
     return result;
+}
+
+PyResult ShipBound::Handle_GetDirtTimestamp(PyCallArgs &call) {
+    return new PyLong(Win32TimeNow());
 }
