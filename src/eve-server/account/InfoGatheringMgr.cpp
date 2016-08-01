@@ -124,5 +124,5 @@ PyResult InfoGatheringMgr::Handle_GetStateAndConfig(PyCallArgs &call)
 }
 
 PyResult InfoGatheringMgr::Handle_LogInfoEventsFromClient(PyCallArgs &call) {
-    return new PyNone;
+    return new PyDict();
 }
