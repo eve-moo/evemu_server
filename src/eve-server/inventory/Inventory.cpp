@@ -244,9 +244,8 @@ CRowSet* Inventory::List( EVEItemFlags _flag, uint32 forOwner ) const
     header->AddColumn( "groupID",    DBTYPE_I2 );
     header->AddColumn( "categoryID", DBTYPE_I4 );
     header->AddColumn( "customInfo", DBTYPE_STR );
-
-    //header->AddColumn( "singleton",  DBTYPE_BOOL );
-    //header->AddColumn( "stacksize" , DBTYPE_I4 );
+    header->AddColumn( "stacksize",  DBTYPE_I4 );
+    header->AddColumn( "singleton",  DBTYPE_BOOL );
 
     CRowSet* rowset = new CRowSet( &header );
     List( rowset, _flag, forOwner );
