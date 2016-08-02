@@ -618,6 +618,37 @@ void Client::_UpdateSession( const CharacterConstRef& character )
         mSession.SetInt("shipid", GetShipID());
 }
 
+/* Session change notes
+ * First session change sent to client after character creation (logging into space)
+ *      genderID        bool-
+ *      constellationid int-
+ *      raceID          int-
+ *      corpid          int-
+ *      regionid        int-
+ *      bloodlineID     int-
+ *      locationid      int-
+ *      hqID            int-
+ *      solarsystemid2  int-
+ *      solarsystemid   int
+ *      shipid          int-
+ *      charid          int-
+ *
+ * First session change sent to client while docked in station
+ *      genderID        bool-
+ *      shipid          int-
+ *      constellationid int-
+ *      bloodlineID     int-
+ *      stationid2      int
+ *      regionid        int-
+ *      worldspaceid    int
+ *      stationid       int
+ *      locationid      int-
+ *      hqID            int-
+ *      raceID          int-
+ *      solarsystemid2  int-
+ *      corpid          int-
+ *      charid          int-
+ */
 
 void Client::_UpdateSession2( uint32 characterID )
 {
@@ -672,45 +703,35 @@ void Client::_UpdateSession2( uint32 characterID )
     raceID = characterDataMap["raceID"];
     bloodlineID = characterDataMap["bloodlineID"];
 
-	mSession.SetInt( "genderID", gender );
-    mSession.SetInt( "charid", characterID );
-    mSession.SetInt( "corpid", corporationID );
-    if( stationID == 0 )
+    m_shipId = shipID;
+    if( m_char )
     {
-        mSession.Clear( "stationid" );
-        mSession.Clear( "stationid2" );
-        mSession.Clear( "worldspaceid" );
+        m_char->SetActiveShip(m_shipId);
+    }
 
-        mSession.SetInt( "solarsystemid", solarSystemID );
-        mSession.SetInt( "locationid", solarSystemID );
+    // Always sent
+    mSession.SetInt("genderID",        gender);
+    mSession.SetInt("constellationid", constellationID);
+    mSession.SetInt("raceID",          raceID);
+    mSession.SetInt("corpid",          corporationID);
+    mSession.SetInt("regionid",        regionID);
+    mSession.SetInt("bloodlineID",     bloodlineID);
+    mSession.SetInt("locationid",      locationID);
+    mSession.SetInt("hqID",            corporationHQ);
+    mSession.SetInt("solarsystemid2",  solarSystemID);
+    mSession.SetInt("shipid",          shipID);
+    mSession.SetInt("charid",          characterID);
+
+    if(IsInSpace())
+    {
+        mSession.SetInt("solarsystemid", solarSystemID);
     }
     else
     {
-        mSession.Clear( "solarsystemid" );
-
-        mSession.SetInt( "stationid", stationID );
-        mSession.SetInt( "stationid2", stationID );
-        mSession.SetInt( "locationid", stationID );		// used to be locationID, I don't know if this change will screw up using medical clones and such -- Aknor Jaden
+        mSession.SetInt("stationid2",   stationID);
+        mSession.SetInt("worldspaceid", stationID);
+        mSession.SetInt("stationid",    stationID);
     }
-	mSession.SetInt( "cloneLocationID", locationID );	// This is a CUSTOM key-value-pair that is NOT defined by CCP, so the question is, will this mess up the client?
-    mSession.SetInt( "solarsystemid2", solarSystemID );
-    mSession.SetInt( "constellationid", constellationID );
-    mSession.SetInt( "regionid", regionID );
-
-    mSession.SetInt( "hqID", corporationHQ );
-    mSession.SetLong( "corprole", corpRole );
-    mSession.SetLong( "rolesAtAll", rolesAtAll );
-    mSession.SetLong( "rolesAtBase", rolesAtBase );
-    mSession.SetLong( "rolesAtHQ", rolesAtHQ );
-    mSession.SetLong( "rolesAtOther", rolesAtOther );
-
-    m_shipId = shipID;
-    if( m_char )
-        m_char->SetActiveShip(m_shipId);
-    if (IsInSpace())
-        mSession.SetInt( "shipid", shipID );
-    mSession.SetInt( "raceID", raceID );
-    mSession.SetInt( "bloodlineID", bloodlineID );
 }
 
 void Client::_SendCallReturn( const PyAddress& source, uint64 callID, PyRep** return_value, const char* channel )
