@@ -85,7 +85,7 @@ PyService *PyServiceMgr::LookupService(const std::string &name) {
         {
             //this is added here so you know which server opens the call
             //that if it gets loaded
-            SysLog::Debug("ServiceOfIterest", (*cur)->GetName());
+//            SysLog::Debug("ServiceOfIterest", (*cur)->GetName());
             return(*cur);
         }
     }
