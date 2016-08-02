@@ -474,7 +474,9 @@ SET(services_INCLUDE
         "${TARGET_INCLUDE_DIR}/services/bounty/BountyProxy.h"
         "${TARGET_INCLUDE_DIR}/services/jumpTimers/jumpTimers.h"
         "${TARGET_INCLUDE_DIR}/services/shipSkinMgr/ShipSkinMgr.h"
-        "${TARGET_INCLUDE_DIR}/services/shipKillCounter/ShipKillCounter.h"
+		"${TARGET_INCLUDE_DIR}/services/shipKillCounter/ShipKillCounter.h"
+		"${TARGET_INCLUDE_DIR}/services/districtLocation/DistrictLocation.h"
+		"${TARGET_INCLUDE_DIR}/services/scanMgr/ScanMgr.h"
 		)
 SET(services_SOURCE
         "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
@@ -482,8 +484,10 @@ SET(services_SOURCE
         "${TARGET_SOURCE_DIR}/services/crestAPI/CrestAPIService.cpp"
         "${TARGET_SOURCE_DIR}/services/bounty/BountyProxy.cpp"
         "${TARGET_SOURCE_DIR}/services/jumpTimers/JumpTimers.cpp"
-		"${TARGET_SOURCE_DIR}/services/shipSkinMgr/ShipSkinMgr.cpp"
-        "${TARGET_SOURCE_DIR}/services/shipKillCounter/ShipKillCounter.cpp"
+        "${TARGET_SOURCE_DIR}/services/shipSkinMgr/ShipSkinMgr.cpp"
+		"${TARGET_SOURCE_DIR}/services/shipKillCounter/ShipKillCounter.cpp"
+		"${TARGET_SOURCE_DIR}/services/districtLocation/DistrictLocation.cpp"
+		"${TARGET_SOURCE_DIR}/services/scanMgr/ScanMgr.cpp"
 		)
 
 ########################

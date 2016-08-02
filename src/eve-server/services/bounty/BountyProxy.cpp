@@ -38,6 +38,7 @@ BountyProxyService::BountyProxyService()
     PyCallable_REG_CALL(BountyProxyService, GetMyKillRights)
     PyCallable_REG_CALL(BountyProxyService, GetBountiesAndKillRights)
     PyCallable_REG_CALL(BountyProxyService, GetBounties)
+    PyCallable_REG_CALL(BountyProxyService, GetTopPilotBounties)
 }
 
 BountyProxyService::~BountyProxyService() { }
@@ -191,3 +192,10 @@ PyResult BountyProxyService::Handle_GetBounties(PyCallArgs &call)
     }
     return resBounties;
 }
+
+PyResult BountyProxyService::Handle_GetTopPilotBounties(PyCallArgs &call)
+{
+    return new PyList();
+    //TODO: Likely wrong return type
+}
+
