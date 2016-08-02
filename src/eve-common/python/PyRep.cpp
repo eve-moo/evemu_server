@@ -1191,6 +1191,18 @@ PyTuple * new_tuple(PyRep* arg1, PyRep* arg2, PyRep* arg3, PyRep* arg4)
     return res;
 }
 
+PyTuple * new_tuple(PyRep* arg1, PyRep* arg2, PyRep* arg3, PyRep* arg4, PyRep* arg5, PyRep* arg6)
+{
+    PyTuple * res = new PyTuple(6);
+    res->SetItem(0, arg1);
+    res->SetItem(1, arg2);
+    res->SetItem(2, arg3);
+    res->SetItem(3, arg4);
+    res->SetItem(4, arg5);
+    res->SetItem(5, arg6);
+    return res;
+}
+
 PyTuple * new_tuple(PyRep* arg1, PyRep* arg2, PyRep* arg3)
 {
     PyTuple * res = new PyTuple(3);
