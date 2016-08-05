@@ -35,6 +35,7 @@ EVEServerConfig::EVEConfigFiles EVEServerConfig::files;
 //EVEServerConfig::EVEConfigNet EVEServerConfig::net;
 EVEServerConfig::EVEConfigImageServer EVEServerConfig::imageServer;
 std::vector<EVEServerConfig::EVEConfigNet> EVEServerConfig::networks;
+EVEServerConfig::EVEConfigServerInfo EVEServerConfig::serverInfo;
 
 /*************************************************************************/
 /* EVEServerConfig                                                       */
@@ -125,6 +126,10 @@ bool EVEServerConfig::ParseFile(const char *file)
         if(name == "net")
         {
             ProcessNet(member);
+        }
+        if(name == "serverInfo")
+        {
+            ProcessServerInfo(member);
         }
     }
 
@@ -297,6 +302,35 @@ bool EVEServerConfig::ProcessNet(const std::shared_ptr<XMLElement> ele)
         }
     }
     networks.push_back(_net);
+    return true;
+}
+
+bool EVEServerConfig::ProcessServerInfo(const std::shared_ptr<XMLElement> ele)
+{
+    for (auto value : ele->getChildren())
+    {
+        if (value->getName() == "serverName")
+        {
+            serverInfo.serverName = value->getValue();
+        }
+        if (value->getName() == "ip")
+        {
+            serverInfo.ip = value->getValue();
+        }
+        if (value->getName() == "espIP")
+        {
+            serverInfo.espIP = value->getValue();
+        }
+        if (value->getName() == "espPort")
+        {
+            serverInfo.espPort = std::stoi(value->getValue());
+        }
+        if (value->getName() == "isLive")
+        {
+            serverInfo.isLive = (value->getValue() != "0");
+        }
+    }
+    serverInfo.compiledValue = serverInfo.serverName + "," + serverInfo.ip + "," + serverInfo.espIP + ":" + std::to_string(serverInfo.espPort) + "," + std::to_string(serverInfo.isLive);
     return true;
 }
 

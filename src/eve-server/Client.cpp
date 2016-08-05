@@ -1721,7 +1721,7 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     server_shake.challenge_responsehash = "55087";
 
     // begin config_vals
-            server_shake.imageserverurl = ImageServer::getURL(m_networkConfig); // Image server used to download images
+    server_shake.imageserverurl = ImageServer::getURL(m_networkConfig); // Image server used to download images
     server_shake.publicCrestUrl = "";
     server_shake.bugReporting_BugReportServer = "";
     server_shake.sessionChangeDelay = "10";       // yea yea, the client has this as a default anyway, Live sends it therefor we do too
@@ -1730,6 +1730,7 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     server_shake.experimental_newcam3 = "1";      // See above remark
     server_shake.isProjectDiscoveryEnabled = "0"; // Why...
     server_shake.bugReporting_ShowButton = "0";   // We do not have that service.
+    server_shake.serverInfo = EVEServerConfig::serverInfo.compiledValue;
 
 
     server_shake.macho_version = MachoNetVersion;

@@ -97,4 +97,13 @@ a likely exception to this goal).
         <imageServerPort>26001</imageServerPort>
     </net>
 
+    <serverInfo>
+        <serverName>Zen</serverName>
+        <ip>127.0.0.1</ip>
+        <espIP>127.0.0.1</espIP>
+        <espPort>50001</espPort>
+        <isLive>0</isLive>
+        <!-- isLive note: 0 = false, anything else is true, you probably want 0 -->
+    </serverInfo>
+
 </eve-server>
