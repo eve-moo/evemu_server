@@ -672,6 +672,7 @@ PyRep *InventoryBound::_ExecAdd(Client *c, const std::vector<int32> &items, uint
 }
 
 PyResult InventoryBound::Handle_GetSelfInvItem(PyCallArgs &call){
-    return call.client->GetShip()->getPackedRow();
+    return mInventory.GetItem();
     // TODO: Wrong, live does not send singleton or stacksize with this.
+    // Note: The above comment may be wrong, maybe only some instances of invbound return singleton/stacksize
 }
