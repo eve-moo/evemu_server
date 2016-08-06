@@ -582,40 +582,25 @@ void Client::_UpdateSession( const CharacterConstRef& character )
     if( !character )
         return;
 
-    mSession.SetInt( "charid", character->itemID() );
-    mSession.SetString( "charname", character->itemName().c_str() );
-    mSession.SetInt( "corpid", character->corporationID() );
-    if( character->stationID() == 0 )
-    {
-        mSession.Clear( "stationid" );
-        mSession.Clear( "stationid2" );
-        mSession.Clear( "worldspaceid" );
+    mSession.SetInt("constellationid", GetConstellationID());
+    mSession.SetInt("corpid",          GetCorporationID());
+    mSession.SetInt("regionid",        GetRegionID());
+    mSession.SetInt("locationid",      GetLocationID());
+    mSession.SetInt("hqID",            GetCorpHQ());
+    mSession.SetInt("solarsystemid2",  character->solarSystemID());
+    mSession.SetInt("shipid",          GetShipID());
+    mSession.SetInt("charid",          GetCharacterID());
 
-        mSession.SetInt( "solarsystemid", character->solarSystemID() );
-        mSession.SetInt( "locationid", character->solarSystemID() );
+    if(IsInSpace())
+    {
+        mSession.SetInt("solarsystemid", character->solarSystemID());
     }
     else
     {
-        mSession.Clear( "solarsystemid" );
-
-        mSession.SetInt( "stationid", character->stationID() );
-        mSession.SetInt( "stationid2", character->stationID() );
-        mSession.SetInt( "worldspaceid", character->stationID() );
-        mSession.SetInt( "locationid", character->stationID() );
+        mSession.SetInt("stationid2",   character->stationID());
+        mSession.SetInt("worldspaceid", character->stationID());
+        mSession.SetInt("stationid",    character->stationID());
     }
-    mSession.SetInt( "solarsystemid2", character->solarSystemID() );
-    mSession.SetInt( "constellationid", character->constellationID() );
-    mSession.SetInt( "regionid", character->regionID() );
-
-    mSession.SetInt( "hqID", character->corporationHQ() );
-    mSession.SetLong( "corprole", character->corpRole() );
-    mSession.SetLong( "rolesAtAll", character->rolesAtAll() );
-    mSession.SetLong( "rolesAtBase", character->rolesAtBase() );
-    mSession.SetLong( "rolesAtHQ", character->rolesAtHQ() );
-    mSession.SetLong( "rolesAtOther", character->rolesAtOther() );
-
-    if (IsInSpace())
-        mSession.SetInt("shipid", GetShipID());
 }
 
 /* Session change notes
@@ -722,7 +707,7 @@ void Client::_UpdateSession2( uint32 characterID )
     mSession.SetInt("shipid",          shipID);
     mSession.SetInt("charid",          characterID);
 
-    if(IsInSpace())
+    if(stationID == 0)
     {
         mSession.SetInt("solarsystemid", solarSystemID);
     }
