@@ -134,6 +134,25 @@ public:
         uint16 imageServerPort;
     };
 
+    /// From <serverInfo/>
+
+    struct EVEConfigServerInfo
+    {
+        // Server name i.e Tranquility/Serenity
+        std::string serverName;
+        // Server public IP
+        std::string ip;
+        // ESP Server public IP
+        std::string espIP;
+        // ESP Server port
+        uint16 espPort;
+        // Should client create crash dumps
+        bool isLive;
+
+        // compiled value
+        std::string compiledValue;
+    };
+
     static EVEConfigRates rates;
     static EVEConfigAccount account;
     static EVEConfigCharacter character;
@@ -141,6 +160,7 @@ public:
     static EVEConfigFiles files;
     static EVEConfigImageServer imageServer;
     static std::vector<EVEConfigNet> networks;
+    static EVEConfigServerInfo serverInfo;
 
 protected:
     bool ProcessRates(const std::shared_ptr<XMLElement> ele);
@@ -150,6 +170,7 @@ protected:
     bool ProcessFiles(const std::shared_ptr<XMLElement> ele);
     bool ProcessImage(const std::shared_ptr<XMLElement> ele);
     bool ProcessNet(const std::shared_ptr<XMLElement> ele);
+    bool ProcessServerInfo(const std::shared_ptr<XMLElement> ele);
 };
 
 #endif /* !__EVE_SERVER_CONFIG__H__INCL__ */

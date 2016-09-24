@@ -23,27 +23,24 @@
     Author:        eve-moo
  */
 
-#ifndef __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
-#define __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
 
-#include "PyService.h"
+#include "eve-server.h"
+#include "JumpTimers.h"
+#include "PyBoundObject.h"
+#include "PyServiceCD.h"
+#include "PyServiceMgr.h"
 
-class PyRep;
+PyCallable_Make_InnerDispatcher(JumpTimersService)
 
-class BountyProxyService : public PyService
+JumpTimersService::JumpTimersService()
+        : PyService("jumpTimers", new Dispatcher(this))
 {
-public:
-    BountyProxyService();
-    virtual ~BountyProxyService();
+    PyCallable_REG_CALL(JumpTimersService, GetTimers)
+}
 
-    PyCallable_DECL_CALL(GetMyKillRights)
-    PyCallable_DECL_CALL(GetBountiesAndKillRights)
-    PyCallable_DECL_CALL(GetBounties)
-    PyCallable_DECL_CALL(GetTopPilotBounties)
+JumpTimersService::~JumpTimersService() { }
 
-protected:
-    class Dispatcher;
-
-};
-
-#endif
+PyResult JumpTimersService::Handle_GetTimers(PyCallArgs &call) {
+    SysLog::Log("JumpTimersService", "Called GetTimers stub.");
+    return new_tuple(new PyNone(), new PyNone(), new PyNone(), new PyNone());
+}

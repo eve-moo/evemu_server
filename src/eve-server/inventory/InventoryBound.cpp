@@ -51,6 +51,7 @@ InventoryBound::InventoryBound( Inventory &inventory, EVEItemFlags flag)
     PyCallable_REG_CALL(InventoryBound, SetPassword)
     PyCallable_REG_CALL(InventoryBound, CreateBookmarkVouchers)
     PyCallable_REG_CALL(InventoryBound, Voucher)
+    PyCallable_REG_CALL(InventoryBound, GetSelfInvItem)
 }
 
 InventoryBound::~InventoryBound()
@@ -668,4 +669,10 @@ PyRep *InventoryBound::_ExecAdd(Client *c, const std::vector<int32> &items, uint
 
     //Return Null if no item was created
     return NULL;
+}
+
+PyResult InventoryBound::Handle_GetSelfInvItem(PyCallArgs &call){
+    return mInventory.GetItem();
+    // TODO: Wrong, live does not send singleton or stacksize with this.
+    // Note: The above comment may be wrong, maybe only some instances of invbound return singleton/stacksize
 }

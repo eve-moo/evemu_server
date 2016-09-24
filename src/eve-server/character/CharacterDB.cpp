@@ -276,10 +276,14 @@ void CharacterDB::GetCharacterData(uint32 characterID, std::map<std::string, uin
         "  srvCharacter.rolesAtOther, "
         "  srvCharacter.shipID, "
 		"  srvCharacter.gender, "
-        "  srvEntity.locationID "
+        "  srvEntity.locationID, "
+        "  chrBloodlines.raceID, "
+        "  blkBloodlineTypes.bloodlineID "
         " FROM srvCharacter "
         "  LEFT JOIN srvCorporation USING (corporationID) "
         "  LEFT JOIN srvEntity ON srvEntity.itemID = srvCharacter.characterID "
+        "  LEFT JOIN blkBloodlineTypes USING (typeID)"
+        "  LEFT JOIN chrBloodlines USING (bloodlineID)"
         " WHERE characterID = %u",
         characterID))
     {
@@ -309,6 +313,8 @@ void CharacterDB::GetCharacterData(uint32 characterID, std::map<std::string, uin
     characterDataMap["shipID"] = row.GetUInt(11);
 	characterDataMap["gender"] = row.GetUInt(12);
     characterDataMap["locationID"] = row.GetUInt(13);
+    characterDataMap["raceID"] = row.GetUInt(14);
+    characterDataMap["bloodlineID"] = row.GetUInt(15);
 }
 
 PyObject *CharacterDB::GetCharPublicInfo3(uint32 characterID) {

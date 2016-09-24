@@ -377,11 +377,11 @@ SET( ship_modules_INCLUDE
      "${TARGET_INCLUDE_DIR}/ship/modules/mining_modules/MiningLaser.h"
      "${TARGET_INCLUDE_DIR}/ship/modules/mining_modules/SurveyScanner.h"
      "${TARGET_INCLUDE_DIR}/ship/modules/propulsion_modules/Afterburner.h"
-	 "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/EnergyTurret.h"
-	 "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/HybridTurret.h"
-	 "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/MissileLauncher.h"
-	 "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/ProjectileTurret.h"
-	 "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/SuperWeapon.h" )
+     "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/EnergyTurret.h"
+     "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/HybridTurret.h"
+     "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/MissileLauncher.h"
+     "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/ProjectileTurret.h"
+     "${TARGET_INCLUDE_DIR}/ship/modules/weapon_modules/SuperWeapon.h" )
 SET( ship_modules_SOURCE
      "${TARGET_SOURCE_DIR}/ship/modules/ActiveModules.cpp"
      "${TARGET_SOURCE_DIR}/ship/modules/ModuleDB.cpp"
@@ -392,11 +392,11 @@ SET( ship_modules_SOURCE
      "${TARGET_SOURCE_DIR}/ship/modules/mining_modules/MiningLaser.cpp"
      "${TARGET_SOURCE_DIR}/ship/modules/mining_modules/SurveyScanner.cpp"
      "${TARGET_SOURCE_DIR}/ship/modules/propulsion_modules/Afterburner.cpp"
-	 "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/EnergyTurret.cpp"
-	 "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/HybridTurret.cpp"
-	 "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/MissileLauncher.cpp"
-	 "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/ProjectileTurret.cpp"
-	 "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/SuperWeapon.cpp" )
+     "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/EnergyTurret.cpp"
+     "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/HybridTurret.cpp"
+     "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/MissileLauncher.cpp"
+     "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/ProjectileTurret.cpp"
+     "${TARGET_SOURCE_DIR}/ship/modules/weapon_modules/SuperWeapon.cpp" )
     #"${TARGET_SOURCE_DIR}/ship/modules/.cpp"
     #"${TARGET_SOURCE_DIR}/ship/modules/.cpp" )
 
@@ -468,17 +468,27 @@ SET( system_SOURCE
      "${TARGET_SOURCE_DIR}/system/WrecksAndLoot.cpp" )
 
 SET(services_INCLUDE
-        "${TARGET_INCLUDE_DIR}/services/lscProxy/LscProxyService.h"
-        "${TARGET_INCLUDE_DIR}/services/eventLog/EventLogService.h"
-        "${TARGET_INCLUDE_DIR}/services/crestAPI/CrestAPIService.h"
-        "${TARGET_INCLUDE_DIR}/services/bounty/BountyProxy.h"
-        )
+     "${TARGET_INCLUDE_DIR}/services/lscProxy/LscProxyService.h"
+     "${TARGET_INCLUDE_DIR}/services/eventLog/EventLogService.h"
+     "${TARGET_INCLUDE_DIR}/services/crestAPI/CrestAPIService.h"
+     "${TARGET_INCLUDE_DIR}/services/bounty/BountyProxy.h"
+     "${TARGET_INCLUDE_DIR}/services/jumpTimers/jumpTimers.h"
+     "${TARGET_INCLUDE_DIR}/services/shipSkinMgr/ShipSkinMgr.h"
+     "${TARGET_INCLUDE_DIR}/services/shipKillCounter/ShipKillCounter.h"
+     "${TARGET_INCLUDE_DIR}/services/districtLocation/DistrictLocation.h"
+     "${TARGET_INCLUDE_DIR}/services/scanMgr/ScanMgr.h"
+     )
 SET(services_SOURCE
-        "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
-        "${TARGET_SOURCE_DIR}/services/eventLog/EventLogService.cpp"
-        "${TARGET_SOURCE_DIR}/services/crestAPI/CrestAPIService.cpp"
-        "${TARGET_SOURCE_DIR}/services/bounty/BountyProxy.cpp"
-        )
+     "${TARGET_SOURCE_DIR}/services/lscProxy/LscProxyService.cpp"
+     "${TARGET_SOURCE_DIR}/services/eventLog/EventLogService.cpp"
+     "${TARGET_SOURCE_DIR}/services/crestAPI/CrestAPIService.cpp"
+     "${TARGET_SOURCE_DIR}/services/bounty/BountyProxy.cpp"
+     "${TARGET_SOURCE_DIR}/services/jumpTimers/JumpTimers.cpp"
+     "${TARGET_SOURCE_DIR}/services/shipSkinMgr/ShipSkinMgr.cpp"
+     "${TARGET_SOURCE_DIR}/services/shipKillCounter/ShipKillCounter.cpp"
+     "${TARGET_SOURCE_DIR}/services/districtLocation/DistrictLocation.cpp"
+     "${TARGET_SOURCE_DIR}/services/scanMgr/ScanMgr.cpp"
+     )
 
 ########################
 # Setup the executable #

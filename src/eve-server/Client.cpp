@@ -582,42 +582,58 @@ void Client::_UpdateSession( const CharacterConstRef& character )
     if( !character )
         return;
 
-    mSession.SetInt( "charid", character->itemID() );
-    mSession.SetString( "charname", character->itemName().c_str() );
-    mSession.SetInt( "corpid", character->corporationID() );
-    if( character->stationID() == 0 )
-    {
-        mSession.Clear( "stationid" );
-        mSession.Clear( "stationid2" );
-        mSession.Clear( "worldspaceid" );
+    mSession.SetInt("constellationid", GetConstellationID());
+    mSession.SetInt("corpid",          GetCorporationID());
+    mSession.SetInt("regionid",        GetRegionID());
+    mSession.SetInt("locationid",      GetLocationID());
+    mSession.SetInt("hqID",            GetCorpHQ());
+    mSession.SetInt("solarsystemid2",  character->solarSystemID());
+    mSession.SetInt("shipid",          GetShipID());
+    mSession.SetInt("charid",          GetCharacterID());
 
-        mSession.SetInt( "solarsystemid", character->solarSystemID() );
-        mSession.SetInt( "locationid", character->solarSystemID() );
+    if(IsInSpace())
+    {
+        mSession.SetInt("solarsystemid", character->solarSystemID());
     }
     else
     {
-        mSession.Clear( "solarsystemid" );
-
-        mSession.SetInt( "stationid", character->stationID() );
-        mSession.SetInt( "stationid2", character->stationID() );
-        mSession.SetInt( "worldspaceid", character->stationID() );
-        mSession.SetInt( "locationid", character->stationID() );
+        mSession.SetInt("stationid2",   character->stationID());
+        mSession.SetInt("worldspaceid", character->stationID());
+        mSession.SetInt("stationid",    character->stationID());
     }
-    mSession.SetInt( "solarsystemid2", character->solarSystemID() );
-    mSession.SetInt( "constellationid", character->constellationID() );
-    mSession.SetInt( "regionid", character->regionID() );
-
-    mSession.SetInt( "hqID", character->corporationHQ() );
-    mSession.SetLong( "corprole", character->corpRole() );
-    mSession.SetLong( "rolesAtAll", character->rolesAtAll() );
-    mSession.SetLong( "rolesAtBase", character->rolesAtBase() );
-    mSession.SetLong( "rolesAtHQ", character->rolesAtHQ() );
-    mSession.SetLong( "rolesAtOther", character->rolesAtOther() );
-
-    if (IsInSpace())
-        mSession.SetInt("shipid", GetShipID());
 }
 
+/* Session change notes
+ * First session change sent to client after character creation (logging into space)
+ *      genderID        bool-
+ *      constellationid int-
+ *      raceID          int-
+ *      corpid          int-
+ *      regionid        int-
+ *      bloodlineID     int-
+ *      locationid      int-
+ *      hqID            int-
+ *      solarsystemid2  int-
+ *      solarsystemid   int
+ *      shipid          int-
+ *      charid          int-
+ *
+ * First session change sent to client while docked in station
+ *      genderID        bool-
+ *      shipid          int-
+ *      constellationid int-
+ *      bloodlineID     int-
+ *      stationid2      int
+ *      regionid        int-
+ *      worldspaceid    int
+ *      stationid       int
+ *      locationid      int-
+ *      hqID            int-
+ *      raceID          int-
+ *      solarsystemid2  int-
+ *      corpid          int-
+ *      charid          int-
+ */
 
 void Client::_UpdateSession2( uint32 characterID )
 {
@@ -644,6 +660,8 @@ void Client::_UpdateSession2( uint32 characterID )
     uint32 rolesAtOther = 0;
     uint32 locationID = 0;
     uint32 shipID = 0;
+    uint32 raceID = 0;
+    uint32 bloodlineID = 0;
 
     ((CharUnboundMgrService *) (PyServiceMgr::LookupService("charUnboundMgr")))->GetCharacterData(characterID, characterDataMap);
 
@@ -667,44 +685,38 @@ void Client::_UpdateSession2( uint32 characterID )
     rolesAtOther = characterDataMap["rolesAtOther"];
     locationID = characterDataMap["locationID"];
     shipID = characterDataMap["shipID"];
-
-	mSession.SetInt( "genderID", gender );
-    mSession.SetInt( "charid", characterID );
-    mSession.SetInt( "corpid", corporationID );
-    if( stationID == 0 )
-    {
-        mSession.Clear( "stationid" );
-        mSession.Clear( "stationid2" );
-        mSession.Clear( "worldspaceid" );
-
-        mSession.SetInt( "solarsystemid", solarSystemID );
-        mSession.SetInt( "locationid", solarSystemID );
-    }
-    else
-    {
-        mSession.Clear( "solarsystemid" );
-
-        mSession.SetInt( "stationid", stationID );
-        mSession.SetInt( "stationid2", stationID );
-        mSession.SetInt( "locationid", stationID );		// used to be locationID, I don't know if this change will screw up using medical clones and such -- Aknor Jaden
-    }
-	mSession.SetInt( "cloneLocationID", locationID );	// This is a CUSTOM key-value-pair that is NOT defined by CCP, so the question is, will this mess up the client?
-    mSession.SetInt( "solarsystemid2", solarSystemID );
-    mSession.SetInt( "constellationid", constellationID );
-    mSession.SetInt( "regionid", regionID );
-
-    mSession.SetInt( "hqID", corporationHQ );
-    mSession.SetLong( "corprole", corpRole );
-    mSession.SetLong( "rolesAtAll", rolesAtAll );
-    mSession.SetLong( "rolesAtBase", rolesAtBase );
-    mSession.SetLong( "rolesAtHQ", rolesAtHQ );
-    mSession.SetLong( "rolesAtOther", rolesAtOther );
+    raceID = characterDataMap["raceID"];
+    bloodlineID = characterDataMap["bloodlineID"];
 
     m_shipId = shipID;
     if( m_char )
+    {
         m_char->SetActiveShip(m_shipId);
-    if (IsInSpace())
-        mSession.SetInt( "shipid", shipID );
+    }
+
+    // Always sent
+    mSession.SetInt("genderID",        gender);
+    mSession.SetInt("constellationid", constellationID);
+    mSession.SetInt("raceID",          raceID);
+    mSession.SetInt("corpid",          corporationID);
+    mSession.SetInt("regionid",        regionID);
+    mSession.SetInt("bloodlineID",     bloodlineID);
+    mSession.SetInt("locationid",      locationID);
+    mSession.SetInt("hqID",            corporationHQ);
+    mSession.SetInt("solarsystemid2",  solarSystemID);
+    mSession.SetInt("shipid",          shipID);
+    mSession.SetInt("charid",          characterID);
+
+    if(stationID == 0)
+    {
+        mSession.SetInt("solarsystemid", solarSystemID);
+    }
+    else
+    {
+        mSession.SetInt("stationid2",   stationID);
+        mSession.SetInt("worldspaceid", stationID);
+        mSession.SetInt("stationid",    stationID);
+    }
 }
 
 void Client::_SendCallReturn( const PyAddress& source, uint64 callID, PyRep** return_value, const char* channel )
@@ -768,7 +780,7 @@ void Client::_SendSessionChange()
     SessionChangeNotification scn;
     scn.changes = new PyDict;
     // TO-DO: This should be a unique value for each login.
-    scn.sessionID = GetAccountID();
+    scn.sessionID = GetSessionID();
 
     mSession.EncodeChanges( scn.changes );
     if( scn.changes->empty() )
@@ -1694,7 +1706,7 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     server_shake.challenge_responsehash = "55087";
 
     // begin config_vals
-            server_shake.imageserverurl = ImageServer::getURL(m_networkConfig); // Image server used to download images
+    server_shake.imageserverurl = ImageServer::getURL(m_networkConfig); // Image server used to download images
     server_shake.publicCrestUrl = "";
     server_shake.bugReporting_BugReportServer = "";
     server_shake.sessionChangeDelay = "10";       // yea yea, the client has this as a default anyway, Live sends it therefor we do too
@@ -1703,6 +1715,7 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     server_shake.experimental_newcam3 = "1";      // See above remark
     server_shake.isProjectDiscoveryEnabled = "0"; // Why...
     server_shake.bugReporting_ShowButton = "0";   // We do not have that service.
+    server_shake.serverInfo = EVEServerConfig::serverInfo.compiledValue;
 
 
     server_shake.macho_version = MachoNetVersion;
@@ -1723,6 +1736,7 @@ bool Client::_VerifyLogin( CryptoChallengePacket& ccp )
     mSession.SetInt( "userType", 20); // That was old, 1 is not defined by the client, 20 is userTypePBC //1 );
     mSession.SetInt( "userid", account_info.id );
     mSession.SetLong( "role", account_info.role );
+    mSession.SetLong( "sessionID", MakeRandomInt(0, UINT64_MAX-1)); // defined in client in basesession.py:GetNewSid(): return random.getrandbits(63)
 
     return true;
 
@@ -1743,9 +1757,8 @@ bool Client::_VerifyFuncResult( CryptoHandshakeResult& result )
     CryptoHandshakeAck ack;
     ack.access_token = new PyNone;
     ack.client_hash = new PyNone;
-    ack.sessionID = 123456789; // TODO: Generate random sessionID for every client.
-    // TO-DO: This should be (incrementingOffset * 10000000000L + nodeID)
-    ack.user_clientid = GetAccountID();
+    ack.sessionID = GetSessionID();
+    ack.user_clientid = GetNextClientSessionID();
     ack.live_updates = new PyList(0);       // No, we will never update the client with this method.
     ack.languageID = GetLanguageID();
     ack.userid = GetAccountID();
@@ -1884,3 +1897,7 @@ void Client::UpdateSession(const char *sessionType, int value)
     mSession.SetInt(sessionType, value);
 }
 
+int64 GetNextClientSessionID()
+{
+    return ++EntityList::clientIDOffset * 10000000000 + PyServiceMgr::GetNodeID();
+}

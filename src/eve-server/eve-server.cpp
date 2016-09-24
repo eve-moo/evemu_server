@@ -159,6 +159,11 @@ trapfpe()
 #include "services/eventLog/EventLogService.h"
 #include "services/crestAPI/CrestAPIService.h"
 #include "services/bounty/BountyProxy.h"
+#include "services/jumpTimers/JumpTimers.h"
+#include "services/shipSkinMgr/ShipSkinMgr.h"
+#include "services/shipKillCounter/ShipKillCounter.h"
+#include "services/districtLocation/DistrictLocation.h"
+#include "services/scanMgr/ScanMgr.h"
 // service manager
 #include "PyServiceMgr.h"
 
@@ -386,6 +391,11 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new EventLogService());
     PyServiceMgr::RegisterService(new CrestAPIService());
     PyServiceMgr::RegisterService(new BountyProxyService());
+    PyServiceMgr::RegisterService(new JumpTimersService());
+    PyServiceMgr::RegisterService(new ShipSkinMgrService());
+    PyServiceMgr::RegisterService(new ShipKillCounterService());
+    PyServiceMgr::RegisterService(new ScanMgrService());
+    PyServiceMgr::RegisterService(new DistrictLocationService());
 
     SysLog::Log("Server Init", "Priming cached objects.");
     PyServiceMgr::cache_service->PrimeCache();

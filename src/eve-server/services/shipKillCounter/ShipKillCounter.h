@@ -20,26 +20,23 @@
     Place - Suite 330, Boston, MA 02111-1307, USA, or go to
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
-    Author:        eve-moo
- */
+    Author:        Cometo
+*/
 
-#ifndef __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
-#define __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
+#ifndef __EVEMOO_SERVICES_SHIPKILLCOUNTER_H_INCL__
+#define __EVEMOO_SERVICES_SHIPKILLCOUNTER_H_INCL__
 
 #include "PyService.h"
 
 class PyRep;
 
-class BountyProxyService : public PyService
+class ShipKillCounterService: public PyService
 {
 public:
-    BountyProxyService();
-    virtual ~BountyProxyService();
+    ShipKillCounterService();
+    virtual ~ShipKillCounterService();
 
-    PyCallable_DECL_CALL(GetMyKillRights)
-    PyCallable_DECL_CALL(GetBountiesAndKillRights)
-    PyCallable_DECL_CALL(GetBounties)
-    PyCallable_DECL_CALL(GetTopPilotBounties)
+    PyCallable_DECL_CALL(GetItemKillCountPlayer)
 
 protected:
     class Dispatcher;

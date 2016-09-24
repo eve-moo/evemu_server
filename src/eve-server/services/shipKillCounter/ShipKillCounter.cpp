@@ -20,30 +20,28 @@
     Place - Suite 330, Boston, MA 02111-1307, USA, or go to
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
-    Author:        eve-moo
- */
+    Author:        Cometo
+*/
 
-#ifndef __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
-#define __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
 
-#include "PyService.h"
+#include "eve-server.h"
+#include "ShipKillCounter.h"
+#include "PyBoundObject.h"
+#include "PyServiceCD.h"
+#include "PyServiceMgr.h"
 
-class PyRep;
+PyCallable_Make_InnerDispatcher(ShipKillCounterService)
 
-class BountyProxyService : public PyService
+ShipKillCounterService::ShipKillCounterService()
+        : PyService("shipKillCounter", new Dispatcher(this))
 {
-public:
-    BountyProxyService();
-    virtual ~BountyProxyService();
+    PyCallable_REG_CALL(ShipKillCounterService, GetItemKillCountPlayer)
+}
 
-    PyCallable_DECL_CALL(GetMyKillRights)
-    PyCallable_DECL_CALL(GetBountiesAndKillRights)
-    PyCallable_DECL_CALL(GetBounties)
-    PyCallable_DECL_CALL(GetTopPilotBounties)
+ShipKillCounterService::~ShipKillCounterService() {
+}
 
-protected:
-    class Dispatcher;
-
-};
-
-#endif
+PyResult ShipKillCounterService::Handle_GetItemKillCountPlayer(PyCallArgs &call) {
+    SysLog::Log("ShipKillCounterService", "Called GetItemKillCountPlayer stub.");
+    return new PyInt(0);
+}

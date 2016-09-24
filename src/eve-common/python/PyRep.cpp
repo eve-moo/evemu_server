@@ -721,6 +721,10 @@ void PyDict::SetItem( const char* key, const char* value )
     SetItem(key, (PyRep*)new PyString(value));
 }
 
+void PyDict::SetItem( uint32 key, PyRep *value)
+{
+    SetItem(new PyInt(key), value);
+}
 
 void PyDict::SetItem( const char* key, PyRep* value )
 {
@@ -1177,6 +1181,28 @@ PyTuple * new_tuple(const char* arg1, PyRep* arg2, PyRep* arg3)
 }
 
 /* @note we should increase ref here.... but don't make it to complicated to use... for now... */
+PyTuple * new_tuple(PyRep* arg1, PyRep* arg2, PyRep* arg3, PyRep* arg4)
+{
+    PyTuple * res = new PyTuple(4);
+    res->SetItem(0, arg1);
+    res->SetItem(1, arg2);
+    res->SetItem(2, arg3);
+    res->SetItem(3, arg4);
+    return res;
+}
+
+PyTuple * new_tuple(PyRep* arg1, PyRep* arg2, PyRep* arg3, PyRep* arg4, PyRep* arg5, PyRep* arg6)
+{
+    PyTuple * res = new PyTuple(6);
+    res->SetItem(0, arg1);
+    res->SetItem(1, arg2);
+    res->SetItem(2, arg3);
+    res->SetItem(3, arg4);
+    res->SetItem(4, arg5);
+    res->SetItem(5, arg6);
+    return res;
+}
+
 PyTuple * new_tuple(PyRep* arg1, PyRep* arg2, PyRep* arg3)
 {
     PyTuple * res = new PyTuple(3);
@@ -1219,5 +1245,19 @@ PyDict *new_dict(PyRep *key1, PyRep *value1, PyRep *key2, PyRep *value2)
     PyDict *rtn = new PyDict();
     rtn->SetItem(key1, value1);
     rtn->SetItem(key2, value2);
+    return rtn;
+}
+
+PyList *new_list(PyRep *arg1, PyRep *arg2)
+{
+    PyList *rtn = new PyList();
+    rtn->AddItem(arg1);
+    rtn->AddItem(arg2);
+    return rtn;
+}
+PyList *new_list(PyRep *arg1)
+{
+    PyList *rtn = new PyList();
+    rtn->AddItem(arg1);
     return rtn;
 }

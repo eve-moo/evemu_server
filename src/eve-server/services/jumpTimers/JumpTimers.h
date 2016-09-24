@@ -23,23 +23,20 @@
     Author:        eve-moo
  */
 
-#ifndef __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
-#define __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
+#ifndef __EVEMOO_SERVICES_JUMPTIMERS_H_INCL__
+#define __EVEMOO_SERVICES_JUMPTIMERS_H_INCL__
 
 #include "PyService.h"
 
 class PyRep;
 
-class BountyProxyService : public PyService
+class JumpTimersService : public PyService
 {
 public:
-    BountyProxyService();
-    virtual ~BountyProxyService();
+    JumpTimersService();
+    virtual ~JumpTimersService();
 
-    PyCallable_DECL_CALL(GetMyKillRights)
-    PyCallable_DECL_CALL(GetBountiesAndKillRights)
-    PyCallable_DECL_CALL(GetBounties)
-    PyCallable_DECL_CALL(GetTopPilotBounties)
+    PyCallable_DECL_CALL(GetTimers)
 
 protected:
     class Dispatcher;

@@ -70,6 +70,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <iostream>
 
 // Standard Template Library includes
 #include <algorithm>

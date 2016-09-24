@@ -1062,6 +1062,8 @@ PyPackedRow *InventoryItem::getPackedRow()
     header->AddColumn("groupID", DBTYPE_I4);
     header->AddColumn("categoryID", DBTYPE_I4);
     header->AddColumn("customInfo", DBTYPE_STR);
+    header->AddColumn("stacksize", DBTYPE_I4);
+    header->AddColumn("singleton", DBTYPE_BOOL);
 
     PyPackedRow* row = new PyPackedRow(header);
     getPackedRow(row);
@@ -1089,6 +1091,8 @@ void InventoryItem::getPackedRow(PyPackedRow* into) const
     into->SetField("groupID", new PyInt(m_type->groupID));
     into->SetField("categoryID", new PyInt(m_type->getCategoryID()));
     into->SetField("customInfo", new PyString(m_customInfo));
+    into->SetField("stacksize", new PyInt(m_quantity));
+    into->SetField("singleton", new PyBool(m_singleton));
 }
 
 void InventoryItem::sendItemChangeNotice(Client *client)

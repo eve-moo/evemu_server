@@ -490,116 +490,81 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
         codelog(SERVICE__ERROR, "Unable to decode arguments from '%s'", call.client->GetName());
         return NULL;
     }
+    SysLog::Debug("DogmaIMBound", "GetAllInfo: getCharInfo: %s", args.arg1 ? "true" : "false");
+    SysLog::Debug("DogmaIMBound", "GetAllInfo: getShipInfo: %s", args.arg2 ? "true" : "false");
 
-	// ========================================================================
-	// Create the response dictionary:
-    PyDict *rsp = new PyDict;
+    PyDict *rtn = new PyDict();
+//-----
+    PyNone *shipModifiedCharAttribs = new PyNone();
+//-----
+    PyNone *locationInfo = new PyNone();
+//-----
+    PyDict *structureInfo = new PyDict();
+//-----
+    PyDict *shipInfo = new PyDict();
 
-    rsp->SetItemString("charInfo", new PyDict);
-    rsp->SetItemString("activeShipID", new PyInt(call.client->GetShipID()));
-    rsp->SetItemString("locationInfo", new PyNone);
-    rsp->SetItemString("structureInfo", new PyDict);
-    rsp->SetItemString("shipInfo", new PyNone);
-    rsp->SetItemString("shipModifiedCharAttribs", new PyNone);
-    rsp->SetItemString("shipState", new PyNone);
+    PyDict *shipInfoShipID = new PyDict();
+    shipInfoShipID->SetItem("itemID", new PyInt(call.client->GetShipID()));
+    shipInfoShipID->SetItem("invItem", call.client->GetShip()->getPackedRow());
+    shipInfoShipID->SetItem("activeEffects", new PyDict());
+    shipInfoShipID->SetItem("time", new PyLong(Win32TimeNow()));
+    shipInfoShipID->SetItem("attributes", new PyDict());
+    shipInfoShipID->SetItem("wallclockTime", new PyLong(Win32TimeNow()));
 
+    shipInfo->SetItem(call.client->GetShipID(), new PyObject("utillib.KeyVal", shipInfoShipID));
+//-----
+    PyTuple *charInfo = new PyTuple(2);
 
-	// ========================================================================
-	// Setting "charInfo" in the Dictionary:
-    if(args.arg1)
-    {
-        PyTuple *charResult = call.client->GetChar()->CharGetInfo();
-        if(charResult == NULL) {
-            codelog(SERVICE__ERROR, "Unable to build char info for char %u", call.client->GetCharacterID());
-            return NULL;
-        }
+    PyDict *charInfoCharFittedItems = new PyDict();
+    PyDict *charInfoCharFittedItemsKV = new PyDict();
+    charInfoCharFittedItemsKV->SetItem("itemID", new PyInt(call.client->GetCharacterID()));
+    charInfoCharFittedItemsKV->SetItem("invItem", call.client->GetChar()->getPackedRow());
+    charInfoCharFittedItemsKV->SetItem("activeEffects", new PyDict());
+    charInfoCharFittedItemsKV->SetItem("time", new PyLong(Win32TimeNow()));
+    charInfoCharFittedItemsKV->SetItem("attributes", new PyDict());
+    charInfoCharFittedItemsKV->SetItem("wallclockTime", new PyLong(Win32TimeNow()));
+    charInfoCharFittedItems->SetItem(call.client->GetCharacterID(), new PyObject("utillib.KeyVal", charInfoCharFittedItemsKV));
 
-        rsp->SetItemString("charInfo", charResult);
-    }
-	// ========================================================================
+    PyTuple *charInfoCharBrain = new PyTuple(3);
+    charInfoCharBrain->SetItem(0, new PyInt(1));	//brainVersion
+    charInfoCharBrain->SetItem(1, new PyList());	//charEffects
+    charInfoCharBrain->SetItem(2, new PyList());	//shipEffects
 
+    charInfo->SetItem(0, charInfoCharFittedItems);
+    charInfo->SetItem(1, charInfoCharBrain);
+//-----
+    PyTuple *shipState = new PyTuple(4);
 
-	// ========================================================================
-	// Setting "locationInfo" in the Dictionary:
-	// TODO
-	// ========================================================================
+    PyDict *shipStateInstanceCache = new PyDict();
+    shipStateInstanceCache->SetItem(call.client->GetShipID(), call.client->GetShip()->getPackedRow());
+    shipStateInstanceCache->SetItem(call.client->GetCharacterID(), call.client->GetChar()->getPackedRow());
 
+    PyDict *shipStateInstanceFlagQuantityCache = new PyDict();
+    shipStateInstanceFlagQuantityCache->SetItem(call.client->GetShipID(), new PyDict());
 
-	// ========================================================================
-	// Setting "shipInfo" in the Dictionary:
-	if(args.arg2)
-    {
-        PyDict *shipResult = call.client->GetShip()->ShipGetInfo();
-        if(shipResult == NULL) {
-            codelog(SERVICE__ERROR, "Unable to build ship info for ship %u", call.client->GetShipID());
-            return NULL;
-        }
-        rsp->SetItemString("shipInfo", shipResult);
-    }
-	// ========================================================================
+    PyObjectEx_Type1 *shipStateWbData = new PyObjectEx_Type1(new PyToken("collections.defaultdict"), new_tuple(new PyToken("__builtin__.set")));
 
+    PyDict *shipStateHeatStates = new PyDict();
+    shipStateHeatStates->SetItem(AttrHeatLow, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
+    shipStateHeatStates->SetItem(AttrHeatMed, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
+    shipStateHeatStates->SetItem(AttrHeatHi, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
 
-	// ========================================================================
-	// Setting "shipModifiedCharAttribs" in the Dictionary:
-	// TODO
-	// ========================================================================
+    shipState->SetItem(0, shipStateInstanceCache);
+    shipState->SetItem(1, shipStateInstanceFlagQuantityCache);
+    shipState->SetItem(2, shipStateWbData);
+    shipState->SetItem(3, shipStateHeatStates);
+//-----
+    PyInt *activeShipID = new PyInt(call.client->GetShipID());
+//-----
+    rtn->SetItem("shipModifiedCharAttribs", shipModifiedCharAttribs);
+    rtn->SetItem("locationInfo", locationInfo);
+    rtn->SetItem("structureInfo", structureInfo);
+    rtn->SetItem("shipInfo", shipInfo);
+    rtn->SetItem("charInfo", charInfo);
+    rtn->SetItem("shipState", shipState);
+    rtn->SetItem("activeShipID", activeShipID);
 
-
-	// ========================================================================
-	// Setting "shipState" in the Dictionary:
-    //Get some attributes about the ship and its modules for shipState
-    PyTuple *rspShipState = new PyTuple(4);
-
-    //Contains a dict of the ship and its modules
-
-    if( call.client->GetShip().get() == NULL ) {
-        codelog(SERVICE__ERROR, "Unable to build ship status for ship %u", call.client->GetShipID());
-        return NULL;
-    }
-    PyDict *shipState = call.client->GetShip()->ShipGetState();
-    rspShipState->items[0] = shipState;
-
-    //Contains a dict with the ship and an empty dict
-    PyDict *shipStateItem2 = new PyDict();
-    shipStateItem2->SetItem(new PyInt(call.client->GetShipID()), new PyDict());
-    rspShipState->items[1] = shipStateItem2;
-
-    //Some PyObjectEx
-    rspShipState->items[2] = new BuiltinSet();
-
-    // Report heat state.
-    // TO-DO: Find out what all these params are for.  See also, onHeatAdded and onHeatRemoved messages.
-    PyDict *shipStateItem4 = new PyDict();
-    PyTuple *heatLow = new PyTuple(6);
-    heatLow->SetItem(0, new PyFloat(0)); // possible heat level % (i.e. 21.499 = 21.499%)
-    heatLow->SetItem(1, new PyFloat(100));
-    heatLow->SetItem(2, new PyInt(0));
-    heatLow->SetItem(3, new PyFloat(1));
-    heatLow->SetItem(4, new PyFloat(0.01));
-    heatLow->SetItem(5, new PyLong(Win32TimeNow()));
-    PyTuple *heatMed = new PyTuple(6);
-    heatMed->SetItem(0, new PyFloat(0));
-    heatMed->SetItem(1, new PyFloat(100));
-    heatMed->SetItem(2, new PyInt(0));
-    heatMed->SetItem(3, new PyFloat(1));
-    heatMed->SetItem(4, new PyFloat(0.01));
-    heatMed->SetItem(5, new PyLong(Win32TimeNow()));
-    PyTuple *heatHi = new PyTuple(6);
-    heatHi->SetItem(0, new PyFloat(0));
-    heatHi->SetItem(1, new PyFloat(100));
-    heatHi->SetItem(2, new PyInt(0));
-    heatHi->SetItem(3, new PyFloat(1));
-    heatHi->SetItem(4, new PyFloat(0.01));
-    heatHi->SetItem(5, new PyLong(Win32TimeNow()));
-    shipStateItem4->SetItem(new PyInt(AttrHeatLow), heatLow);
-    shipStateItem4->SetItem(new PyInt(AttrHeatMed), heatMed);
-    shipStateItem4->SetItem(new PyInt(AttrHeatHi), heatHi);
-    rspShipState->items[3] = shipStateItem4;
-
-    rsp->SetItemString("shipState", rspShipState);
-
-
-	return new PyObject( "utillib.KeyVal", rsp );
+    return new PyObject("utillib.KeyVal", rtn);
 }
 
 PyResult DogmaIMBound::Handle_InjectSkillIntoBrain(PyCallArgs& call)

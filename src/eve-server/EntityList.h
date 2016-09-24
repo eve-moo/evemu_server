@@ -77,6 +77,7 @@ public:
     static void Unicast(uint32 charID, const char *notifyType, const char *idType, PyTuple **payload, bool seq = true);
     static void GetClients(const character_set &cset, std::vector<Client *> &result);
 
+    static uint32 clientIDOffset;
 };
 
 #endif

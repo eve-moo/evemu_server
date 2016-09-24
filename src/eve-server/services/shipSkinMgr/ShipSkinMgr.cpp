@@ -20,30 +20,28 @@
     Place - Suite 330, Boston, MA 02111-1307, USA, or go to
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
-    Author:        eve-moo
- */
+    Author:        Cometo
+*/
 
-#ifndef __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
-#define __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
 
-#include "PyService.h"
+#include "eve-server.h"
+#include "ShipSkinMgr.h"
+#include "PyBoundObject.h"
+#include "PyServiceCD.h"
+#include "PyServiceMgr.h"
 
-class PyRep;
+PyCallable_Make_InnerDispatcher(ShipSkinMgrService)
 
-class BountyProxyService : public PyService
+ShipSkinMgrService::ShipSkinMgrService()
+        : PyService("shipSkinMgr", new Dispatcher(this))
 {
-public:
-    BountyProxyService();
-    virtual ~BountyProxyService();
+    PyCallable_REG_CALL(ShipSkinMgrService, GetAppliedSkinMaterialSetID)
+}
 
-    PyCallable_DECL_CALL(GetMyKillRights)
-    PyCallable_DECL_CALL(GetBountiesAndKillRights)
-    PyCallable_DECL_CALL(GetBounties)
-    PyCallable_DECL_CALL(GetTopPilotBounties)
+ShipSkinMgrService::~ShipSkinMgrService() {
+}
 
-protected:
-    class Dispatcher;
-
-};
-
-#endif
+PyResult ShipSkinMgrService::Handle_GetAppliedSkinMaterialSetID(PyCallArgs &call) {
+    SysLog::Log("ShipSkinMgrService", "Called GetAppliedSkinMaterialSetID stub.");
+    return new PyNone();
+}

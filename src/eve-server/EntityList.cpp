@@ -35,6 +35,7 @@ client_list m_clients;
 typedef std::map<uint32, SystemManager *> system_list;
 system_list m_systems;
 Mutex mMutex;
+uint32 EntityList::clientIDOffset = 0;
 
 void EntityList::Add(Client **client)
 {

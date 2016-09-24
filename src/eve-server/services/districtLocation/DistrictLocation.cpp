@@ -20,30 +20,28 @@
     Place - Suite 330, Boston, MA 02111-1307, USA, or go to
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
-    Author:        eve-moo
+    Author:        Cometo
  */
 
-#ifndef __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
-#define __EVEMOO_SERVICES_BOUNTYPROXY_H_INCL__
 
-#include "PyService.h"
+#include "eve-server.h"
+#include "DistrictLocation.h"
+#include "PyBoundObject.h"
+#include "PyServiceCD.h"
+#include "PyServiceMgr.h"
 
-class PyRep;
+PyCallable_Make_InnerDispatcher(DistrictLocationService)
 
-class BountyProxyService : public PyService
+DistrictLocationService::DistrictLocationService()
+: PyService("districtLocation", new Dispatcher(this))
 {
-public:
-    BountyProxyService();
-    virtual ~BountyProxyService();
+    PyCallable_REG_CALL(DistrictLocationService, GetDistrictsBySolarSystem)
+}
 
-    PyCallable_DECL_CALL(GetMyKillRights)
-    PyCallable_DECL_CALL(GetBountiesAndKillRights)
-    PyCallable_DECL_CALL(GetBounties)
-    PyCallable_DECL_CALL(GetTopPilotBounties)
+DistrictLocationService::~DistrictLocationService() { }
 
-protected:
-    class Dispatcher;
+PyResult DistrictLocationService::Handle_GetDistrictsBySolarSystem(PyCallArgs &call)
+{
+    return new PyDict();
+}
 
-};
-
-#endif
