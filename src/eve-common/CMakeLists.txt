@@ -225,11 +225,6 @@ ${python_classes_SOURCE}
 ${tables_SOURCE}
 ${utils_SOURCE} )
 
-IF(PCH)
-    TARGET_BUILD_PCH( "${TARGET_NAME}"
-                      "${TARGET_INCLUDE_DIR}/eve-common.h"
-                      "${TARGET_SOURCE_DIR}/utils/EVEUtils.cpp" )
-ENDIF()
 TARGET_INCLUDE_DIRECTORIES( "${TARGET_NAME}"
                             ${UTILS_INCLUDE_DIRS}
                             ${eve-core_INCLUDE_DIRS}
@@ -238,3 +233,8 @@ TARGET_INCLUDE_DIRECTORIES( "${TARGET_NAME}"
 TARGET_LINK_LIBRARIES( "${TARGET_NAME}"
                        ${UTILS_LIBRARIES}
                        "eve-core" )
+IF(PCH)
+TARGET_BUILD_PCH( "${TARGET_NAME}"
+                  "${TARGET_INCLUDE_DIR}/eve-common.h"
+                  "${TARGET_SOURCE_DIR}/utils/EVEUtils.cpp" )
+ENDIF()

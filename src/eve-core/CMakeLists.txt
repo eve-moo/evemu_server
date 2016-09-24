@@ -106,11 +106,6 @@ ${network_SOURCE}
 ${threading_SOURCE}
 ${utils_SOURCE} )
 
-IF(PCH)
-    TARGET_BUILD_PCH( "${TARGET_NAME}"
-                      "${TARGET_INCLUDE_DIR}/eve-core.h"
-                      "${TARGET_SOURCE_DIR}/eve-compat.cpp" )
-ENDIF()
 TARGET_INCLUDE_DIRECTORIES( "${TARGET_NAME}"
                             ${Boost_INCLUDE_DIRS}
                             ${MYSQL_INCLUDE_DIRS}
@@ -122,3 +117,9 @@ TARGET_LINK_LIBRARIES( "${TARGET_NAME}"
                        "${ZLIB_LIBRARY}"
                        ${CMAKE_NET_LIBS}
                        ${CMAKE_THREAD_LIBS} )
+INCLUDE_DIRECTORIES( "${PROJECT_BINARY_DIR}" )
+IF(PCH)
+TARGET_BUILD_PCH( "${TARGET_NAME}"
+                  "${TARGET_INCLUDE_DIR}/eve-core.h"
+                  "${TARGET_SOURCE_DIR}/eve-compat.cpp" )
+ENDIF()
