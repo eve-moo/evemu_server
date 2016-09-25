@@ -577,7 +577,6 @@ PyResult DogmaIMBound::Handle_InjectSkillIntoBrain(PyCallArgs& call)
         return NULL;
     }
 
-    PyDict *skillInfos = new PyDict();
     CharacterRef chr = call.client->GetChar();
     // Loop through the items.
     for(int32 itemID : args.ints)
@@ -591,8 +590,9 @@ PyResult DogmaIMBound::Handle_InjectSkillIntoBrain(PyCallArgs& call)
             continue;
         }
 
+        skill = chr->injectSkillIntoBrain(skill, call.client);
         // Inject the skill into the characters brain.
-        if(!chr->injectSkillIntoBrain(skill, call.client))
+        if(skill.get() == nullptr)
         {
             //TODO: build and send UserError about injection failure.
             codelog(ITEM__ERROR, "%s: Injection of skill %u failed", call.client->GetName(), skill->itemID());
@@ -600,16 +600,7 @@ PyResult DogmaIMBound::Handle_InjectSkillIntoBrain(PyCallArgs& call)
         }
         // Send the item change notice.
         skill->sendItemChangeNotice(call.client);
-        // Add the skill change notice to the list of changed skills.
-        skillInfos->SetItem(new PyInt(skill->typeID()), skill->getKeyValDict());
+        skill->sendSkillChangeNotice(call.client);
     }
-    PyRep *event = new PyNone();
-    // TO-DO: find out if the can be false.
-    // i.e. if skill is level 5 or char injects skill with another char already training.
-    PyBool *canTrain = new PyBool(true);
-    PyTuple *tuple = new_tuple(skillInfos, event, canTrain);
-    PyTuple *newQueue = new_tuple(new PyInt(0), new_tuple(new PyInt(0), new_tuple(new PyInt(1), tuple)));
-    call.client->SendNotification("OnServerSkillsChanged", "charid", &newQueue, false);
-
     return NULL;
 }

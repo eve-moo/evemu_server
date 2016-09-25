@@ -601,7 +601,7 @@ EvilNumber Character::GetEndOfTraining() const
     return skill->getAttribute(AttrExpiryTime);
 }
 
-bool Character::injectSkillIntoBrain(SkillRef skill, Client *client)
+SkillRef Character::injectSkillIntoBrain(SkillRef skill, Client *client)
 {
     SkillRef oldSkill = GetSkill( skill->typeID() );
     if( oldSkill )
@@ -611,7 +611,7 @@ bool Character::injectSkillIntoBrain(SkillRef skill, Client *client)
         {
             client->SendNotifyMsg("You already know this skill.");
         }
-        return false;
+        return SkillRef();
     }
 
     if (!canUse(skill))
@@ -623,7 +623,7 @@ bool Character::injectSkillIntoBrain(SkillRef skill, Client *client)
         {
             client->SendNotifyMsg("Injection failed!  Skill prerequisites incomplete.");
         }
-        return false;
+        return SkillRef();
     }
 
     // Are we injecting from a stack of skills?
@@ -637,7 +637,7 @@ bool Character::injectSkillIntoBrain(SkillRef skill, Client *client)
         if( !skill )
         {
             _log(ITEM__ERROR, "%s (%u): Unable to split stack of %s (%u).", itemName().c_str(), itemID(), iName.c_str(), iID);
-            return false;
+            return SkillRef();
         }
     }
     // Inject the skill.
@@ -652,7 +652,7 @@ bool Character::injectSkillIntoBrain(SkillRef skill, Client *client)
         skill->sendSkillChangeNotice(client);
         client->SendNotifyMsg("Injection of skill complete.");
     }
-    return true;
+    return skill;
 }
 
 void Character::AddToSkillQueue(uint32 typeID, uint8 level)

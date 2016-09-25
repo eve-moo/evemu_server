@@ -291,7 +291,7 @@ public:
      * @param InventoryItem
      * @param client The client to notify.
      */
-    bool injectSkillIntoBrain(SkillRef skill, Client *client);
+    SkillRef injectSkillIntoBrain(SkillRef skill, Client *client);
     /* AddSkillToSkillQueue()
      *
      * This will add a skill into the skill queue.

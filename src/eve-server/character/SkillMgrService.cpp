@@ -53,6 +53,13 @@ public:
     PyCallable_DECL_CALL(AbortTraining)
     PyCallable_DECL_CALL(GetDiminishedSpFromInjectors)
     PyCallable_DECL_CALL(InjectSkillPoints)
+    /**
+     * AddToEndOfSkillQueue
+     *
+     * Adds a skill to end of a characters skill queue.
+     */
+    PyCallable_DECL_CALL(AddToEndOfSkillQueue)
+
 
     //    /**
     //     * CharStartTrainingSkillByTypeID
@@ -72,14 +79,6 @@ public:
     //     * from the client.
     //     */
     //    PyCallable_DECL_CALL(SaveSkillQueue)
-    //
-    //    /**
-    //     * AddToEndOfSkillQueue
-    //     *
-    //     * Adds a skill to end of a characters skill
-    //     * queue.
-    //     */
-    //    PyCallable_DECL_CALL(AddToEndOfSkillQueue)
     //
     //    PyCallable_DECL_CALL(GetCharacterAttributeModifiers)
 
@@ -454,6 +453,21 @@ PyResult SkillMgr2Bound::Handle_InjectSkillPoints(PyCallArgs &call)
     return new PyNone();
 }
 
+PyResult SkillMgr2Bound::Handle_AddToEndOfSkillQueue(PyCallArgs &call) {
+    Call_TwoIntegerArgs args;
+    if(!args.Decode(&call.tuple)) {
+        codelog(CLIENT__ERROR, "%s: failed to decode arguments", call.client->GetName());
+        return NULL;
+    }
+
+    CharacterRef ch = call.client->GetChar();
+
+    ch->AddToSkillQueue(args.arg1, args.arg2);
+    ch->updateSkillQueue();
+
+    return NULL;
+}
+
 //PyResult SkillMgr2Bound::Handle_GetCharacterAttributeModifiers(PyCallArgs &call)
 //{
 //    // Called for Attribute re-mapping.
@@ -567,22 +581,6 @@ PyResult SkillMgr2Bound::Handle_InjectSkillPoints(PyCallArgs &call)
 //        // Delete Item,  Unplugged implants are destroyed!
 //        item->Delete();
 //    }
-//
-//    return NULL;
-//}
-//
-//
-//PyResult SkillMgr2Bound::Handle_AddToEndOfSkillQueue(PyCallArgs &call) {
-//    Call_TwoIntegerArgs args;
-//    if(!args.Decode(&call.tuple)) {
-//        codelog(CLIENT__ERROR, "%s: failed to decode arguments", call.client->GetName());
-//        return NULL;
-//    }
-//
-//    CharacterRef ch = call.client->GetChar();
-//
-//    ch->AddToSkillQueue(args.arg1, args.arg2);
-//    ch->UpdateSkillQueue();
 //
 //    return NULL;
 //}
