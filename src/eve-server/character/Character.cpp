@@ -390,13 +390,12 @@ bool Character::loadState()
             m_trainingStartTime = row.GetInt64(0);
         }
     }
-    updateSkillQueueTimes();
-
     bLoadSuccessful = Owner::loadState();
 
 	// Update Skill Queue and Total Skill Points Trained:
     if(bLoadSuccessful)
     {
+        updateSkillQueueTimes();
         updateSkillQueue();
     }
     // OLD //// Calculate total SP trained and store in internal variable:
