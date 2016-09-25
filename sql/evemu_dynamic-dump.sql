@@ -945,6 +945,7 @@ CREATE TABLE `srvKillRights` (
   `restrictedTo` INT(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`killRightID`));
 
+DROP TABLE IF EXISTS `srvRedeemTokens`;
 CREATE TABLE `srvRedeemTokens` (
   `accountID` INT(10) NOT NULL DEFAULT '0',
   `tokenID` INT(10) NOT NULL DEFAULT '0',

@@ -66,7 +66,8 @@ Get a copy of the static data dump from <a href="https://www.fuzzwork.co.uk/dump
   source %devRoot%/evemu_server/sql/liveupdates.sql;
   source %devRoot%/evemu_server/sql/market_npc.sql;
   INSERT INTO srvAccount (accountID, accountName, role, password, online, banned) VALUES(NULL, 'your_account_name', 5003499186008621056, 'your_password', 0, 0);
-  GRANT ALL ON evemu.* TO evemuUser@localhost IDENTIFIED BY 'evemuPass';
+  CREATE USER evemuUser@localhost IDENTIFIED BY 'evemuPass';
+  GRANT ALL ON evemu.* TO evemuUser@localhost;
 </pre>
 In the last two lines replace "your_account_name" with the account name you want to log into the game with.<br>
 And "your_password" with the password you will use.<br>
@@ -74,7 +75,7 @@ Change "evemuUser" to the username you want the server to log into you database 
 And "evemuPass" to the password the server should use.<br>
 
 <h3>Server configuration file</h3>
-Create the server config file %serverRoot%/etc/eve-server.xml<br>
+Create the server configuration file %serverRoot%/etc/eve-server.xml<br>
 Make sure to set the proper database username and password.<br>
 Here is a sample file.
 <pre class="brush: html">
