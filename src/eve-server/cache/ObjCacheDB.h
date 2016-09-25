@@ -86,12 +86,10 @@ protected:
     static PyRep *Generate_ramALTypeCategory();
     static PyRep *Generate_ramALTypes();
     static PyRep *Generate_ramCompletedStatuses();
-    static PyRep *Generate_ramTypeRequirements();
 
     static PyRep *Generate_mapCelestialDescriptions();
     static PyRep *Generate_tickerNames();
     static PyRep *Generate_invGroups();
-    static PyRep *Generate_certificates();
     static PyRep *Generate_certificateRelationships();
     static PyRep *Generate_invShipTypes();
     static PyRep *Generate_cacheLocations();

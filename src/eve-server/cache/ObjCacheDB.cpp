@@ -71,12 +71,10 @@ std::map<std::string, ObjCacheDB::genFunc> ObjCacheDB::m_generators = {
     { "config.BulkData.ramaltypesdetailpercategory", &ObjCacheDB::Generate_ramALTypeCategory},
     { "config.BulkData.ramaltypes", &ObjCacheDB::Generate_ramALTypes},
     { "config.BulkData.ramcompletedstatuses", &ObjCacheDB::Generate_ramCompletedStatuses},
-    { "config.BulkData.ramtyperequirements", &ObjCacheDB::Generate_ramTypeRequirements},
 
     { "config.BulkData.mapcelestialdescriptions", &ObjCacheDB::Generate_mapCelestialDescriptions},
     { "config.BulkData.tickernames", &ObjCacheDB::Generate_tickerNames},
     { "config.BulkData.groups", &ObjCacheDB::Generate_invGroups},
-    { "config.BulkData.certificates", &ObjCacheDB::Generate_certificates},
     { "config.BulkData.certificaterelationships", &ObjCacheDB::Generate_certificateRelationships},
     { "config.BulkData.shiptypes", &ObjCacheDB::Generate_invShipTypes},
     { "config.BulkData.locations", &ObjCacheDB::Generate_cacheLocations},
@@ -569,18 +567,6 @@ PyRep *ObjCacheDB::Generate_ramCompletedStatuses()
     return DBResultToCRowset(res);
 }
 
-PyRep *ObjCacheDB::Generate_ramTypeRequirements()
-{
-    DBQueryResult res;
-    const char *q = "SELECT typeID, activityID, requiredTypeID, quantity, damagePerJob, recycle FROM ramTypeRequirements";
-    if(DBcore::RunQuery(res, q)==false)
-    {
-        _log(SERVICE__ERROR, "Error in query for cached object 'config.BulkData.ramtyperequirements': %s", res.error.c_str());
-        return NULL;
-    }
-    return DBResultToCRowset(res);
-}
-
 PyRep *ObjCacheDB::Generate_mapCelestialDescriptions()
 {
     DBQueryResult res;
@@ -608,18 +594,6 @@ PyRep *ObjCacheDB::Generate_tickerNames()
 PyRep *ObjCacheDB::Generate_invGroups()
 {
     return EVEStatic::getInvGroupsCache();
-}
-
-PyRep *ObjCacheDB::Generate_certificates()
-{
-    DBQueryResult res;
-    const char *q = "SELECT certificateID, categoryID, classID, grade, iconID, corpID, description, 0 AS dataID FROM crtCertificates";
-    if(DBcore::RunQuery(res, q)==false)
-    {
-        _log(SERVICE__ERROR, "Error in query for cached object 'config.BulkData.certificates': %s", res.error.c_str());
-        return NULL;
-    }
-    return DBResultToCRowset(res);
 }
 
 PyRep *ObjCacheDB::Generate_certificateRelationships()
@@ -678,10 +652,10 @@ PyRep *ObjCacheDB::Generate_invBlueprintTypes()
 PyRep *ObjCacheDB::Generate_eveGraphics()
 {
     DBQueryResult res;
-    const char *q = "SELECT eveGraphics.graphicID, graphicFile, graphicName, description, obsolete, "
-            "graphicType, collisionFile, paperdollFile, animationTemplate, collidable, explosionID, "
-            "directoryID, graphicMinX, graphicMinY, graphicMinZ, graphicMaxX, graphicMaxY, graphicMaxZ "
-            "FROM eveGraphics LEFT JOIN extEveGraphics USING(graphicID)";
+    const char *q = "SELECT graphicID, graphicFile, description,"
+            " collisionFile, paperdollFile, animationTemplate,"
+            " graphicMinX, graphicMinY, graphicMinZ, graphicMaxX, graphicMaxY, graphicMaxZ"
+            " FROM eveGraphics LEFT JOIN extEveGraphics USING(graphicID)";
     if(DBcore::RunQuery(res, q)==false)
     {
         _log(SERVICE__ERROR, "Error in query for cached object 'config.BulkData.graphics': %s", res.error.c_str());

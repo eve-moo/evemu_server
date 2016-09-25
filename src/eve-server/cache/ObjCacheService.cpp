@@ -53,7 +53,6 @@ const char *const ObjCacheService::LoginCachableObjects[] = {
     "config.BulkData.icons",
     "config.Units",
     "config.BulkData.tickernames",
-    "config.BulkData.ramtyperequirements",
     "config.BulkData.ramaltypesdetailpergroup",
     "config.BulkData.ramaltypes",
     "config.BulkData.allianceshortnames",
@@ -77,7 +76,6 @@ const char *const ObjCacheService::LoginCachableObjects[] = {
     "config.BulkData.bptypes",
     "config.BulkData.graphics",
     "config.BulkData.mapcelestialdescriptions",
-    "config.BulkData.certificates",
     "config.StaticLocations",
     "config.InvContrabandTypes",
     "config.BulkData.certificaterelationships",
@@ -184,11 +182,9 @@ ObjCacheService::ObjCacheService(const char *cacheDir)
     m_cacheKeys["config.BulkData.ramaltypesdetailpercategory"] = "config.BulkData.ramaltypesdetailpercategory";
     m_cacheKeys["config.BulkData.ramaltypes"] = "config.BulkData.ramaltypes";
     m_cacheKeys["config.BulkData.ramcompletedstatuses"] = "config.BulkData.ramcompletedstatuses";
-    m_cacheKeys["config.BulkData.ramtyperequirements"] = "config.BulkData.ramtyperequirements";
     m_cacheKeys["config.BulkData.mapcelestialdescriptions"] = "config.BulkData.mapcelestialdescriptions";
     m_cacheKeys["config.BulkData.tickernames"] = "config.BulkData.tickernames";
     m_cacheKeys["config.BulkData.groups"] = "config.BulkData.groups";
-    m_cacheKeys["config.BulkData.certificates"] = "config.BulkData.certificates";
     m_cacheKeys["config.BulkData.certificaterelationships"] = "config.BulkData.certificaterelationships";
     m_cacheKeys["config.BulkData.shiptypes"] = "config.BulkData.shiptypes";
     m_cacheKeys["config.BulkData.locations"] = "config.BulkData.locations";
