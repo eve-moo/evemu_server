@@ -377,8 +377,9 @@ bool Character::loadState()
         DBQueryResult result;
         if(!DBcore::RunQuery(result,
                              "SELECT eventTime"
-                             " FROM srvChrSkillHistory ORDER BY eventTime"
-                             " WHERE characterID=%u AND eventID = %u AND typeID= %u AND level=%u",
+                             " FROM srvChrSkillHistory"
+                             " WHERE characterID=%u AND eventID = %u AND typeID= %u AND level=%u"
+                             " ORDER BY eventTime",
                              itemID(), skillEventTrainingStarted, training->typeID(), training->GetSkillLevel()))
         {
             _log(DATABASE__ERROR, "Failed to get skill start time for character %u: %s", itemID(), result.error.c_str());
