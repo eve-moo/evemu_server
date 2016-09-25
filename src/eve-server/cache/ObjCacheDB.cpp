@@ -869,7 +869,12 @@ PyRep *ObjCacheDB::Generate_c_chrAncestries()
 PyRep *ObjCacheDB::Generate_c_chrSchools()
 {
     DBQueryResult res;
-    const char *q = "SELECT raceID, schoolID, schoolName, description, graphicID, blkChrSchools.corporationID, blkChrSchools.agentID, newAgentID, iconID, schoolNameID, descriptionID FROM blkChrSchools LEFT JOIN agtAgents USING (corporationID) GROUP BY schoolID";
+    const char *q = "SELECT "
+    " raceID, schoolID, schoolName, description, graphicID, blkChrSchools.corporationID,"
+    " blkChrSchools.agentID, newAgentID, iconID, schoolNameID, descriptionID FROM blkChrSchools"
+    " LEFT JOIN agtAgents USING (corporationID)"
+    " GROUP BY schoolID, raceID, schoolName, description, graphicID, blkChrSchools.corporationID,"
+    " blkChrSchools.agentID, newAgentID, iconID, schoolNameID, descriptionID";
     if(DBcore::RunQuery(res, q)==false)
     {
         _log(SERVICE__ERROR, "Error in query for cached object 'charCreationInfo.schools': %s", res.error.c_str());
