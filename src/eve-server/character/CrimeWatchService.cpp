@@ -56,7 +56,7 @@ public:
     //GetRequiredSafetyLevelForEngagingDrones
     //GetSafetyLevel
     //GetSafetyLevelRestrictionForAttackingTarget
-    //GetSecurityStatusTransactions
+    PyCallable_DECL_CALL(GetSecurityStatusTransactions)
     //GetSlimItemDataForCharID
     //GetWeaponsTimer
     //HasLimitedEngagmentWith
@@ -130,6 +130,7 @@ m_locationID(locationID)
 
     PyCallable_REG_CALL(CrimeWatchServiceBound, GetClientStates)
     PyCallable_REG_CALL(CrimeWatchServiceBound, GetMySecurityStatus)
+    PyCallable_REG_CALL(CrimeWatchServiceBound, GetSecurityStatusTransactions)
 }
 
 CrimeWatchServiceBound::~CrimeWatchServiceBound() { }
@@ -144,30 +145,6 @@ bool CrimeWatchServiceBound::Load()
 {
     return true;
 }
-
-#define weaponsTimerStateIdle 100
-#define weaponsTimerStateActive 101
-#define weaponsTimerStateTimer 102
-#define weaponsTimerStateInherited 103
-#define pvpTimerStateIdle 200
-#define pvpTimerStateActive 201
-#define pvpTimerStateTimer 202
-#define pvpTimerStateInherited 203
-#define criminalTimerStateIdle 300
-#define criminalTimerStateActiveCriminal 301
-#define criminalTimerStateActiveSuspect 302
-#define criminalTimerStateTimerCriminal 303
-#define criminalTimerStateTimerSuspect 304
-#define criminalTimerStateInheritedCriminal 305
-#define criminalTimerStateInheritedSuspect 306
-#define npcTimerStateIdle 400
-#define npcTimerStateActive 401
-#define npcTimerStateTimer 402
-#define npcTimerStateInherited 403
-// Safety levels
-#define shipSafetyLevelNone 0
-#define shipSafetyLevelPartial 1
-#define shipSafetyLevelFull 2
 
 PyResult CrimeWatchServiceBound::Handle_GetClientStates(PyCallArgs &call)
 {
@@ -219,4 +196,41 @@ PyResult CrimeWatchServiceBound::Handle_GetMySecurityStatus(PyCallArgs &call)
         return new PyFloat(chr->securityRating());
     }
     return new PyFloat(0);
+}
+
+PyResult CrimeWatchServiceBound::Handle_GetSecurityStatusTransactions(PyCallArgs &call)
+{
+    DBQueryResult result;
+    CharacterRef chr = call.client->GetChar();
+    if(chr.get() != nullptr)
+    {
+        // TO-DO: The sample returned 8 results, need to find limit of number of results or time span?
+/*
+INSERT INTO srvChrSecurityTransactions
+( characterID, eventDate, eventTypeID, referenceID, newValue, modification, locationID, otherID, otherOwnerID, otherTypeID)
+VALUES
+( characterID,
+ Win32TimeNow(), eventSecStatusKillPirateNpc, factionID,
+ newValue, changePercent, solarSystemID,
+ factionID, targetID, targetTypeID
+)
+; */
+        // referenceID appears to always equal otherOwnerID? FactionID for NPC, need to see vs player result.
+        // modification is the percentage of change (1.0 = 100% ;0.01=1%)in the following formula.
+        // securityStatus += (10-oldstanding) * modification
+        if (!DBcore::RunQuery(result, "SELECT "
+                " eventDate, eventTypeID, referenceID,"
+                " newValue, modification, locationID,"
+                " otherID, otherOwnerID, otherTypeID"
+                " FROM srvChrSecurityTransactions"
+                " WHERE characterID=%u"
+                " ORDER BY eventDate DESC"
+                " LIMIT 50"
+                , chr->itemID()))
+        {
+            SysLog::Error("Static DB", "Error in query: %s", result.error.c_str());
+            return nullptr;
+        }
+    }
+    return DBResultToCRowset(result);
 }

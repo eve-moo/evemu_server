@@ -28,6 +28,38 @@
 
 #include "PyService.h"
 
+#define weaponsTimerStateIdle 100
+#define weaponsTimerStateActive 101
+#define weaponsTimerStateTimer 102
+#define weaponsTimerStateInherited 103
+#define pvpTimerStateIdle 200
+#define pvpTimerStateActive 201
+#define pvpTimerStateTimer 202
+#define pvpTimerStateInherited 203
+#define criminalTimerStateIdle 300
+#define criminalTimerStateActiveCriminal 301
+#define criminalTimerStateActiveSuspect 302
+#define criminalTimerStateTimerCriminal 303
+#define criminalTimerStateTimerSuspect 304
+#define criminalTimerStateInheritedCriminal 305
+#define criminalTimerStateInheritedSuspect 306
+#define npcTimerStateIdle 400
+#define npcTimerStateActive 401
+#define npcTimerStateTimer 402
+#define npcTimerStateInherited 403
+// Safety levels
+#define shipSafetyLevelNone 0
+#define shipSafetyLevelPartial 1
+#define shipSafetyLevelFull 2
+
+// Security status change event types.
+// Found in eve/common/script/mgt/appLogConst.py
+#define eventSecStatusGmRollback 386
+#define eventSecStatusGmModification 380
+#define eventSecStatusHandInTags 385
+#define eventSecStatusIllegalAggression 379
+#define eventSecStatusKillPirateNpc 378
+
 /*
 crimewatchOutcomeNone = 0
 crimewatchOutcomeSuspect = 1

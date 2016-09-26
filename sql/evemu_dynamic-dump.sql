@@ -963,4 +963,19 @@ CREATE TABLE `srvRedeemTokens` (
   `stationID` INT(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`accountID`));
 
+DROP TABLE IF EXISTS `srvChrSecurityTransactions`;
+CREATE TABLE `srvChrSecurityTransactions` (
+  `eventID` int(10) unsigned NOT NULL auto_increment,
+  `characterID` INT(10) NOT NULL DEFAULT '0',
+  `eventDate` BIGINT(10) NOT NULL DEFAULT '0',
+  `eventTypeID` SMALLINT NOT NULL DEFAULT '0',
+  `referenceID` INT(10) NOT NULL DEFAULT '0',
+  `newValue` DOUBLE NOT NULL DEFAULT '0',
+  `modification` DOUBLE NOT NULL DEFAULT '0',
+  `locationID` INT(10) NOT NULL DEFAULT '0',
+  `otherID` INT(10) NULL,
+  `otherOwnerID` INT(10) NULL,
+  `otherTypeID` INT(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`eventID`));
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
