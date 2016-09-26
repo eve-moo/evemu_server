@@ -315,7 +315,7 @@ PyResult InvBrokerBound::Handle_GetSelfInvItem(PyCallArgs &call)
                          call.client->GetShip()->itemID()))
     {
         _log(DATABASE__ERROR, "Failed to query ship item for %u: %s.", call.client->GetCharacterID(), result.error.c_str());
-        return false;
+        return nullptr;
     }
 
     DBRowDescriptor *header = new DBRowDescriptor(result);
