@@ -27,6 +27,8 @@
 #define __IMAGESERVER__H__INCL__
 
 #include "../EVEServerConfig.h"
+// Boost.Asio
+#include <boost/asio.hpp>
 
 class ImageServerListener;
 

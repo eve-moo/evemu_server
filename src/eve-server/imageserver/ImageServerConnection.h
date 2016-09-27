@@ -26,6 +26,9 @@
 #ifndef __IMAGESERVERCONNECTION__H__INCL__
 #define __IMAGESERVERCONNECTION__H__INCL__
 
+// Boost.Asio
+#include <boost/asio.hpp>
+
 /**
  * \class ImageServerConnection
  *

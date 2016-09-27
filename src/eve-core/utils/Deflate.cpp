@@ -26,6 +26,8 @@
 #include "eve-core.h"
 
 #include "utils/Deflate.h"
+// zlib
+#include <zlib.h>
 
 const uint8 DeflateHeaderByte = 0x78; //'x'
 

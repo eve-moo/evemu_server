@@ -111,6 +111,8 @@
 #endif /* !HAVE_SYS_TIME_H */
 
 #ifdef HAVE_VLD_H
+// Visual leak detector for Visual Studio is installed.
+// https://vld.codeplex.com/
 #   include <vld.h>
 #endif /* HAVE_VLD_H */
 
@@ -132,18 +134,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #endif /* !HAVE_WINSOCK2_H */
-
-#ifndef HAVE_ASINH
-#   include <boost/math/special_functions.hpp>
-#endif /* !HAVE_ASINH */
-
-/************************************************************************/
-/* Dependencies                                                         */
-/************************************************************************/
-// Boost.Asio
-#include <boost/asio.hpp>
-// zlib
-#include <zlib.h>
 
 /*************************************************************************/
 /* Other stuff included by default                                       */
