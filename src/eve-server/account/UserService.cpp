@@ -27,6 +27,8 @@
 
 #include "PyServiceCD.h"
 #include "account/UserService.h"
+#include "cache/ObjCacheService.h"
+#include "PyServiceMgr.h"
 
 PyCallable_Make_InnerDispatcher(UserService)
 
@@ -36,6 +38,7 @@ UserService::UserService()
     PyCallable_REG_CALL(UserService, GetRedeemTokens)
     PyCallable_REG_CALL(UserService, GetCreateDate)
     PyCallable_REG_CALL(UserService, ReportISKSpammer)
+    PyCallable_REG_CALL(UserService, GetMultiCharactersTrainingSlots)
 }
 
 UserService::~UserService() {
@@ -80,4 +83,34 @@ PyResult UserService::Handle_ReportISKSpammer( PyCallArgs& call )
 {
     //  will add this completed code at a later date  -allan 25Jul14
     return NULL;
+}
+
+PyResult UserService::Handle_GetMultiCharactersTrainingSlots( PyCallArgs& call )
+{
+    PyTuple *tuple = new PyTuple(3);
+    PyObject *object = new PyObject(
+            new PyString( "carbon.common.script.net.objectCaching.CachedMethodCallResult" ),
+            tuple
+            );
+    // Construct version check.
+    PyTuple *run = new PyTuple(3);
+    run->items[0] = new PyString("run");
+    run->items[1] = new PyNone();
+    run->items[2] = new PyNone();
+    PyDict *versionCheck = new PyDict();
+    versionCheck->SetItemString("versionCheck", run);
+    tuple->items[0] = versionCheck;
+
+    // Construct result.
+    tuple->items[1] = new PyDict();
+
+    // Construct timestamp and version.
+    PyList *timestampVersion = new PyList();
+    timestampVersion->AddItem(new PyLong(Win32TimeNow()));
+    uint32 version = 61145237;
+    timestampVersion->AddItem(new PyInt(version));
+    tuple->items[2] = timestampVersion;
+    
+    object->Dump(DEBUG__DEBUG, "TrainingSlots");
+    return object;
 }
