@@ -37,6 +37,8 @@ public:
     virtual ~ShipSkinMgrService();
 
     PyCallable_DECL_CALL(GetAppliedSkinMaterialSetID)
+    PyCallable_DECL_CALL(GetAppliedSkin)
+    PyCallable_DECL_CALL(GetLicencedSkinsForType)
 
 protected:
     class Dispatcher;

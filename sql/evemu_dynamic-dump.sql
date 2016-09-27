@@ -978,4 +978,19 @@ CREATE TABLE `srvChrSecurityTransactions` (
   `otherTypeID` INT(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`eventID`));
 
+DROP TABLE IF EXISTS `srvChrSkins`;
+CREATE TABLE `srvChrSkins`(
+  `characterID` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+  `skinID` INT(10) UNSIGNED NOT NULL default '0',
+  `expireTime` BIGINT(20) UNSIGNED DEFAULT NULL,
+  PRIMARY KEY (`characterID`, `skinID`)
+);
+
+DROP TABLE IF EXISTS `srvShipSkin`;
+CREATE TABLE `srvShipSkin` (
+  `itemID` INT(10) UNSIGNED NOT NULL default '0',
+  `skinID` INT(10) UNSIGNED NOT NULL default '0',
+  PRIMARY KEY (`itemID`)
+);
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
