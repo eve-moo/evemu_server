@@ -803,8 +803,7 @@ PyTuple *PyCallStream::Encode() {
 
 
 EVENotificationStream::EVENotificationStream()
-: notifyType("NO TYPE SET"),
-  remoteObject(0),
+:  remoteObject(0),
   args(NULL)
 {
 }
@@ -821,7 +820,7 @@ EVENotificationStream *EVENotificationStream::Clone() const {
 
 void EVENotificationStream::Dump(LogType type, PyVisitor& dumper)
 {
-    _log(type, "Notification: %s", notifyType.c_str());
+    _log(type, "Notification:");
     if(remoteObject == 0) {
         _log(type, "  Remote Object: %s", remoteObjectStr.c_str());
     } else {
@@ -949,8 +948,6 @@ bool EVENotificationStream::Decode(const std::string &pkt_type, const std::strin
 
     args = (PyTuple *) subt->items[1];
     subt->items[1] = NULL;
-
-    notifyType = notify_type;
 
     PyDecRef(payload);
     return true;
