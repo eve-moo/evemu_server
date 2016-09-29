@@ -88,7 +88,7 @@ void EVEClientSession::fastQueuePacket(PyPacket** p)
     if(is_log_enabled(CLIENT__OUT_ALL))
     {
         PyLogDumpVisitor dumper(CLIENT__OUT_ALL, CLIENT__OUT_ALL, "", true, true);
-        (*p)->Dump(CLIENT__OUT_ALL, dumper);
+        (*p)->Dump(CLIENT__OUT_ALL);
     }
 
     PyRep* r = (*p)->Encode();
