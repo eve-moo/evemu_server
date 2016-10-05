@@ -1109,10 +1109,7 @@ public:
 
     PyRep* Clone() const;
 
-    void addValue(int32 value);
-    void addValue(uint32 value);
-    void addValue(int64 value);
-    void addValue(uint64 value);
+    void addValue(PyRep *obj);
 
 private:
     PyList *values;
