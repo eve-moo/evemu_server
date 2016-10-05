@@ -710,6 +710,8 @@ public:
      */
     PyList& operator=( const PyList& oth );
 
+    static PyList *createIntList(std::vector<int32> vals);
+
     // This needs to be public:
     storage_type items;
 
@@ -938,12 +940,6 @@ public:
     PyDict *GetKeywords() const;
 
     PyRep *FindKeyword(const char* keyword) const;
-    /**
-     * Create a object with a token __builtin__.set and a tuple containing the list of ints.
-     * @param vals The ints to add.
-     * @return The completed object.
-     */
-    static PyRep *createBuiltinSetList(std::vector<int32> vals);
 
 protected:
     static PyTuple* _CreateHeader( PyToken* type, PyTuple* args );
@@ -1101,6 +1097,27 @@ protected:
     PyRep* const mStream;
     const uint32 mChecksum;
 };
+
+
+class BuiltinSet : public PyObjectEx_Type1
+{
+public:
+    BuiltinSet(std::vector<int32> list);
+    BuiltinSet(PyList *list);
+
+    virtual void Dump(std::ostringstream &ss, const std::string &pfx = "") const;
+
+    PyRep* Clone() const;
+
+    void addValue(int32 value);
+    void addValue(uint32 value);
+    void addValue(int64 value);
+    void addValue(uint64 value);
+
+private:
+    PyList *values;
+};
+
 
 /* note: this will decrease memory use with 50% but increase load time with 50%
  * enabling this would have to wait until references work properly.

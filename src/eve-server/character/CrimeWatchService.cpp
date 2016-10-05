@@ -168,10 +168,10 @@ PyResult CrimeWatchServiceBound::Handle_GetClientStates(PyCallArgs &call)
     PyTuple *flaggedCharacters = new PyTuple(2);
     // TO-DO: populate criminal list with characterIDs of characters with criminal flag.
     PyList *criminalList = new PyList();
-    PyObjectEx_Type1 *criminals = new PyObjectEx_Type1(new PyToken("__builtin__.set"), new_tuple(criminalList));
+    PyObjectEx_Type1 *criminals = new BuiltinSet(criminalList);
     // TO-DO: populate suspect list with characterIDs of characters with suspect flag.
     PyList *suspectList = new PyList();
-    PyObjectEx_Type1 *suspects = new PyObjectEx_Type1(new PyToken("__builtin__.set"), new_tuple(suspectList));
+    PyObjectEx_Type1 *suspects = new BuiltinSet(suspectList);
     flaggedCharacters->SetItem(0, criminals);
     flaggedCharacters->SetItem(1, suspects);
 
