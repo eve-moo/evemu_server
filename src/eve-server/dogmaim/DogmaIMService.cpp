@@ -535,7 +535,7 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
     PyDict *shipStateInstanceFlagQuantityCache = new PyDict();
     shipStateInstanceFlagQuantityCache->SetItem(call.client->GetShipID(), new PyDict());
 
-    PyObjectEx_Type1 *shipStateWbData = new PyObjectEx_Type1(new PyToken("collections.defaultdict"), new_tuple(new PyToken("__builtin__.set")));
+    PyObjectEx_Type1 *shipStateWbData = new DefaultDict();
 
     PyDict *shipStateHeatStates = new PyDict();
     shipStateHeatStates->SetItem(AttrHeatLow, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
