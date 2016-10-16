@@ -430,63 +430,62 @@ PyResult CharUnboundMgrService::Handle_GetCharacterSelectionData(PyCallArgs &cal
     // items are - userDetails, trainingDetails, characterDetails
     PyTuple *rtn = new PyTuple(3);
 
+    uint64 now = Win32TimeNow();
     // userDetails
     DBQueryResult res;
     if (!DBcore::RunQuery(res, "SELECT\n"
             "    accountName AS userName,\n"
-            "    %lu AS creationDate,\n"
             "    3 AS characterSlots,\n"
             "    CAST(3 AS CHAR) AS maxCharacterSlots,\n"
-            "    %lu AS subscriptionEndTime\n"
+            "    %lu AS subscriptionEndTime,\n"
+            "    %lu AS creationDate\n"
             "FROM `srvAccount`\n"
-            "WHERE accountID = %u", (Win32TimeNow() - Win32Time_Month), (Win32TimeNow() + Win32Time_Year), accountID))
+            "WHERE accountID = %u", (now + Win32Time_Year), (now - Win32Time_Month), accountID))
     {
         codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
         return NULL;
     }
-    DBResultRow row;
-    if(!res.GetRow(row))
-    {
-        codelog(SERVICE__ERROR, "Failed to get row for userDetails");
-        return NULL;
-    }
-    rtn->SetItem(0, new_tuple(DBRowToKeyVal(row)));
+    rtn->SetItem(0, DBResultToCRowset(res));
 
     // trainingEnds
-    rtn->SetItem(1, new PyList(0));
+    // T0-DO: Create table for multi character training times.
+    DBRowDescriptor *header = new DBRowDescriptor();
+    header->AddColumn("trainingEnds", DBTYPE::DBTYPE_FILETIME);
+    CRowSet *rowset = new CRowSet( &header );
+    rtn->SetItem(1, rowset);
 
     res.Reset();
     if (!DBcore::RunQuery(res,"SELECT \n"
             "    characterID,\n"
-            "    srvEntity.itemName AS characterName,\n"
-            "    srvCharacter.balance,\n"
+            "    0 AS logoffDate,\n"
             "    skillPoints,\n"
+            "    0 AS paperdollState,\n"
+            "    srvEntity.itemName AS characterName,\n"
             "    srvEntity.typeID,\n"
             "    gender,\n"
             "    bloodlineID,\n"
+            "    NULLIF(deletePrepareDateTime, 0) AS deletePrepareDateTime,\n"
+            "    srvCharacter.balance,\n"
+            "    0 AS balanceChange,\n"            // 0.0 never NULL
             "    corporationID,\n"
             "    NULLIF(allianceID, 0) AS allianceID,\n"
-            "    ship.typeID AS shipTypeID,\n"
-            "    srvCharacter.stationID,\n"                                    // NULL if in space
-            "    solarSystemID,\n"
-            "    security AS locationSecurity,\n"
-            "    NULLIF(deletePrepareDateTime, 0) AS deletePrepareDateTime,\n"
-            "    NULLIF(skillQueueEndTime, 0) AS queueEndTime,\n"
-            "    0 AS logoffDate,\n"                                           // All of these values need to be pulled from the DB in the future
-            "    0 AS paperdollState,\n"
-            "    0 AS balanceChange,\n"            // 0.0 never NULL
             "    0 AS unreadMailCount,\n"          // 0 never NULL
             "    0 AS unprocessedNotifications,\n" // 0 never NULL
+            "    ship.typeID AS shipTypeID,\n"
+            "    solarSystemID,\n"
+            "    srvCharacter.stationID,\n"                                    // NULL if in space
+            "    security AS locationSecurity,\n"
             "    0 AS petitionMessage,\n"          // Bool never NULL
             "    0 AS finishedSkills,\n"           // 0 never NULL
             "    0 AS skillsInQueue,\n"            // 0 never NULL
-            "    NULL AS skillTypeID,\n"           // Can be NULL, Null if no skill in training
-            "    NULL AS toLevel,\n"               // Can be NULL, ^
-            "    NULL AS trainingStartTime,\n"     // Can be NULL, ^
-            "    NULL AS trainingEndTime,\n"       // Can be NULL, ^
-            "    NULL AS finishSP,\n"              // Can be NULL, ^
-            "    NULL AS trainedSP,\n"             // Can be NULL, ^
-            "    NULL AS fromSP\n"                 // Can be NULL, ^
+            "    NULLIF(0, 0) AS skillTypeID,\n"           // Can be NULL, Null if no skill in training
+            "    NULLIF(0, 0) AS toLevel,\n"               // Can be NULL, ^
+            "    NULLIF(0, 0) AS trainingStartTime,\n"     // Can be NULL, ^
+            "    NULLIF(0, 0) AS trainingEndTime,\n"       // Can be NULL, ^
+            "    NULLIF(skillQueueEndTime, 0) AS queueEndTime,\n"
+            "    NULLIF(0, 0) AS finishSP,\n"              // Can be NULL, ^
+            "    NULLIF(0, 0) AS trainedSP,\n"             // Can be NULL, ^
+            "    NULLIF(0, 0) AS fromSP\n"                 // Can be NULL, ^
             "FROM `srvCharacter`\n"
             "    LEFT JOIN srvEntity ON characterID = itemID\n"
             "    LEFT JOIN chrAncestries USING(ancestryID)\n"
@@ -498,8 +497,9 @@ PyResult CharUnboundMgrService::Handle_GetCharacterSelectionData(PyCallArgs &cal
         codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
         return NULL;
     }
+    // TO-DO: This should return as a CRowset but for some reason it's causing client exceptions.
+    //rtn->SetItem(2, DBResultToCRowset(res));
     rtn->SetItem(2, DBResultToTupleKeyVal(res));
-    //rtn->Dump(DEBUG__DEBUG, "GetCharacterSelectionData");
     return rtn;
 }
 
