@@ -533,7 +533,8 @@ void Client::BoardShip(ShipRef new_ship) {
     if((m_system) && (IsInSpace()))
         m_system->RemoveClient(this);
 
-    _SetSelf( new_ship );
+    // Set dynamic system entity item reference.
+    m_self = new_ship;
   //  m_char->MoveInto( *new_ship, flagPilot, true );
 
     new_ship->GetOperator()->SetOperatorObject(this);

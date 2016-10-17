@@ -459,7 +459,7 @@ void PyChecksumedStream::dump(std::ostringstream &ss, const std::string &pfx) co
 void BuiltinSet::dump(std::ostringstream &ss, const std::string &pfx) const
 {
     std::string pfx1(pfx + "    ");
-    ss << "[BuiltinSet]" << std::endl;
+    ss << pfx << "[BuiltinSet]" << std::endl;
     for(auto obj : values->items)
     {
         obj->dump(ss, pfx1);
@@ -470,7 +470,7 @@ void DefaultDict::dump(std::ostringstream &ss, const std::string &pfx) const
 {
     std::string pfx1(pfx + "    ");
     std::string pfx2(pfx1 + "    ");
-    ss << "[DefaultDict]" << std::endl;
+    ss << pfx << "[DefaultDict]" << std::endl;
     PyDict *kWords = GetKeywords();
     if(kWords != nullptr)
     {

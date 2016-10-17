@@ -165,7 +165,6 @@ protected:
     InventoryItemRef m_self;
 
     void _SendDamageStateChanged() const;
-    void _SetSelf(InventoryItemRef self);
 };
 
 
