@@ -98,7 +98,7 @@ public:
      */
     void AddColumn( const char* name, DBTYPE type );
 
-    virtual void Dump(std::ostringstream &ss, const std::string &pfx = "") const;
+    virtual void dump(std::ostringstream &ss, const std::string &pfx = "") const;
 
 protected:
     // Helper functions:
@@ -153,7 +153,7 @@ public:
      */
     PyPackedRow* NewRow();
 
-    virtual void Dump(std::ostringstream &ss, const std::string &pfx = "") const;
+    virtual void dump(std::ostringstream &ss, const std::string &pfx = "") const;
 
 protected:
     DBRowDescriptor* _GetRowDesc() const;
@@ -199,7 +199,7 @@ public:
      */
     PyPackedRow* NewRow( PyRep* key );
 
-    virtual void Dump(std::ostringstream &ss, const std::string &pfx = "") const;
+    virtual void dump(std::ostringstream &ss, const std::string &pfx = "") const;
 
 protected:
     DBRowDescriptor* _GetRowDesc() const;
