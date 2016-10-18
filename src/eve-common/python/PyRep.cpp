@@ -1080,6 +1080,11 @@ bool PyChecksumedStream::visit( PyVisitor& v ) const
 /************************************************************************/
 /* BuiltinSet                                                           */
 /************************************************************************/
+BuiltinSet::BuiltinSet()
+: PyObjectEx_Type1( new PyToken("__builtin__.set"), new_tuple(values = new PyList()) )
+{
+}
+
 BuiltinSet::BuiltinSet(std::vector<int32> list)
 : PyObjectEx_Type1( new PyToken("__builtin__.set"), new_tuple(values = PyList::createIntList(list)) )
 {
