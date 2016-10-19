@@ -720,7 +720,7 @@ PyObject *CorporationDB::GetCorporation(uint32 corpID) {
     //return DBResultToRowset(res);
 }
 
-PyObject *CorporationDB::GetEveOwners(uint32 corpID)
+PyObjectEx *CorporationDB::GetEveOwners(uint32 corpID)
 {
     // This appears to return a list of members. for player corporations.
     // This appears to return a specific list for NPC corporations.
@@ -809,7 +809,7 @@ PyObject *CorporationDB::GetEveOwners(uint32 corpID)
         return NULL;
     }
 
-    return DBResultToRowset(res);
+    return DBResultToCRowset(res);
 }
 
 PyObject *CorporationDB::GetStations(uint32 corpID) {
