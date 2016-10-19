@@ -51,7 +51,6 @@ SkillRef Skill::Load(uint32 skillID)
 
 SkillRef Skill::Spawn(ItemData &data)
 {
-    data.attributes[AttrIsOnline] = EvilNumber((int) 1);
     data.attributes[AttrSkillPoints] = EvilNumber((int) 0);
     data.attributes[AttrSkillLevel] = EvilNumber((int) 0);
     uint32 skillID = _Spawn(data);

@@ -61,7 +61,6 @@ ShipRef Ship::Load(uint32 shipID)
 ShipRef Ship::Spawn(ItemData &data)
 {
     InvTypeRef type = InvType::getType(data.typeID);
-    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
     data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
     data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
     data.attributes[AttrMass] = type->mass; // Mass
