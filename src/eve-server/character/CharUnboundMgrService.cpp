@@ -207,6 +207,11 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     idata.ownerID = 1; // EVE System
     idata.quantity = 1;
     idata.singleton = true;
+    idata.flag = flagPilot;
+    idata.attributes.insert(std::pair<uint32, EvilNumber>(AttrMass, 0));
+    idata.attributes.insert(std::pair<uint32, EvilNumber>(AttrCapacity, 1));
+    idata.attributes.insert(std::pair<uint32, EvilNumber>(AttrVolume, 1));
+    idata.attributes.insert(std::pair<uint32, EvilNumber>(AttrRadius, 0));
 
     cdata.accountID = call.client->GetAccountID();
     cdata.gender = arg.genderID != 0;
@@ -240,7 +245,8 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     idata.locationID = cdata.stationID; // Just so our starting items end up in the same place.
 
     // Change starting corperation based on value in XML file.
-    if( EVEServerConfig::character.startCorporation ) { // Skip if 0
+    if( EVEServerConfig::character.startCorporation )
+    {
         if (CharacterDB::DoesCorporationExist(EVEServerConfig::character.startCorporation))
         {
             cdata.corporationID = EVEServerConfig::character.startCorporation;
@@ -262,7 +268,8 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     }
 
     // Added ability to set starting station in xml config by Pyrii
-    if( EVEServerConfig::character.startStation ) { // Skip if 0
+    if( EVEServerConfig::character.startStation )
+    {
         if (!CharacterDB::GetLocationByStation(EVEServerConfig::character.startStation, cdata))
         {
             codelog(SERVICE__WARNING, "Could not find default station ID %u. Using Career Defaults instead.", EVEServerConfig::character.startStation);
@@ -304,14 +311,15 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     //now we have all the data we need, stick it in the DB
     //create char item
     CharacterRef char_item = ItemFactory::SpawnCharacter(idata, cdata, corpData);
-    if( !char_item ) {
+    if( !char_item )
+    {
         //a return to the client of 0 seems to be the only means of marking failure
         codelog(CLIENT__ERROR, "Failed to create character '%s'", idata.name.c_str());
         return NULL;
     }
 
-	// build character appearance (body, clothes, accessories)
-	capp.Build(char_item->itemID(), arg.avatarInfo);
+    // build character appearance (body, clothes, accessories)
+    capp.Build(char_item->itemID(), arg.avatarInfo);
 
     // add attribute bonuses
     char_item->setAttribute(AttrIntelligence, 20);
@@ -351,7 +359,7 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
             values += ", ";
         }
         char buf[1024];
-        std::sprintf(buf, "(%u, %u, %u, %f, %u, %" PRId64 ")",
+        snprintf(buf, 1024, "(%u, %u, %u, %f, %u, %" PRId64 ")",
                      charID, skillType, skillLevel, skillPoints, method, time);
         values += buf;
     }
@@ -381,7 +389,9 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     initInvItem = ItemFactory::SpawnItem(itemDamageControl);
 
     if( !initInvItem )
+    {
         codelog(CLIENT__ERROR, "%s: Failed to spawn a starting item", char_item->itemName().c_str());
+    }
 
     // add 1 unit of "Tritanium"
     ItemData itemTritanium( 34, char_item->itemID(), char_item->locationID(), flagHangar, 1 );
@@ -393,7 +403,9 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     initInvItem = ItemFactory::SpawnItem(itemCloneAlpha);
 
     if( !initInvItem )
+    {
         codelog(CLIENT__ERROR, "%s: Failed to spawn a starting item", char_item->itemName().c_str());
+    }
 
     // give the player its ship.
     std::string ship_name = char_item->itemName() + "'s Ship";
@@ -405,13 +417,15 @@ PyResult CharUnboundMgrService::Handle_CreateCharacterWithDoll(PyCallArgs &call)
     char_item->SaveFullCharacter();
 	ship_item->SaveItem();
 
-    if( !ship_item ) {
+    if( !ship_item )
+    {
         codelog(CLIENT__ERROR, "%s: Failed to spawn a starting item", char_item->itemName().c_str());
     }
     else
+    {
         //welcome on board your starting ship
         //char_item->MoveInto( *ship_item, flagPilot, false );
-
+    }
     _log( CLIENT__MESSAGE, "Sending char create ID %u as reply", char_item->itemID() );
 
     // we need to report the charID to the ImageServer so it can correctly assign a previously received image
