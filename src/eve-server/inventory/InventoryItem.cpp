@@ -416,7 +416,6 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         {
             // THESE SHOULD BE MOVED INTO A Charge::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
             data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
             data.attributes[AttrMass] = type->mass; // Mass
             data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
@@ -462,7 +461,6 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
         {
             // THESE SHOULD BE MOVED INTO A Drone::Spawn() function that does not exist yet
             // Create default dynamic attributes in the AttributeMap:
-            data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
             data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
             data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
             data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
@@ -568,7 +566,6 @@ InventoryItemRef InventoryItem::Spawn(ItemData &data)
     }
 
     // Create some basic attributes that are NOT found in dgmTypeAttributes for most items, yet most items DO need:
-    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
     data.attributes[AttrDamage] = EvilNumber(0.0); // Structure Damage
     data.attributes[AttrMass] = type->mass; // Mass
     data.attributes[AttrRadius] = type->getAttribute(AttrRadius); // Radius
@@ -765,6 +762,28 @@ bool InventoryItem::Populate(Rsp_CommonGetInfo_Entry& result)
     result.wallclockTime = Win32TimeNow();
 
     return true;
+}
+
+PyDict *InventoryItem::getEffectDict()
+{
+    PyDict *dict = new PyDict();
+    if (getAttribute(AttrIsOnline).get_int() != 0)
+    {
+        EntityEffectState es;
+        es.env_itemID = itemID();
+        es.env_charID = ownerID();  //may not be quite right...
+        es.env_shipID = locationID();
+        es.env_target = new PyNone(); //this is what they do.
+        es.env_other = new PyNone();
+        es.env_area = new PyList();
+        es.env_effectID = effectOnline;
+        es.startTime = Win32TimeNow() - Win32Time_Second;
+        es.duration = -1;
+        es.repeat = 1;
+
+        dict->SetItem(new PyInt(es.env_effectID), es.Encode());
+    }
+    return dict;
 }
 
 PyObject * InventoryItem::ItemGetInfo()
@@ -1052,7 +1071,11 @@ void InventoryItem::ChangeOwner(uint32 new_owner, bool notify)
 
 PyPackedRow *InventoryItem::getPackedRow()
 {
-    DBRowDescriptor* header = new DBRowDescriptor;
+    PyList *keywords = new PyList();
+    keywords->AddItem(new_tuple(new PyString("stacksize"), new PyToken("eve.common.script.sys.eveCfg.StackSize")));
+    keywords->AddItem(new_tuple(new PyString("singleton"), new PyToken("eve.common.script.sys.eveCfg.Singleton")));
+
+    DBRowDescriptor* header = new DBRowDescriptor(keywords);
     header->AddColumn("itemID", DBTYPE_I8);
     header->AddColumn("typeID", DBTYPE_I4);
     header->AddColumn("ownerID", DBTYPE_I4);
@@ -1062,9 +1085,8 @@ PyPackedRow *InventoryItem::getPackedRow()
     header->AddColumn("groupID", DBTYPE_I4);
     header->AddColumn("categoryID", DBTYPE_I4);
     header->AddColumn("customInfo", DBTYPE_STR);
-    header->AddColumn("stacksize", DBTYPE_I4);
-    header->AddColumn("singleton", DBTYPE_BOOL);
 
+    // Create the packed row.
     PyPackedRow* row = new PyPackedRow(header);
     getPackedRow(row);
 
@@ -1091,8 +1113,46 @@ void InventoryItem::getPackedRow(PyPackedRow* into) const
     into->SetField("groupID", new PyInt(m_type->groupID));
     into->SetField("categoryID", new PyInt(m_type->getCategoryID()));
     into->SetField("customInfo", new PyString(m_customInfo));
-    into->SetField("stacksize", new PyInt(m_quantity));
-    into->SetField("singleton", new PyBool(m_singleton));
+}
+
+PyPackedRow *InventoryItem::getStateRow()
+{
+    DBRowDescriptor* header = new DBRowDescriptor();
+    header->AddColumn("instanceID", DBTYPE_I8);
+    header->AddColumn("online", DBTYPE_BOOL);
+    header->AddColumn("damage", DBTYPE_R8);
+    header->AddColumn("charge", DBTYPE_R8);
+    header->AddColumn("skillPoints", DBTYPE_I4);
+    header->AddColumn("armorDamage", DBTYPE_R8);
+    header->AddColumn("shieldCharge", DBTYPE_R8);
+    header->AddColumn("incapacitated", DBTYPE_BOOL);
+
+    bool online = false;
+    double damage = 0;
+    double charge = 0;
+    int skillPoints = 0;
+    double armorDamage = 0;
+    double shieldCharge = 0;
+    int incapacitated = false;
+    fetchAttribute(AttrDamage, damage);
+    fetchAttribute(AttrCharge, charge);
+    fetchAttribute(AttrArmorDamage, armorDamage);
+    fetchAttribute(AttrSkillPoints, skillPoints);
+    fetchAttribute(AttrShieldCharge, shieldCharge);
+    fetchAttribute(AttrIsIncapacitated, incapacitated);
+
+    // Create the packed row.
+    PyPackedRow* row = new PyPackedRow(header);
+    row->SetField("instanceID", new PyLong(m_itemID));
+    row->SetField("online", new PyBool(online));
+    row->SetField("damage", new PyFloat(damage));
+    row->SetField("charge", new PyFloat(charge));
+    row->SetField("skillPoints", new PyInt(skillPoints));
+    row->SetField("armorDamage", new PyFloat(armorDamage));
+    row->SetField("shieldCharge", new PyFloat(shieldCharge));
+    row->SetField("incapacitated", new PyBool(incapacitated != 0));
+
+    return row;
 }
 
 void InventoryItem::sendItemChangeNotice(Client *client)
@@ -1342,6 +1402,21 @@ EvilNumber InventoryItem::getDefaultAttribute(const uint32 attributeID) const
 EvilNumber InventoryItem::getAttribute(const uint32 attributeID) const
 {
     return m_AttributeMap.GetAttribute(attributeID);
+}
+
+PyDict *InventoryItem::getAttributeDict()
+{
+    PyDict *dict = new PyDict();
+    AttributeMap::AttrMapItr begin = m_AttributeMap.begin();
+    AttributeMap::AttrMapItr end = m_AttributeMap.end();
+    while(begin != end)
+    {
+        uint32 id = begin->first;
+        EvilNumber num = begin->second;
+        dict->SetItem(new PyInt(id), num.GetPyObject());
+        begin++;
+    }
+    return dict;
 }
 
 bool InventoryItem::fetchAttribute(const uint32 attributeID, EvilNumber &value) const

@@ -475,6 +475,79 @@ PyResult DogmaIMBound::Handle_GetWeaponBankInfoForShip( PyCallArgs& call )
     return new PyDict;
 }
 
+PyDict *getShipInfo(std::vector<InventoryItemRef> &modules)
+{
+    PyDict *shipInfo = new PyDict();
+
+    for(InventoryItemRef item : modules)
+    {
+        PyDict *itemInfo = new PyDict();
+        itemInfo->SetItem("itemID", new PyInt(item->itemID()));
+        itemInfo->SetItem("invItem", item->getPackedRow());
+        itemInfo->SetItem("activeEffects", item->getEffectDict());
+        itemInfo->SetItem("time", new PyLong(Win32TimeNow()));
+        itemInfo->SetItem("attributes", item->getAttributeDict());
+        itemInfo->SetItem("wallclockTime", new PyLong(Win32TimeNow()));
+
+        shipInfo->SetItem(new PyInt(item->itemID()), new PyObject("utillib.KeyVal", itemInfo));
+    }
+    
+    return shipInfo;
+}
+
+PyTuple *getCharInfo(Client *client)
+{
+    CharacterRef chr = client->GetChar();
+    PyDict *charInfoCharFittedItems = new PyDict();
+    PyDict *charInfoCharFittedItemsKV = new PyDict();
+    charInfoCharFittedItemsKV->SetItem("itemID", new PyInt(chr->itemID()));
+    charInfoCharFittedItemsKV->SetItem("invItem", chr->getPackedRow());
+    charInfoCharFittedItemsKV->SetItem("activeEffects", new PyDict());
+    charInfoCharFittedItemsKV->SetItem("time", new PyLong(Win32TimeNow()));
+    charInfoCharFittedItemsKV->SetItem("attributes", chr->getAttributeDict());
+    charInfoCharFittedItemsKV->SetItem("wallclockTime", new PyLong(Win32TimeNow()));
+    charInfoCharFittedItems->SetItem(client->GetCharacterID(), new PyObject("utillib.KeyVal", charInfoCharFittedItemsKV));
+
+    PyTuple *charInfoCharBrain = new PyTuple(3);
+    charInfoCharBrain->SetItem(0, new PyInt(1));	//brainVersion
+    charInfoCharBrain->SetItem(1, new PyList());	//charEffects
+    charInfoCharBrain->SetItem(2, new PyList());	//shipEffects
+
+    PyTuple *charInfo = new PyTuple(2);
+    charInfo->SetItem(0, charInfoCharFittedItems);
+    charInfo->SetItem(1, charInfoCharBrain);
+    
+    return charInfo;
+}
+
+PyTuple *getShipState(Client *client, std::vector<InventoryItemRef> &modules)
+{
+    PyTuple *shipState = new PyTuple(4);
+
+    PyDict *shipStateInstanceCache = new PyDict();
+    for(InventoryItemRef item : modules)
+    {
+        shipStateInstanceCache->SetItem(item->itemID(), item->getStateRow());
+    }
+
+    PyDict *shipStateInstanceFlagQuantityCache = new PyDict();
+    shipStateInstanceFlagQuantityCache->SetItem(client->GetShipID(), new PyDict());
+
+    DefaultDict *shipStateWbData = new DefaultDict();
+
+    PyDict *shipStateHeatStates = new PyDict();
+    shipStateHeatStates->SetItem(AttrHeatLow, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
+    shipStateHeatStates->SetItem(AttrHeatMed, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
+    shipStateHeatStates->SetItem(AttrHeatHi, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
+
+    shipState->SetItem(0, shipStateInstanceCache);
+    shipState->SetItem(1, shipStateInstanceFlagQuantityCache);
+    shipState->SetItem(2, shipStateWbData);
+    shipState->SetItem(3, shipStateHeatStates);
+    
+    return shipState;
+}
+
 PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
 {
     //arg1: getCharInfo, arg2: getShipInfo
@@ -486,7 +559,6 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
     SysLog::Debug("DogmaIMBound", "GetAllInfo: getCharInfo: %s", args.arg1 ? "true" : "false");
     SysLog::Debug("DogmaIMBound", "GetAllInfo: getShipInfo: %s", args.arg2 ? "true" : "false");
 
-    PyDict *rtn = new PyDict();
 //-----
     PyNone *shipModifiedCharAttribs = new PyNone();
 //-----
@@ -494,68 +566,20 @@ PyResult DogmaIMBound::Handle_GetAllInfo( PyCallArgs& call )
 //-----
     PyDict *structureInfo = new PyDict();
 //-----
-    PyDict *shipInfo = new PyDict();
-
-    PyDict *shipInfoShipID = new PyDict();
-    shipInfoShipID->SetItem("itemID", new PyInt(call.client->GetShipID()));
-    shipInfoShipID->SetItem("invItem", call.client->GetShip()->getPackedRow());
-    shipInfoShipID->SetItem("activeEffects", new PyDict());
-    shipInfoShipID->SetItem("time", new PyLong(Win32TimeNow()));
-    shipInfoShipID->SetItem("attributes", new PyDict());
-    shipInfoShipID->SetItem("wallclockTime", new PyLong(Win32TimeNow()));
-
-    shipInfo->SetItem(call.client->GetShipID(), new PyObject("utillib.KeyVal", shipInfoShipID));
-//-----
-    PyTuple *charInfo = new PyTuple(2);
-
-    PyDict *charInfoCharFittedItems = new PyDict();
-    PyDict *charInfoCharFittedItemsKV = new PyDict();
-    charInfoCharFittedItemsKV->SetItem("itemID", new PyInt(call.client->GetCharacterID()));
-    charInfoCharFittedItemsKV->SetItem("invItem", call.client->GetChar()->getPackedRow());
-    charInfoCharFittedItemsKV->SetItem("activeEffects", new PyDict());
-    charInfoCharFittedItemsKV->SetItem("time", new PyLong(Win32TimeNow()));
-    charInfoCharFittedItemsKV->SetItem("attributes", new PyDict());
-    charInfoCharFittedItemsKV->SetItem("wallclockTime", new PyLong(Win32TimeNow()));
-    charInfoCharFittedItems->SetItem(call.client->GetCharacterID(), new PyObject("utillib.KeyVal", charInfoCharFittedItemsKV));
-
-    PyTuple *charInfoCharBrain = new PyTuple(3);
-    charInfoCharBrain->SetItem(0, new PyInt(1));	//brainVersion
-    charInfoCharBrain->SetItem(1, new PyList());	//charEffects
-    charInfoCharBrain->SetItem(2, new PyList());	//shipEffects
-
-    charInfo->SetItem(0, charInfoCharFittedItems);
-    charInfo->SetItem(1, charInfoCharBrain);
-//-----
-    PyTuple *shipState = new PyTuple(4);
-
-    PyDict *shipStateInstanceCache = new PyDict();
-    shipStateInstanceCache->SetItem(call.client->GetShipID(), call.client->GetShip()->getPackedRow());
-    shipStateInstanceCache->SetItem(call.client->GetCharacterID(), call.client->GetChar()->getPackedRow());
-
-    PyDict *shipStateInstanceFlagQuantityCache = new PyDict();
-    shipStateInstanceFlagQuantityCache->SetItem(call.client->GetShipID(), new PyDict());
-
-    PyObjectEx_Type1 *shipStateWbData = new DefaultDict();
-
-    PyDict *shipStateHeatStates = new PyDict();
-    shipStateHeatStates->SetItem(AttrHeatLow, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
-    shipStateHeatStates->SetItem(AttrHeatMed, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
-    shipStateHeatStates->SetItem(AttrHeatHi, new_tuple( new PyFloat(0.0f), new PyFloat(100.0f), new PyInt(0), new PyFloat(1.0f), new PyFloat(0.01f), new PyLong(Win32TimeNow()) ));
-
-    shipState->SetItem(0, shipStateInstanceCache);
-    shipState->SetItem(1, shipStateInstanceFlagQuantityCache);
-    shipState->SetItem(2, shipStateWbData);
-    shipState->SetItem(3, shipStateHeatStates);
-//-----
-    PyInt *activeShipID = new PyInt(call.client->GetShipID());
-//-----
+    ShipRef ship = call.client->GetShip();
+    std::vector<InventoryItemRef> modules;
+    modules.push_back(ship);
+    ship->FindByFlagRange(flagLowSlot0, flagHiSlot7, modules);
+    ship->FindByFlagRange(flagRigSlot0, flagRigSlot7, modules);
+    
+    PyDict *rtn = new PyDict();
     rtn->SetItem("shipModifiedCharAttribs", shipModifiedCharAttribs);
     rtn->SetItem("locationInfo", locationInfo);
     rtn->SetItem("structureInfo", structureInfo);
-    rtn->SetItem("shipInfo", shipInfo);
-    rtn->SetItem("charInfo", charInfo);
-    rtn->SetItem("shipState", shipState);
-    rtn->SetItem("activeShipID", activeShipID);
+    rtn->SetItem("shipInfo", getShipInfo(modules));
+    rtn->SetItem("charInfo", getCharInfo(call.client));
+    rtn->SetItem("shipState", getShipState(call.client, modules));
+    rtn->SetItem("activeShipID", new PyInt(call.client->GetShipID()));
 
     return new PyObject("utillib.KeyVal", rtn);
 }
