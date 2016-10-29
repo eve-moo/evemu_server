@@ -51,7 +51,7 @@ const std::map<uint32, EVEItemFlags> InventoryItem::m_cargoAttributeFlagMap = {
     {AttrSpecialIndustrialShipHoldCapacity, flagSpecializedIndustrialShipHold},
     {AttrSpecialAmmoHoldCapacity, flagSpecializedAmmoHold},
     {AttrShipMaintenanceBayCapacity, flagShipHangar},
-    {AttrCorporateHangarCapacity, flagHangar}
+    {AttrFleetHangarCapacity, flagHangar}
 };
 
 const std::map<EVEItemFlags, uint32 > InventoryItem::m_cargoFlagAttributeMap = {
@@ -68,7 +68,7 @@ const std::map<EVEItemFlags, uint32 > InventoryItem::m_cargoFlagAttributeMap = {
     {flagSpecializedIndustrialShipHold, AttrSpecialIndustrialShipHoldCapacity},
     {flagSpecializedAmmoHold, AttrSpecialAmmoHoldCapacity},
     {flagShipHangar, AttrShipMaintenanceBayCapacity},
-    {flagHangar, AttrCorporateHangarCapacity}
+    {flagHangar, AttrFleetHangarCapacity}
 };
 
 /*

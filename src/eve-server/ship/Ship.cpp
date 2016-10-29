@@ -294,7 +294,7 @@ bool Ship::ValidateAddItem(EVEItemFlags flag, InventoryItemRef item) const
     }
     else if( flag == flagHangar )
     {
-        if (m_pOperator->GetShip()->getAttribute(AttrHasCorporateHangars) != 0)
+        if (m_pOperator->GetShip()->getAttribute(AttrHasFleetHangars) != 0)
         {
             // We have no corporate hangars
             throw PyException(MakeCustomError("%s has no corporate hangars.", item->itemName().c_str()));
