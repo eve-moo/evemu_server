@@ -932,7 +932,10 @@ PyTuple* PyObjectEx_Type2::_CreateHeader( PyTuple* args, PyDict* keywords )
 /************************************************************************/
 /* PyPackedRow                                                          */
 /************************************************************************/
-PyPackedRow::PyPackedRow( DBRowDescriptor* header ) : PyRep( PyRep::PyTypePackedRow ), mHeader( header ), mFields( new PyList( header->ColumnCount() ) ) {}
+PyPackedRow::PyPackedRow( DBRowDescriptor* header ) : PyRep( PyRep::PyTypePackedRow ), mHeader( header ), mFields( new PyList( header->ColumnCount() ) )
+{
+    PyIncRef( mHeader );
+}
 PyPackedRow::PyPackedRow( const PyPackedRow& oth ) : PyRep( PyRep::PyTypePackedRow ),
   mHeader( oth.header() ), mFields( new PyList( oth.header()->ColumnCount() ) )
 {
