@@ -767,7 +767,9 @@ bool InventoryItem::Populate(Rsp_CommonGetInfo_Entry& result)
 PyDict *InventoryItem::getEffectDict()
 {
     PyDict *dict = new PyDict();
-    if (getAttribute(AttrIsOnline).get_int() != 0)
+    int online = 0;
+    fetchAttribute(AttrIsOnline, online);
+    if (online != 0)
     {
         EntityEffectState es;
         es.env_itemID = itemID();
