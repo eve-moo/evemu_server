@@ -184,12 +184,12 @@ CorpRegistryService::~CorpRegistryService() {
 
 PyBoundObject* CorpRegistryService::_CreateBoundObject( Client* c, const PyRep* bind_args)
 {
-    const PyTuple *tup = bind_args->AsTuple();
+    const PyTuple *tup = pyAs(Tuple, bind_args);
     if(tup == nullptr)
     {
         return nullptr;
     }
-    const PyInt *id = tup->GetItem(0)->AsInt();
+    const PyInt *id = pyAs(Int, tup->GetItem(0));
     if(id == nullptr)
     {
         return nullptr;
@@ -759,11 +759,11 @@ PyResult CorpRegistryBound::Handle_UpdateApplicationOffer(PyCallArgs &call) {
         // OnCorporationMemberChanged event
         Notify_OnCorpMemberChange ocmc;
 
-            ocmc.charID = args.characterID;
-        ocmc.newCorpID = change.corporationIDNew->AsInt()->value();
-        ocmc.oldCorpID = change.corporationIDOld->AsInt()->value();
-        ocmc.newDate = OCAC.applicationDateTimeNew->AsInt()->value();
-        ocmc.oldDate = OCAC.applicationDateTimeOld->AsInt()->value();
+        ocmc.charID = args.characterID;
+        ocmc.newCorpID = pyAs(Int, change.corporationIDNew)->value();
+        ocmc.oldCorpID = pyAs(Int, change.corporationIDOld)->value();
+        ocmc.newDate = pyAs(Int, OCAC.applicationDateTimeNew)->value();
+        ocmc.oldDate = pyAs(Int, OCAC.applicationDateTimeOld)->value();
 
 
         // both corporations' members will be notified about the change

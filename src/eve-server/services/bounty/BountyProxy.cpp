@@ -74,8 +74,8 @@ PyResult BountyProxyService::Handle_GetBountiesAndKillRights(PyCallArgs &call)
         codelog(CLIENT__ERROR, "%s: Incorrect tuple size expected 2 got %u", call.client->GetName(), call.tuple->size());
         return nullptr;
     }
-    PyObjectEx_Type1 *objEx = (PyObjectEx_Type1 *) call.tuple->GetItem(0)->AsObjectEx();
-    PyList *list1 = call.tuple->GetItem(1)->AsList();
+    PyObjectEx_Type1 *objEx = (PyObjectEx_Type1 *) pyAs(ObjectEx, call.tuple->GetItem(0));
+    PyList *list1 = pyAs(List, call.tuple->GetItem(1));
     if(objEx == nullptr || list1 == nullptr)
     {
         codelog(CLIENT__ERROR, "%s: Incorrect item type in GetBountiesAndKillRights", call.client->GetName());
@@ -91,7 +91,7 @@ PyResult BountyProxyService::Handle_GetBountiesAndKillRights(PyCallArgs &call)
     {
         return nullptr;
     }
-    PyList *bountiesList = tuple->GetItem(0)->AsList();
+    PyList *bountiesList = pyAs(List, tuple->GetItem(0));
     if(bountiesList == nullptr)
     {
         return nullptr;
@@ -106,11 +106,11 @@ PyResult BountyProxyService::Handle_GetBountiesAndKillRights(PyCallArgs &call)
     for(int i = 0; i < bountiesList->size(); i++)
     {
         PyRep *itm = bountiesList->GetItem(i);
-        if(!itm->IsInt())
+        PyInt *val;
+        if(!pyIsAs(Int, itm, val))
         {
             continue;
         }
-        PyInt *val = itm->AsInt();
         uint32 id = val->value();
         // TO-DO: populate list with actual results.
         PyPackedRow *row = new PyPackedRow(header);
@@ -124,11 +124,11 @@ PyResult BountyProxyService::Handle_GetBountiesAndKillRights(PyCallArgs &call)
     for(int i = 0; i < list1->size(); i++)
     {
         PyRep *itm = list1->GetItem(i);
-        if(!itm->IsInt())
+        PyInt *val;
+        if(!pyIsAs(Int, itm, val))
         {
             continue;
         }
-        PyInt *val = itm->AsInt();
         uint32 id = val->value();
         // TO-DO: populate list with results.
     }
@@ -145,7 +145,7 @@ PyResult BountyProxyService::Handle_GetBounties(PyCallArgs &call)
         codelog(CLIENT__ERROR, "%s: Incorrect tuple size expected 1 got %u", call.client->GetName(), call.tuple->size());
         return new PyList();
     }
-    PyObjectEx_Type1 *objEx = (PyObjectEx_Type1 *) call.tuple->GetItem(0)->AsObjectEx();
+    PyObjectEx_Type1 *objEx = (PyObjectEx_Type1 *)pyAs(ObjectEx, call.tuple->GetItem(0));
     if(objEx == nullptr)
     {
         codelog(CLIENT__ERROR, "%s: Incorrect item type in GetBounties", call.client->GetName());
@@ -161,11 +161,11 @@ PyResult BountyProxyService::Handle_GetBounties(PyCallArgs &call)
     {
         return new PyList();
     }
-    if(!tuple->GetItem(0)->IsList())
+    PyList *bountiesList;
+    if(!pyIsAs(List, tuple->GetItem(0), bountiesList))
     {
         return new PyList();
     }
-    PyList *bountiesList = tuple->GetItem(0)->AsList();
     PyList *resBounties = new PyList();
     DBRowDescriptor *header = new DBRowDescriptor();
     header->AddColumn("targetID", DBTYPE_I4);
@@ -175,11 +175,11 @@ PyResult BountyProxyService::Handle_GetBounties(PyCallArgs &call)
     for(int i = 0; i < bountiesList->size(); i++)
     {
         PyRep *itm = bountiesList->GetItem(i);
-        if(!itm->IsInt())
+        PyInt *val;
+        if(!pyIsAs(Int, itm, val))
         {
             continue;
         }
-        PyInt *val = itm->AsInt();
         uint32 id = val->value();
         // TO-DO: populate list with actual results.
         PyPackedRow *row = new PyPackedRow(header);

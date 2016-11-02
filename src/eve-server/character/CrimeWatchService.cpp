@@ -86,26 +86,26 @@ CrimeWatchService::~CrimeWatchService() { }
 
 PyBoundObject *CrimeWatchService::_CreateBoundObject(Client *c, const PyRep *bind_args)
 {
-    if(!bind_args->IsTuple())
+    PyTuple *tup;
+    if(!pyIsAs(Tuple, bind_args, tup))
     {
         codelog(CLIENT__ERROR, "%s: Non-tuple bind argument '%s'", c->GetName(), bind_args->TypeString());
         return NULL;
     }
-    const PyTuple *tup = bind_args->AsTuple();
     if(tup->size() != 2)
     {
         codelog(CLIENT__ERROR, "%s: Incorrect tuple size expected 2 got %u", c->GetName(), tup->size());
         return NULL;
     }
-    if(!tup->items[0]->IsInt())
+    if(!pyIs(Int, tup->items[0]))
     {
         codelog(CLIENT__ERROR, "%s: Expected int got %s", c->GetName(), tup->items[0]->TypeString());
         return NULL;
     }
 
-    uint32 locationID = tup->items[0]->AsInt()->value();
+    uint32 locationID = pyAs(Int, tup->items[0])->value();
     // groupID 15 = station, 5 = solar system, 935 = world space
-    uint32 groupID = tup->items[1]->AsInt()->value();
+    uint32 groupID = pyAs(Int, tup->items[1])->value();
 
     CrimeWatchServiceBound *obj = new CrimeWatchServiceBound(locationID, groupID);
     if(!obj->Load())

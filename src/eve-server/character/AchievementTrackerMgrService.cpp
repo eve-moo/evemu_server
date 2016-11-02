@@ -78,38 +78,38 @@ PyResult AchievementTrackerMgrService::Handle_UpdateClientAchievmentsAndCounters
         codelog(CLIENT__ERROR, "%s: Update achievements tuple wrong size.", call.client->GetName());
         return NULL;
     }
-    if(!call.tuple->GetItem(0)->IsDict() || !call.tuple->GetItem(1)->IsDict())
+    PyDict *dict1;
+    PyDict *dict2;
+    if(!pyIsAs(Dict, call.tuple->GetItem(0), dict1) || !pyIsAs(Dict, call.tuple->GetItem(1), dict2))
     {
         codelog(CLIENT__ERROR, "%s: Update achievements item not dict.", call.client->GetName());
         return NULL;
     }
-    PyDict *dict1 = call.tuple->GetItem(0)->AsDict();
     for(auto pair : dict1->items)
     {
-        int key = pair.first->AsInt()->value();
+        int key = pyAs(Int, pair.first)->value();
         uint64 time = 0;
-        if(pair.second->IsInt())
+        if(pyIs(Int, pair.second))
         {
-            time = pair.second->AsInt()->value();
+            time = pyAs(Int, pair.second)->value();
         }
-        if(pair.second->IsLong())
+        if(pyIs(Long, pair.second))
         {
-            time = pair.second->AsLong()->value();
+            time = pyAs(Long, pair.second)->value();
         }
         // TO-DO: save these values.
     }
-    PyDict *dict2 = call.tuple->GetItem(1)->AsDict();
     for(auto pair : dict1->items)
     {
-        std::string key = pair.first->AsString()->content();
+        std::string key = pyAs(String, pair.first)->content();
         uint64 value = 0;
-        if(pair.second->IsInt())
+        if(pyIs(Int, pair.second))
         {
-            value = pair.second->AsInt()->value();
+            value = pyAs(Int, pair.second)->value();
         }
-        if(pair.second->IsLong())
+        if(pyIs(Long, pair.second))
         {
-            value = pair.second->AsLong()->value();
+            value = pyAs(Long, pair.second)->value();
         }
         // TO-DO: save these values.
     }

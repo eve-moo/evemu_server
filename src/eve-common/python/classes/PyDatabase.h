@@ -146,7 +146,7 @@ public:
      *
      * @return Row with given index.
      */
-    PyPackedRow* GetRow( uint32 index ) const { return list().GetItem( index )->AsPackedRow(); }
+    PyPackedRow* GetRow( uint32 index ) const { return pyAs(PackedRow, list().GetItem( index )); }
 
     /**
      * @return New row which user may fill.
@@ -192,7 +192,7 @@ public:
      *
      * @return Row with given index.
      */
-    PyPackedRow* GetRow( PyRep* index ) const { return dict().GetItem( index )->AsPackedRow(); }
+    PyPackedRow* GetRow( PyRep* index ) const { return pyAs(PackedRow, dict().GetItem( index )); }
 
     /**
      * @return New row which user may fill.
@@ -237,7 +237,7 @@ public:
      * @return Row with given index.
      */
     PyPackedRow* GetRow( PyRep* key, uint32 index ) 
-		const { return GetRowset(key)->GetRow( index )->AsPackedRow(); }
+		const { return pyAs(PackedRow, GetRowset(key)->GetRow( index )); }
 
     /**
      * @return New rowset which user may fill.

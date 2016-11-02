@@ -57,12 +57,12 @@ PyResult ShipSkinMgrService::Handle_GetAppliedSkinMaterialSetID(PyCallArgs &call
     for (int i = 0; i < 2; i++)
     {
         PyRep *val = call.tuple->items[i];
-        if (!val->IsInt())
+        if (!pyIs(Int, val))
         {
             codelog(CLIENT__ERROR, "%s: Expected int got %s", call.client->GetName(), val->TypeString());
             return nullptr;
         }
-        values[i] = (val->AsInt())->value();
+        values[i] = pyAs(Int, val)->value();
     }
     DBQueryResult res;
 
@@ -106,12 +106,12 @@ PyResult ShipSkinMgrService::Handle_GetAppliedSkin(PyCallArgs &call)
     for (int i = 0; i < 2; i++)
     {
         PyRep *val = call.tuple->items[i];
-        if (!val->IsInt())
+        if (!pyIs(Int, val))
         {
             codelog(CLIENT__ERROR, "%s: Expected int got %s", call.client->GetName(), val->TypeString());
             return nullptr;
         }
-        values[i] = (val->AsInt())->value();
+        values[i] = pyAs(Int, val)->value();
     }
     DBQueryResult res;
 
@@ -165,13 +165,13 @@ PyResult ShipSkinMgrService::Handle_GetLicencedSkinsForType(PyCallArgs &call)
         return licencedSkins;
     }
     PyRep *val = call.tuple->items[0];
-    if (!val->IsInt())
+    if (!pyIs(Int, val))
     {
         codelog(CLIENT__ERROR, "%s: Expected int got %s", call.client->GetName(), val->TypeString());
         // Error: Just return the empty list.
         return licencedSkins;
     }
-    uint32 typeID = (val->AsInt())->value();
+    uint32 typeID = pyAs(Int, val)->value();
     DBQueryResult res;
 
     if (!DBcore::RunQuery(res,

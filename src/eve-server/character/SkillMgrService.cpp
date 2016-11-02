@@ -286,25 +286,25 @@ PyResult SkillMgr2Bound::Handle_SaveNewQueue(PyCallArgs &call)
         codelog(CLIENT__ERROR, "%s: Save queue tuple wrong size.", call.client->GetName());
         return NULL;
     }
-    if(!call.tuple->GetItem(0)->IsDict())
+    PyDict *skills;
+    if(!pyIsAs(Dict, call.tuple->GetItem(0), skills))
     {
         codelog(CLIENT__ERROR, "%s: Save queue not a dict.", call.client->GetName());
         return NULL;
     }
-    PyDict *skills = call.tuple->GetItem(0)->AsDict();
 
     CharacterRef chr = call.client->GetChar();
     chr->ClearSkillQueue();
     for(auto skill : skills->items)
     {
-        if(skill.first->IsInt())
+        PyInt *index;
+        if(pyIsAs(Int, skill.first, index))
         {
-            PyInt *index = skill.first->AsInt();
-            if(skill.second->IsTuple())
+            PyTuple *tup;
+            if(pyIsAs(Tuple, skill.second, tup))
             {
-                PyTuple *tup = skill.second->AsTuple();
-                int32 typeID = tup->GetItem(0)->AsInt()->value();
-                int32 level = tup->GetItem(1)->AsInt()->value();
+                int32 typeID = pyAs(Int, tup->GetItem(0))->value();
+                int32 level = pyAs(Int, tup->GetItem(1))->value();
                 chr->AddToSkillQueue(typeID, level);
             }
         }
@@ -352,7 +352,8 @@ PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
         codelog(CLIENT__ERROR, "%s: Respec character tuple wrong size.", call.client->GetName());
         return NULL;
     }
-    if(!call.tuple->GetItem(0)->IsDict())
+    PyDict *attribs;
+    if(!pyIsAs(Dict, call.tuple->GetItem(0), attribs))
     {
         codelog(CLIENT__ERROR, "%s: Respec character not a dict.", call.client->GetName());
         return NULL;
@@ -371,17 +372,16 @@ PyResult SkillMgr2Bound::Handle_RespecCharacter(PyCallArgs &call)
     // Stop the training for the respec.
     chr->stopTraining(false);
     // Do the respec.
-    PyDict *attribs = call.tuple->GetItem(0)->AsDict();
     // TODO: validate these values (and their sum)
     for(auto attrib : attribs->items)
     {
         uint32 attribID = 0;
-        if(attrib.first->IsInt())
+        if(pyIs(Int, attrib.first))
         {
-            attribID = attrib.first->AsInt()->value();
-            if(attrib.second->IsInt())
+            attribID = pyAs(Int, attrib.first)->value();
+            if(pyIs(Int, attrib.second))
             {
-                uint32 value = attrib.second->AsInt()->value();
+                uint32 value = pyAs(Int, attrib.second)->value();
                 chr->setAttribute(attribID, value);
             }
         }
@@ -424,13 +424,13 @@ PyResult SkillMgr2Bound::Handle_InjectSkillPoints(PyCallArgs &call)
         return NULL;
     }
     uint64 itemID = 0;
-    if(call.tuple->GetItem(0)->IsInt())
+    if(pyIs(Int, call.tuple->GetItem(0)))
     {
-        itemID = call.tuple->GetItem(0)->AsInt()->value();
+        itemID = pyAs(Int, call.tuple->GetItem(0))->value();
     }
-    else if(call.tuple->GetItem(0)->IsLong())
+    else if(pyIs(Long, call.tuple->GetItem(0)))
     {
-        itemID = call.tuple->GetItem(0)->AsLong()->value();
+        itemID = pyAs(Long, call.tuple->GetItem(0))->value();
     }
     else
     {
@@ -438,9 +438,9 @@ PyResult SkillMgr2Bound::Handle_InjectSkillPoints(PyCallArgs &call)
         return NULL;
     }
     uint32 qty;
-    if(call.tuple->GetItem(1)->IsInt())
+    if(pyIs(Int, call.tuple->GetItem(1)))
     {
-        qty = call.tuple->GetItem(1)->AsInt()->value();
+        qty = pyAs(Int, call.tuple->GetItem(1))->value();
     }
     else
     {
