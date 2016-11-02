@@ -107,8 +107,8 @@ public:
      */
     virtual PyRep* GetItem() = 0;
 
-    CRowSet* List( EVEItemFlags flag, uint32 forOwner = 0 ) const;
-    void List( CRowSet* into, EVEItemFlags flag, uint32 forOwner = 0 ) const;
+    BuiltinSet* List( EVEItemFlags flag, uint32 forOwner = 0 ) const;
+    void List( BuiltinSet *set, DBRowDescriptor *rowDesc, EVEItemFlags flag, uint32 forOwner = 0 ) const;
 
 protected:
     virtual void AddItem(InventoryItemRef item);

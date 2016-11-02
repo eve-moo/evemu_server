@@ -61,7 +61,6 @@ ShipRef Ship::Load(uint32 shipID)
 ShipRef Ship::Spawn(ItemData &data)
 {
     InvTypeRef type = InvType::getType(data.typeID);
-    data.attributes[AttrIsOnline] = EvilNumber(1); // Is Online
     data.attributes[AttrShieldCharge] = type->getAttribute(AttrShieldCapacity); // Shield Charge
     data.attributes[AttrArmorDamage] = EvilNumber(0.0); // Armor Damage
     data.attributes[AttrMass] = type->mass; // Mass
@@ -295,7 +294,7 @@ bool Ship::ValidateAddItem(EVEItemFlags flag, InventoryItemRef item) const
     }
     else if( flag == flagHangar )
     {
-        if (m_pOperator->GetShip()->getAttribute(AttrHasCorporateHangars) != 0)
+        if (m_pOperator->GetShip()->getAttribute(AttrHasFleetHangars) != 0)
         {
             // We have no corporate hangars
             throw PyException(MakeCustomError("%s has no corporate hangars.", item->itemName().c_str()));

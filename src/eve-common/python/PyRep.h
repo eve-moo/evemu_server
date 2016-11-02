@@ -955,6 +955,7 @@ protected:
 class BuiltinSet : public PyObjectEx_Type1
 {
 public:
+    BuiltinSet();
     BuiltinSet(std::vector<int32> list);
     BuiltinSet(PyList *list);
 

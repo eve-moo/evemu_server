@@ -133,6 +133,8 @@ public:
      * Primary public packet builders:
      */
     bool Populate(Rsp_CommonGetInfo_Entry &into);
+    
+    PyDict *getEffectDict();
 
     PyPackedRow* GetItemStatusRow() const;
     void GetItemStatusRow( PyPackedRow* into ) const;
@@ -204,6 +206,11 @@ public:
     PyPackedRow *getPackedRow();
     void getPackedRow(PyPackedRow* into) const;
     /**
+     * Get the packed row of the item state information.
+     * @return The packed row.
+     */
+    PyPackedRow *getStateRow();
+    /**
      * Send a notice to the client about the item changing.
      * @param client The client to notify.
      */
@@ -220,6 +227,11 @@ public:
     bool setAttribute(uint32 attributeID, double num, bool notify = true, bool shadow_copy_to_default_set = false);
     bool setAttribute(uint32 attributeID, EvilNumber num, bool notify = true, bool shadow_copy_to_default_set = false);
 
+    /**
+     * Get A PyDict with the attributes
+     * @return The dict of attributes
+     */
+    PyDict *getAttributeDict();
 
     EvilNumber getDefaultAttribute(const uint32 attributeID) const;
 

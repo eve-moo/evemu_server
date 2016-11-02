@@ -228,11 +228,11 @@ void Inventory::DeleteContents()
     mContents.clear();
 }
 
-CRowSet* Inventory::List( EVEItemFlags _flag, uint32 forOwner ) const
+BuiltinSet* Inventory::List( EVEItemFlags _flag, uint32 forOwner ) const
 {
     PyList *keywords = new PyList();
-    keywords->AddItem(new_tuple(new PyString("stacksize"), new PyToken("util.StackSize")));
-    keywords->AddItem(new_tuple(new PyString("singleton"), new PyToken("util.Singleton")));
+    keywords->AddItem(new_tuple(new PyString("stacksize"), new PyToken("eve.common.script.sys.eveCfg.StackSize")));
+    keywords->AddItem(new_tuple(new PyString("singleton"), new PyToken("eve.common.script.sys.eveCfg.Singleton")));
 
     DBRowDescriptor* header = new DBRowDescriptor(keywords);
     header->AddColumn( "itemID",     DBTYPE_I8 );
@@ -244,29 +244,23 @@ CRowSet* Inventory::List( EVEItemFlags _flag, uint32 forOwner ) const
     header->AddColumn( "groupID",    DBTYPE_I2 );
     header->AddColumn( "categoryID", DBTYPE_I4 );
     header->AddColumn( "customInfo", DBTYPE_STR );
-    header->AddColumn( "stacksize",  DBTYPE_I4 );
-    header->AddColumn( "singleton",  DBTYPE_BOOL );
 
-    CRowSet* rowset = new CRowSet( &header );
-    List( rowset, _flag, forOwner );
-    return rowset;
+    BuiltinSet *set = new BuiltinSet();
+    List( set, header, _flag, forOwner );
+    return set;
 }
 
-void Inventory::List( CRowSet* into, EVEItemFlags _flag, uint32 forOwner ) const
+void Inventory::List( BuiltinSet *set, DBRowDescriptor *rowDesc, EVEItemFlags _flag, uint32 forOwner ) const
 {
-    //there has to be a better way to build this...
-    std::map<uint32, InventoryItemRef>::const_iterator cur, end;
-    cur = mContents.begin();
-    end = mContents.end();
-    for(; cur != end; cur++)
+    std::vector<InventoryItemRef> items;
+    FindByFlag(_flag, items);
+    for(InventoryItemRef item : items)
     {
-        InventoryItemRef i = cur->second;
-
-        if(    ( i->flag() == _flag       || _flag == flagAnywhere )
-            && ( i->ownerID() == forOwner || forOwner == 0 ) )
+        if(( item->ownerID() == forOwner || forOwner == 0 ) )
         {
-            PyPackedRow* row = into->NewRow();
-            i->getPackedRow(row);
+            PyPackedRow* row = new PyPackedRow( rowDesc );
+            item->getPackedRow(row);
+            set->addValue(row);
         }
     }
 }
@@ -334,7 +328,7 @@ uint32 Inventory::FindByFlag(EVEItemFlags _flag, std::vector<InventoryItemRef> &
     {
         if (cur->second)
         {
-            if(cur->second->flag() == _flag)
+            if(cur->second->flag() == _flag || _flag == flagAnywhere)
             {
                 items.push_back( cur->second );
             }

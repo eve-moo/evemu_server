@@ -51,6 +51,30 @@ void test()
     }
 }
     </pre>
+    An example from the project that shows why.  In the function CharUnboundMgrService::Handle_CreateCharacterWithDoll.
+    <pre class="brush: cpp">
+    if( !ship_item ) {
+        codelog(CLIENT__ERROR, "%s: Failed to spawn a starting item", char_item->itemName().c_str());
+    }
+    else
+        //welcome on board your starting ship
+        //char_item->MoveInto( *ship_item, flagPilot, false );
+
+    _log( CLIENT__MESSAGE, "Sending char create ID %u as reply", char_item->itemID() );
+    </pre>
+    The one line that was commented out now cause the next line to be conditional.  Luckily this was not a fatal error!<br>
+    Should have been as follows.
+    <pre class="brush: cpp">
+    if( !ship_item ) {
+        codelog(CLIENT__ERROR, "%s: Failed to spawn a starting item", char_item->itemName().c_str());
+    }
+    else
+    {
+        //welcome on board your starting ship
+        //char_item->MoveInto( *ship_item, flagPilot, false );
+    }
+    _log( CLIENT__MESSAGE, "Sending char create ID %u as reply", char_item->itemID() );
+    </pre>
     Class, structure, and typedef names should be in upper camel case.<br/>
 Function names in should be in lower camel case.<br/>
 Defines should be in all upper case.<br/>

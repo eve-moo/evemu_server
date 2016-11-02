@@ -39,7 +39,7 @@ class CorporationDB
 public:
     static PyObject *GetCorporation(uint32 corpID);
     static PyObject *GetStations(uint32 corpID);
-    static PyObject *GetEveOwners(uint32 corpID);
+    static PyObjectEx *GetEveOwners(uint32 corpID);
 
     static PyRep *GetMyApplications(uint32 charID);
     static PyRep *GetApplications(uint32 corpID);

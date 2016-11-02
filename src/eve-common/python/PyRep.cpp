@@ -932,7 +932,10 @@ PyTuple* PyObjectEx_Type2::_CreateHeader( PyTuple* args, PyDict* keywords )
 /************************************************************************/
 /* PyPackedRow                                                          */
 /************************************************************************/
-PyPackedRow::PyPackedRow( DBRowDescriptor* header ) : PyRep( PyRep::PyTypePackedRow ), mHeader( header ), mFields( new PyList( header->ColumnCount() ) ) {}
+PyPackedRow::PyPackedRow( DBRowDescriptor* header ) : PyRep( PyRep::PyTypePackedRow ), mHeader( header ), mFields( new PyList( header->ColumnCount() ) )
+{
+    PyIncRef( mHeader );
+}
 PyPackedRow::PyPackedRow( const PyPackedRow& oth ) : PyRep( PyRep::PyTypePackedRow ),
   mHeader( oth.header() ), mFields( new PyList( oth.header()->ColumnCount() ) )
 {
@@ -1080,6 +1083,11 @@ bool PyChecksumedStream::visit( PyVisitor& v ) const
 /************************************************************************/
 /* BuiltinSet                                                           */
 /************************************************************************/
+BuiltinSet::BuiltinSet()
+: PyObjectEx_Type1( new PyToken("__builtin__.set"), new_tuple(values = new PyList()) )
+{
+}
+
 BuiltinSet::BuiltinSet(std::vector<int32> list)
 : PyObjectEx_Type1( new PyToken("__builtin__.set"), new_tuple(values = PyList::createIntList(list)) )
 {
