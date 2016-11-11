@@ -536,7 +536,7 @@ DROP TABLE IF EXISTS `srvEntity_attributes`;
 CREATE TABLE `srvEntity_attributes` (
   `itemID` int(10) unsigned NOT NULL default '0',
   `attributeID` int(10) unsigned NOT NULL default '0',
-  `valueInt` int(10) default NULL,
+  `valueInt` BIGINT(20) default NULL,
   `valueFloat` double default NULL,
   PRIMARY KEY  (`itemID`,`attributeID`),
   KEY `attributeID` (`attributeID`)
@@ -551,7 +551,7 @@ DROP TABLE IF EXISTS `srvEntity_default_attributes`;
 CREATE TABLE `srvEntity_default_attributes` (
   `itemID` int(10) unsigned NOT NULL default '0',
   `attributeID` int(10) unsigned NOT NULL default '0',
-  `valueInt` int(10) default NULL,
+  `valueInt` BIGINT(20) default NULL,
   `valueFloat` double default NULL,
   PRIMARY KEY  (`itemID`,`attributeID`),
   KEY `attributeID` (`attributeID`)
