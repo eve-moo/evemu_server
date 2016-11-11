@@ -867,7 +867,7 @@ SkillRef Character::startTraining(uint32 skillID, uint64 nextStartTime, bool not
     // Minimum of 10 seconds training time,
     timeTraining = std::max(timeTraining, Win32Time_Second * 10);
     // Set training time end.
-    startTraining->setAttribute(AttrExpiryTime, (double) timeTraining);
+    startTraining->setAttribute(AttrExpiryTime, (long) timeTraining);
     m_trainingStartTime = nextStartTime;
     // Set training flag.
     startTraining->SetFlag(flagSkillInTraining);
@@ -1031,7 +1031,7 @@ void Character::updateSkillQueueTimes()
     }
 
     DBerror err;
-    if(!DBcore::RunQuery(err, "UPDATE srvCharacter SET skillQueueEndTime = %f WHERE characterID = %u ", time, itemID()))
+    if(!DBcore::RunQuery(err, "UPDATE srvCharacter SET skillQueueEndTime = %lu WHERE characterID = %u ", (long)time, itemID()))
     {
         _log(DATABASE__ERROR, "Failed to set skillQueueEndTime for character %u: %s", itemID(), err.c_str());
         return;

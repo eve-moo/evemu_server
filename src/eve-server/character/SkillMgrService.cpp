@@ -143,7 +143,7 @@ SkillMgr2Bound::SkillMgr2Bound()
     //    PyCallable_REG_CALL(SkillMgr2Bound, CharAddImplant)
     //    PyCallable_REG_CALL(SkillMgr2Bound, RemoveImplantFromCharacter)
     //    PyCallable_REG_CALL(SkillMgr2Bound, SaveSkillQueue)
-    //    PyCallable_REG_CALL(SkillMgr2Bound, AddToEndOfSkillQueue)
+    PyCallable_REG_CALL(SkillMgr2Bound, AddToEndOfSkillQueue)
     //
     //    PyCallable_REG_CALL(SkillMgr2Bound, GetCharacterAttributeModifiers)
 }
