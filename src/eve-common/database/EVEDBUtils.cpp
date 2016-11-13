@@ -182,8 +182,12 @@ PyObject *DBResultToIndexRowset(DBQueryResult &result, const char *key) {
     uint32 key_index;
 
     for(key_index = 0; key_index < cc; key_index++)
+    {
         if(strcmp(key, result.ColumnName(key_index)) == 0)
+        {
             break;
+        }
+    }
 
     if(key_index == cc)
     {
@@ -202,13 +206,17 @@ PyObject *DBResultToIndexRowset(DBQueryResult &result, uint32 key_index) {
     PyObject *res = new PyObject( "util.IndexRowset", args );
 
     if(cc == 0 || cc < key_index)
+    {
         return res;
+    }
 
     //list off the column names:
     PyList *header = new PyList(cc);
     args->SetItemString("header", header);
     for(uint32 i = 0; i < cc; i++)
+    {
         header->SetItemString(i, result.ColumnName(i));
+    }
 
     //RowClass:
     args->SetItemString("RowClass", new PyToken("util.Row"));
@@ -221,14 +229,78 @@ PyObject *DBResultToIndexRowset(DBQueryResult &result, uint32 key_index) {
 
     //add a line entry for each result row:
     DBResultRow row;
-    while(result.GetRow(row)) {
+    while(result.GetRow(row))
+    {
         PyRep *key = DBColumnToPyRep(row, key_index);
 
         PyList *line = new PyList(cc);
         for(uint32 i = 0; i < cc; i++)
+        {
             line->SetItem(i, DBColumnToPyRep(row, i));
+        }
 
         items->SetItem(key, line);
+    }
+
+    return res;
+}
+
+PyObjectEx *DBResultToRowDict(DBQueryResult &result, const char *key) {
+    uint32 cc = result.ColumnCount();
+    uint32 key_index;
+
+    for(key_index = 0; key_index < cc; key_index++)
+    {
+        if(strcmp(key, result.ColumnName(key_index)) == 0)
+        {
+            break;
+        }
+    }
+
+    if(key_index == cc)
+    {
+        SysLog::Error("EVEDBUtils", "DBResultToIndexRowset | Failed to find key column '%s' in result for IndexRowset", key);
+        return NULL;
+    }
+
+    return DBResultToRowDict(result, key_index);
+}
+
+PyObjectEx *DBResultToRowDict(DBQueryResult &result, uint32 key_index) {
+    uint32 cc = result.ColumnCount();
+
+    //start building the IndexRowset
+    PyDict *keywords = new PyDict();
+    PyTuple *args = new_tuple(new PyToken("eve.common.script.sys.rowset.RowDict"));
+    PyObjectEx_Type2 *res = new PyObjectEx_Type2( args, keywords );
+
+    if(cc == 0 || cc < key_index)
+    {
+        return res;
+    }
+
+    //list off the column names:
+    PyList *header = new PyList(cc);
+    keywords->SetItemString("column", header);
+    for(uint32 i = 0; i < cc; i++)
+    {
+        header->SetItemString(i, result.ColumnName(i));
+    }
+    
+    DBRowDescriptor *desc = new DBRowDescriptor(result);
+    keywords->SetItemString("header", desc);
+    keywords->SetItemString("key", new PyString( result.ColumnName(key_index) ));
+
+    //items:
+    PyDict &items = res->dict();
+
+    //add a line entry for each result row:
+    DBResultRow row;
+    while(result.GetRow(row))
+    {
+        PyRep *key = DBColumnToPyRep(row, key_index);
+        PyPackedRow *line = DBRowToPackedRow(row);
+        items.SetItem(key, line);
     }
 
     return res;

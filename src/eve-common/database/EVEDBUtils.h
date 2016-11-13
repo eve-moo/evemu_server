@@ -53,6 +53,8 @@ PyRep *DBColumnToPyRep(const DBResultRow &row, uint32 column_index);
 PyObject *DBResultToRowset(DBQueryResult &result);
 PyObject *DBResultToIndexRowset(DBQueryResult &result, const char *key);
 PyObject *DBResultToIndexRowset(DBQueryResult &result, uint32 key_index);
+PyObjectEx *DBResultToRowDict(DBQueryResult &result, const char *key);
+PyObjectEx *DBResultToRowDict(DBQueryResult &result, uint32 key_index);
 PyTuple *DBResultToTupleSet(DBQueryResult &result);
 PyTuple *DBResultToRowList(DBQueryResult &result, const char *type = "util.Row");
 PyDict *DBResultToIntRowDict(DBQueryResult &result, uint32 key_index, const char *type = "util.Row");
