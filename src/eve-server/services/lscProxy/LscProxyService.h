@@ -27,20 +27,64 @@
 #define __EVEMOO_SERVICES_LSCPROXY_H_INCL__
 
 #include "PyService.h"
+#include "chat/LSCService.h"
+#include "chat/LSCChannel.h"
+#include "admin/CommandDispatcher.h"
+#include <memory>
+#include <mutex>
 
 class PyRep;
+class LSCService;
 
 class LSCProxyService: public PyService
 {
+    friend class LSCService;
 public:
-    LSCProxyService();
+    // All user-created chat channels are created with IDs that are in this set:
+    //     [baseChannelID,maxChannelID]  (note the inclusivity in that set)
+    static const uint32 BASE_CHANNEL_ID;
+    static const uint32 MAX_CHANNEL_ID;
+
+    LSCProxyService(CommandDispatcher *cd);
     virtual ~LSCProxyService();
 
-    PyCallable_DECL_CALL(JoinChannels)
+    PyResult ExecuteCommand(Client *from, const char *msg);
+    void CreateSystemChannel(uint32 systemID);
+    void CharacterLogout(uint32 charID, OnLSC_SenderInfo * si);
+
+    void SendMail(uint32 sender, uint32 recipient, const std::string &subject, const std::string &content) {
+        std::vector<int32> recs(1, recipient);
+        SendMail(sender, recs, subject, content);
+    }
+    void SendMail(uint32 sender, const std::vector<int32> &recipients, const std::string &subject, const std::string &content);
 
 protected:
     class Dispatcher;
 
+    PyCallable_DECL_CALL(JoinChannels)
+    PyCallable_DECL_CALL(LeaveChannels)
+    PyCallable_DECL_CALL(SendMessage)
+
+    CommandDispatcher *const m_commandDispatch;
+
+    std::mutex sMutex;
+    std::map<uint32, std::shared_ptr<LSCChannel>> m_channels;  //we own these pointers
+
+private:
+    std::shared_ptr<LSCChannel> CreateChannel(uint32 channelID, const char * name, const char * motd,
+                              std::string type, const char * compkey,
+                              uint32 ownerID, bool memberless, const char * password,
+                              bool maillist, uint32 cspa, uint32 temporary, uint32 mode);
+    std::shared_ptr<LSCChannel> CreateChannel(uint32 channelID, const char * name, const char * motd,
+                              std::string type, bool maillist = false);
+    std::shared_ptr<LSCChannel> CreateChannel(uint32 channelID, const char * name, std::string type, bool maillist = false);
+    std::shared_ptr<LSCChannel> CreateChannel(uint32 channelID, std::string type);
+    std::shared_ptr<LSCChannel> CreateChannel(uint32 channelID);
+    std::shared_ptr<LSCChannel> CreateChannel(const char * name, bool maillist = false);
+    void InitiateStaticChannels();
+    
+    std::shared_ptr<LSCChannel> getChannel(uint32 channelID);
+    void removeChannel(uint32 channelID);
 };
 
 #endif

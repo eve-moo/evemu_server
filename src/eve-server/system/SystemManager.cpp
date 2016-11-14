@@ -26,7 +26,7 @@
 #include "eve-server.h"
 
 #include "Client.h"
-#include "chat/LSCService.h"
+#include "services/lscProxy/LscProxyService.h"
 #include "mining/Asteroid.h"
 #include "npc/NPC.h"
 #include "npc/SpawnManager.h"
@@ -58,7 +58,7 @@ SystemManager::SystemManager(uint32 systemID)//, ItemData idata)
     uint32 inventoryID = m_solarSystemRef->itemID();
 
     //create our chat channel
-    PyServiceMgr::lsc_service->CreateSystemChannel(m_systemID);
+    PyServiceMgr::lscProxy_service->CreateSystemChannel(m_systemID);
 }
 
 SystemManager::~SystemManager() {

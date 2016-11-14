@@ -357,7 +357,7 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new LocalizationServerService());
     PyServiceMgr::RegisterService(new LookupService());
     PyServiceMgr::RegisterService(new LPService());
-    PyServiceMgr::RegisterService(PyServiceMgr::lsc_service = new LSCService(&command_dispatcher));
+    PyServiceMgr::RegisterService(new LSCService(&command_dispatcher));
     PyServiceMgr::RegisterService(new MailMgrService());
     PyServiceMgr::RegisterService(new MailingListMgrService());
     PyServiceMgr::RegisterService(new MapService());
@@ -389,7 +389,7 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new VoiceMgrService());
     PyServiceMgr::RegisterService(new WarRegistryService());
 
-    PyServiceMgr::RegisterService(new LSCProxyService());
+    PyServiceMgr::RegisterService(PyServiceMgr::lscProxy_service = new LSCProxyService(&command_dispatcher));
     PyServiceMgr::RegisterService(new EventLogService());
     PyServiceMgr::RegisterService(new CrestAPIService());
     PyServiceMgr::RegisterService(new BountyProxyService());

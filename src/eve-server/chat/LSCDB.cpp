@@ -26,7 +26,7 @@
 #include "eve-server.h"
 
 #include "chat/LSCDB.h"
-#include "chat/LSCService.h"
+#include "services/lscProxy/LscProxyService.h"
 
 PyObject *LSCDB::LookupChars(const char *match, bool exact) {
     DBQueryResult res;
@@ -424,13 +424,13 @@ uint32 LSCDB::GetNextAvailableChannelID()
         " SELECT "
         "    channelID "
                           " FROM srvChannels "
-        " WHERE channelID >= %u ", LSCService::BASE_CHANNEL_ID ))
+        " WHERE channelID >= %u ", LSCProxyService::BASE_CHANNEL_ID ))
     {
         codelog(SERVICE__ERROR, "Error in query: %s", res.error.c_str());
         return 0;
     }
 
-    uint32 currentChannelID = LSCService::BASE_CHANNEL_ID;
+    uint32 currentChannelID = LSCProxyService::BASE_CHANNEL_ID;
 
     // Traverse through the rows in the query result until the first gap is found
     // and return the value that would be first (or only one) in the gap as the next
@@ -446,11 +446,15 @@ uint32 LSCDB::GetNextAvailableChannelID()
         ++currentChannelID;
     }
 
-        // Check to make sure that the next available channelID is not equal to the Maximum channel ID value
-    if( currentChannelID <= LSCService::MAX_CHANNEL_ID )
+    // Check to make sure that the next available channelID is not equal to the Maximum channel ID value
+    if( currentChannelID <= LSCProxyService::MAX_CHANNEL_ID )
+    {
         return currentChannelID;
+    }
     else
+    {
         return 0;    // No free channel IDs found (this should never happen as there are way too many IDs to exhaust)
+    }
 }
 
 

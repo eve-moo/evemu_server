@@ -28,7 +28,7 @@
 #include "Client.h"
 #include "LiveUpdateDB.h"
 #include "PyBoundObject.h"
-#include "chat/LSCService.h"
+#include "services/lscProxy/LscProxyService.h"
 #include "imageserver/ImageServer.h"
 #include "npc/NPC.h"
 #include "ship/DestinyManager.h"
@@ -75,7 +75,7 @@ Client::~Client() {
         // we have valid character
 
         // LSC logout
-        PyServiceMgr::lsc_service->CharacterLogout(GetCharacterID(), LSCChannel::_MakeSenderInfo(this));
+        PyServiceMgr::lscProxy_service->CharacterLogout(GetCharacterID(), LSCChannel::_MakeSenderInfo(this));
 
         //before we remove ourself from the system, store our last location.
         SavePosition();

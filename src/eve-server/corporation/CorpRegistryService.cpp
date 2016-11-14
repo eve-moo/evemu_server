@@ -29,7 +29,7 @@
 #include "PyBoundObject.h"
 #include "PyServiceCD.h"
 #include "cache/ObjCacheService.h"
-#include "chat/LSCService.h"
+#include "services/lscProxy/LscProxyService.h"
 #include "corporation/CorpRegistryService.h"
 #include "corporation/CorporationDB.h"
 #include "PyServiceMgr.h"
@@ -550,7 +550,7 @@ PyResult CorpRegistryBound::Handle_InsertApplication(PyCallArgs &call) {
         body = res.message;
     std::vector<int32> recipients;
     recipients.push_back(CorporationDB::GetCorporationCEO(res.corpID));
-    PyServiceMgr::lsc_service->SendMail(call.client->GetCharacterID(), recipients, subject, body);
+    PyServiceMgr::lscProxy_service->SendMail(call.client->GetCharacterID(), recipients, subject, body);
 
     /// Reply: ~\x00\x00\x00\x00\x01
     return NULL;

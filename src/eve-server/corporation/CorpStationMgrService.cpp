@@ -27,7 +27,7 @@
 
 #include "PyBoundObject.h"
 #include "PyServiceCD.h"
-#include "chat/LSCService.h"
+#include "services/lscProxy/LscProxyService.h"
 #include "corporation/CorpStationMgrService.h"
 #include "corporation/CorporationDB.h"
 #include "PyServiceMgr.h"
@@ -393,7 +393,7 @@ PyResult CorpStationMgrIMBound::Handle_RentOffice(PyCallArgs &call) {
     // Who to send notification? corpRoleJuniorAccountant and equiv? atm it's enough to send it to the renter
     // TODO: get the correct evemail content from somewhere
     // TODO: send it to every corp member who's affected by it. corpRoleAccountant, corpRoleJuniorAccountant or equiv
-    PyServiceMgr::lsc_service->SendMail(
+    PyServiceMgr::lscProxy_service->SendMail(
                                         CorporationDB::GetStationCorporationCEO(oInfo.stationID),
         call.client->GetCharacterID(),
         "Bill issued",

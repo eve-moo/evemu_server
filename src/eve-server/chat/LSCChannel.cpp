@@ -28,7 +28,7 @@
 #include "Client.h"
 #include "chat/kenny.h"
 #include "chat/LSCChannel.h"
-#include "chat/LSCService.h"
+#include "services/lscProxy/LscProxyService.h"
 
 PyRep *LSCChannelChar::Encode() const {
     ChannelJoinChannelCharsLine line;
@@ -38,18 +38,21 @@ PyRep *LSCChannelChar::Encode() const {
     line.corpID = m_corpID;
     line.role = m_role;
     line.warFactionID = m_warFactionID;
-
-    util_Row rs;
-    rs.header.push_back("ownerID");
-    rs.header.push_back("ownerName");
-    rs.header.push_back("typeID");
-    rs.line = new PyList;
-    rs.line->AddItemInt( m_charID );
-    rs.line->AddItemString( m_charName.c_str() );
-    rs.line->AddItemInt( 1378 );
-    line.extra = rs.Encode();//m_extra;
+    line.extra = EncodeExtra();
 
     return line.Encode();
+}
+
+PyRep *LSCChannelChar::EncodeExtra() const {
+    PyList *extra = new PyList();
+    extra->items.push_back(new PyInt(m_charID));
+    extra->items.push_back(new PyString(m_charName));
+    extra->items.push_back(new PyInt(m_typeID));
+    // To-DO: find out what this value is (sometimes it's true)
+    extra->items.push_back(new PyBool(false));
+    extra->items.push_back(new PyNone());
+
+    return extra;
 }
 
 PyRep *LSCChannelMod::Encode() {
@@ -66,9 +69,9 @@ PyRep *LSCChannelMod::Encode() {
 }
 
 LSCChannel::LSCChannel(
-    LSCService *svc,
+    LSCProxyService *svc,
     uint32 channelID,
-    Type type,
+    std::string type,
     uint32 ownerID,
     const char *displayName,
     const char *motd,
@@ -132,20 +135,26 @@ void LSCChannel::SetChannelInfo(uint32 ownerID, std::string displayName, std::st
     SetMode(mode);
 }
 
-bool LSCChannel::JoinChannel(Client * c) {
+PyRep *LSCChannel::JoinChannel(Client * c)
+{
+    uint32 charID = c->GetCharacterID();
+    if(this->IsJoined(charID))
+    {
+        return nullptr;
+    }
     _log(LSC__CHANNELS, "Channel %s: Join from %s", m_displayName.c_str(), c->GetName());
 
-
+    LSCChannelChar cChar( this, c->GetCorporationID(), charID, c->GetCharacterName(), c->Item()->typeID(), c->GetAllianceID(), c->GetWarFactionID(), c->GetAccountRole(), 0 );
     m_chars.insert(
-        std::make_pair(
-            c->GetCharacterID(),
-            LSCChannelChar( this, c->GetCorporationID(), c->GetCharacterID(), c->GetCharacterName(), c->GetAllianceID(), c->GetWarFactionID(), c->GetAccountRole(), 0 )
-        )
+        std::make_pair(c->GetCharacterID(), cChar)
     );
     c->ChannelJoined( this );
 
-
-    //if ((m_type != LSCChannel::normal) && (m_channelID > 2)) {
+    // Don't broadcast presence in wormhole systems.
+    bool isWormhole = (m_type == "solarsystemid2" && m_channelID >= 61000000);
+    // Don't breadcast presence in help channels.
+    if (m_channelID > 2 && !isWormhole)
+    {
         OnLSC_JoinChannel join;
         join.sender = _MakeSenderInfo(c);
         join.member_count = m_chars.size();
@@ -157,21 +166,32 @@ bool LSCChannel::JoinChannel(Client * c) {
         cur = m_chars.begin();
         end = m_chars.end();
         for( ; cur != end; cur++ )
+        {
             mct.characters.insert( cur->first );
+        }
 
         PyTuple *answer = join.Encode();
-        EntityList::Multicast( "OnLSC", GetTypeString(), &answer, mct );
-    //}
+        EntityList::Multicast( "OnLSC", m_type.c_str(), &answer, mct );
+    }
 
+    // Create response entry.
+    ChannelJoinReply rep;
+    rep.ChannelID = EncodeID();
+    rep.ok = 1;
+    rep.ChannelInfo = EncodeChannelSmall(charID);
+    rep.ChannelMods = EncodeChannelMods();
+    rep.ChannelChars = EncodeChannelChars();
 
-    return true;
+    return rep.Encode();
 }
 
 void LSCChannel::LeaveChannel(uint32 charID, OnLSC_SenderInfo * si) {
     _log(LSC__CHANNELS, "Channel %s: Leave from %u", m_displayName.c_str(), charID);
 
     if (m_chars.find(charID) == m_chars.end())
+    {
         return;
+    }
 
     m_chars.erase(charID);
 
@@ -186,10 +206,12 @@ void LSCChannel::LeaveChannel(uint32 charID, OnLSC_SenderInfo * si) {
     cur = m_chars.begin();
     end = m_chars.end();
     for(; cur != end; cur++)
+    {
         mct.characters.insert( cur->first );
+    }
 
     PyTuple *answer = leave.Encode();
-    EntityList::Multicast("OnLSC", GetTypeString(), &answer, mct);
+    EntityList::Multicast("OnLSC", m_type.c_str(), &answer, mct);
 }
 
 void LSCChannel::LeaveChannel(Client *c, bool self) {
@@ -214,7 +236,7 @@ void LSCChannel::LeaveChannel(Client *c, bool self) {
         mct.characters.insert( cur->first );
 
     PyTuple *answer = leave.Encode();
-    EntityList::Multicast("OnLSC", GetTypeString(), &answer, mct);
+    EntityList::Multicast("OnLSC", m_type.c_str(), &answer, mct);
 
     m_chars.erase(charID);
     c->ChannelLeft(this);
@@ -236,7 +258,7 @@ void LSCChannel::Evacuate(Client * c) {
         mct.characters.insert(cur->first);
 
     PyTuple *answer = dc.Encode();
-    EntityList::Multicast("OnLSC", GetTypeString(), &answer, mct);
+    EntityList::Multicast("OnLSC", m_type.c_str(), &answer, mct);
 }
 
 void LSCChannel::SendMessage(Client * c, const char * message, bool self) {
@@ -269,7 +291,7 @@ void LSCChannel::SendMessage(Client * c, const char * message, bool self) {
     sm.member_count = m_chars.size();
 
     PyTuple *answer = sm.Encode();
-    EntityList::Multicast("OnLSC", GetTypeString(), &answer, mct);
+    EntityList::Multicast("OnLSC", m_type, &answer, mct);
 */
 
     // NEW KENNY TRANSLATOR VERSION:
@@ -346,7 +368,7 @@ void LSCChannel::SendMessage(Client * c, const char * message, bool self) {
             sm_NotKennyfied.message = kennyfied_message;
         }
         answerNotKennyfied = sm_NotKennyfied.Encode();
-        EntityList::Multicast("OnLSC", GetTypeString(), &answerNotKennyfied, mct_NotKennyfied);
+        EntityList::Multicast("OnLSC", m_type.c_str(), &answerNotKennyfied, mct_NotKennyfied);
     }
 
     sm_Kennyfied.channelID = EncodeID();
@@ -354,7 +376,7 @@ void LSCChannel::SendMessage(Client * c, const char * message, bool self) {
     sm_Kennyfied.member_count = kennyfiedCharListSize;
 
     PyTuple *answerKennyfied = sm_Kennyfied.Encode();
-    EntityList::Multicast("OnLSC", GetTypeString(), &answerKennyfied, mct_Kennyfied);
+    EntityList::Multicast("OnLSC", m_type.c_str(), &answerKennyfied, mct_Kennyfied);
 }
 
 bool LSCChannel::IsJoined(uint32 charID) {
@@ -370,6 +392,7 @@ OnLSC_SenderInfo *LSCChannel::_MakeSenderInfo(Client *c) {
     sender->corpID = c->GetCorporationID();
     sender->role = c->GetAccountRole();
     sender->corp_role = c->GetCorpRole();
+    sender->gender = c->GetChar()->gender();
 
     return(sender);
 }
@@ -383,6 +406,7 @@ OnLSC_SenderInfo *LSCChannel::_FakeSenderInfo() {
     sender->corpID = 1;
     sender->role = 1;
     sender->corp_role = 1;
+    sender->gender = false;
 
     return sender;
 }
@@ -408,41 +432,87 @@ PyRep *LSCChannel::EncodeChannel(uint32 charID) {
 }
 
 PyRep *LSCChannel::EncodeID() {
-    if (m_type == normal)
+    if (m_type == "")
+    {
         return (new PyInt(m_channelID));
+    }
 
     LSCChannelMultiDesc desc;
     desc.id = m_channelID;
-    desc.type = GetTypeString();
+    desc.type = m_type;
 
     return desc.Encode();
 }
 
 PyRep *LSCChannel::EncodeChannelSmall(uint32 charID) {
-    ChannelJoinChannelInfo info;
+    if(m_type == "corpid")
+    {
+        PyDict *dict = new PyDict();
+        dict->SetItem(new PyString("mailingList"), new PyBool(false));
+        if(m_motd.empty())
+        {
+            dict->SetItem(new PyString("motd"), new PyNone());
+        }
+        else
+        {
+            dict->SetItem(new PyString("motd"), new PyWString(m_motd));
+        }
+        PyObject *obj = new PyObject("utillib.KeyVal", dict);
+        return obj;
+    }
+    if(m_type == "solarsystemid2")
+    {
+        return new PyNone();
+    }
+    DBRowDescriptor *header = new DBRowDescriptor();
+    header->AddColumn("channelID", DBTYPE_I4);
+    header->AddColumn("ownerID", DBTYPE_I4);
+    header->AddColumn("displayName", DBTYPE_WSTR);
+    header->AddColumn("motd", DBTYPE_WSTR);
+    header->AddColumn("comparisonKey", DBTYPE_WSTR);
+    header->AddColumn("memberless", DBTYPE_BOOL);
+    header->AddColumn("password", DBTYPE_WSTR);
+    header->AddColumn("mailingList", DBTYPE_BOOL);
+    header->AddColumn("cspa", DBTYPE_I4);
+    header->AddColumn("temporary", DBTYPE_BOOL);
+    header->AddColumn("languageRestriction", DBTYPE_BOOL);
+    header->AddColumn("groupMessageID", DBTYPE_I4);
+    header->AddColumn("channelMessageID", DBTYPE_I4);
+    header->AddColumn("subscribed", DBTYPE_I4);
 
-    info.channelID = m_channelID;
-    info.comparisonKey = m_comparisonKey;
-    info.cspa = m_cspa;
-    info.displayName = m_displayName;
-    info.mailingList = m_mailingList;
-    info.memberless = m_memberless;
-    info.motd = m_motd;
-    info.ownerID = m_ownerID;
-    info.password = m_password.empty() ? (PyRep*)new PyNone() : (PyRep*)new PyString(m_password);
-    info.subscribed = !(m_chars.find(charID) == m_chars.end());
-    info.temporary = (m_temporary == 0) ? false : true;
+    PyPackedRow *row = new PyPackedRow(header);
+    row->SetField("channelID", new PyInt(m_channelID));
+    row->SetField("ownerID", new PyInt(m_ownerID));
+    row->SetField("displayName", new PyWString(m_displayName));
+    row->SetField("motd", new PyWString(m_motd));
+    row->SetField("comparisonKey", new PyWString(m_comparisonKey));
+    row->SetField("memberless", new PyBool(m_memberless));
+    row->SetField("password", new PyWString(m_password));
+    row->SetField("mailingList", new PyBool(m_mailingList));
+    row->SetField("cspa", new PyInt(m_cspa));
+    row->SetField("temporary", new PyBool((m_temporary == 0) ? false : true));
+    row->SetField("languageRestriction", new PyBool(0));
+    row->SetField("groupMessageID", new PyInt(0));
+    row->SetField("channelMessageID", new PyInt(0));
+    row->SetField("subscribed", new PyInt(!(m_chars.find(charID) == m_chars.end())));
 
-    return info.Encode();
+    return row;
 }
 
 PyRep *LSCChannel::EncodeChannelMods()
 {
+    if(m_mods.size() == 0)
+    {
+        return new PyNone();
+    }
+    // TO-DO: This should use a CRowset but it uses a Rowset.
     ChannelJoinChannelMods info;
-    info.lines = new PyList;
+    info.lines = new PyList();
 
     for( uint32 i = 0; i < m_mods.size(); i++ )
+    {
         info.lines->AddItem( m_mods[i].Encode() );
+    }
 
     return info.Encode();
 }
@@ -451,14 +521,41 @@ PyRep *LSCChannel::EncodeChannelChars() {
     ChannelJoinChannelChars info;
     info.lines = new PyList;
 
-    std::map<uint32, LSCChannelChar>::iterator cur, end;
-    cur = m_chars.begin();
-    end = m_chars.end();
-    for(; cur != end; cur++)
+    bool populate = true;
+    if(m_type == "corpid")
     {
-        std::map<uint32, LSCChannelChar>::const_iterator res = m_chars.find( cur->first );
-        if( res != m_chars.end() )
-            info.lines->AddItem( res->second.Encode() );
+        if(m_channelID < EVEMU_MINIMUM_ID)
+        {
+            // NPC corporation.
+            // DO NOT populate member list.
+            populate = false;
+        }
+    }
+    if(m_channelID == 1 || m_channelID == 2)
+    {
+        // Help channel.
+        // DO NOT populate help member lists.
+        populate = false;
+    }
+    if(m_type == "")
+    {
+        // Normal channel.
+        // DO NOT populate list.
+        populate = false;
+    }
+    if(populate)
+    {
+        std::map<uint32, LSCChannelChar>::iterator cur, end;
+        cur = m_chars.begin();
+        end = m_chars.end();
+        for(; cur != end; cur++)
+        {
+            std::map<uint32, LSCChannelChar>::const_iterator res = m_chars.find( cur->first );
+            if( res != m_chars.end() )
+            {
+                info.lines->AddItem( res->second.Encode() );
+            }
+        }
     }
 
     return info.Encode();
@@ -469,21 +566,3 @@ PyRep *LSCChannel::EncodeEmptyChannelChars() {
     info.lines = new PyList;
     return info.Encode();
 }
-
-const char *LSCChannel::GetTypeString() {
-    switch(m_type) {
-    case normal:
-        return("normal");
-    case corp:
-        return("corpid");
-    case solarsystem:
-        return("solarsystemid2");
-    case region:
-        return("regionid");
-    case constellation:
-        return("constellationid");
-    //no default on purpose
-    }
-    return("unknown");
-}
-

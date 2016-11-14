@@ -197,7 +197,7 @@
 
     <elementDef name="Call_SendMessage">
         <tupleInline>
-            <element name="channel" type="LSCChannelMultiDesc" />
+            <raw name="channel" />
             <wstring name="message" />
         </tupleInline>
     </elementDef>
@@ -242,6 +242,8 @@
                 <int name="senderID" />
                 <string name="senderName" />
                 <int name="senderType" />
+                <bool name="gender" />
+                <none/>
             </listInline>
             <!-- 3: whoRole -->
             <long name="role" />

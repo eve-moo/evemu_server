@@ -37,7 +37,7 @@ class PySubStruct;
 class EntityList;
 class ObjCacheService;
 
-class LSCService;
+class LSCProxyService;
 
 class PyServiceMgr
 {
@@ -64,7 +64,7 @@ public:
     //Area to access services by name. This isn't ideal, but it avoids casting.
     //these may be NULL during service init, but should never be after that.
     //we do not own these pointers (we do in their PyService * form though)
-    static LSCService *lsc_service;
+    static LSCProxyService *lscProxy_service;
     static ObjCacheService *cache_service;
 
 protected:

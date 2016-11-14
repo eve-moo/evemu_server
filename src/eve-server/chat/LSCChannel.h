@@ -29,16 +29,17 @@
 #include "EntityList.h"
 
 class PyRep;
-class LSCService;
+class LSCProxyService;
 class LSCChannel;
 
 class LSCChannelChar {
 public:
-    LSCChannelChar(LSCChannel *chan, uint32 corpID, uint32 charID, std::string charName, uint32 allianceID, uint32 warFactionID, uint64 role, uint32 extra) :
-      m_parent(chan),
+    LSCChannelChar(LSCChannel *chan, uint32 corpID, uint32 charID, std::string charName, uint32 typeID, uint32 allianceID, uint32 warFactionID, uint64 role, uint32 extra)
+    : m_parent(chan),
       m_corpID(corpID),
       m_charID(charID),
-          m_charName(charName),
+      m_charName(charName),
+      m_typeID(typeID),
       m_allianceID(allianceID),
       m_warFactionID(warFactionID),
       m_role(role),
@@ -46,12 +47,14 @@ public:
 
     virtual ~LSCChannelChar() { }
     PyRep *Encode() const;
+    PyRep *EncodeExtra() const;
 
 protected:
     LSCChannel *m_parent;
     uint32 m_corpID;
     uint32 m_charID;
-        std::string m_charName;
+    std::string m_charName;
+    uint32 m_typeID;
     uint32 m_allianceID;
     uint32 m_warFactionID;
     uint64 m_role;
@@ -86,18 +89,10 @@ protected:
 
 class LSCChannel {
 public:
-    typedef enum {
-        normal = 0,
-        corp = 1,
-        solarsystem = 2,
-        constellation = 4,
-        region = 3
-    } Type;
-
     LSCChannel(
-        LSCService *svc,
+        LSCProxyService *svc,
         uint32 channelID,
-        Type type,
+        std::string type,
         uint32 ownerID,
         const char *displayName,
         const char *motd,
@@ -119,11 +114,9 @@ public:
     PyRep *EncodeChannelChars();
     PyRep *EncodeEmptyChannelChars();
 
-    const char *GetTypeString();
-
     uint32 GetChannelID() { return m_channelID; }
     uint32 GetOwnerID() { return m_ownerID; }
-    Type GetType() { return m_type; }
+    std::string GetType() { return m_type; }
     std::string GetDisplayName() { return m_displayName; }
     std::string GetMOTD() { return m_motd; }
     std::string GetComparisonKey() { return m_comparisonKey; }
@@ -136,7 +129,7 @@ public:
     uint32 GetMemberCount() { return m_chars.size(); }
 
     void SetOwnerID(uint32 ownerID) { m_ownerID = ownerID; }
-    void SetType(Type new_type) { m_type = new_type; }
+    void SetType(std::string new_type) { m_type = new_type; }
     void SetDisplayName(std::string displayName) { m_displayName = displayName; }
     void SetMOTD(std::string motd) { m_motd = motd; }
     void SetComparisonKey(std::string comparisonKey) { m_comparisonKey = comparisonKey; }
@@ -152,7 +145,7 @@ public:
     void SetChannelInfo(uint32 ownerID, std::string displayName, std::string motd, std::string comparisonKey,
         bool memberless, std::string password, bool mailingList, uint32 cspa, uint32 temporary, uint32 mode);
 
-    bool JoinChannel(Client * c);
+    PyRep *JoinChannel(Client * c);
     void LeaveChannel(Client *c, bool self = true);
     void LeaveChannel(uint32 charID, OnLSC_SenderInfo * si);
     bool IsJoined(uint32 charID);
@@ -164,13 +157,14 @@ public:
     static OnLSC_SenderInfo *_MakeSenderInfo(Client *from);
 
 protected:
-    LSCService *const m_service;    //we do not own this
+//    LSCService *const m_service;    //we do not own this
+    LSCProxyService *const m_service;    //we do not own this
 
     //EntityList::character_set m_members;
 
     uint32 m_ownerID;
     uint32 m_channelID;
-    Type m_type;
+    std::string m_type;
     std::string m_displayName;
     std::string m_motd;
     std::string m_comparisonKey;

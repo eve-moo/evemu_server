@@ -34,7 +34,7 @@
 //Area to access services by name. This isn't ideal, but it avoids casting.
 //these may be NULL during service init, but should never be after that.
 //we do not own these pointers (we do in their PyService * form though)
-LSCService *PyServiceMgr::lsc_service = NULL;
+LSCProxyService *PyServiceMgr::lscProxy_service = NULL;
 ObjCacheService *PyServiceMgr::cache_service = NULL;
 std::set<PyService *> PyServiceMgr::m_services; //we own these pointers.
 uint32 PyServiceMgr::m_nextBindID = 100;

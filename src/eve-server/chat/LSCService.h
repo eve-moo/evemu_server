@@ -63,44 +63,26 @@ class CommandDispatcher;
 class LSCService : public PyService
 {
 public:
-    // All user-created chat channels are created with IDs that are in this set:
-    //     [baseChannelID,maxChannelID]  (note the inclusivity in that set)
-    static const uint32 BASE_CHANNEL_ID;
-    static const uint32 MAX_CHANNEL_ID;
-
     LSCService(CommandDispatcher *cd);
     virtual ~LSCService();
-
-    PyResult ExecuteCommand(Client *from, const char *msg);
-    void CreateSystemChannel(uint32 systemID);
-    void CharacterLogout(uint32 charID, OnLSC_SenderInfo * si);
-
-    void SendMail(uint32 sender, uint32 recipient, const std::string &subject, const std::string &content) {
-        std::vector<int32> recs(1, recipient);
-        SendMail(sender, recs, subject, content);
-    }
-    void SendMail(uint32 sender, const std::vector<int32> &recipients, const std::string &subject, const std::string &content);
 
 protected:
     class Dispatcher;
    
-
     CommandDispatcher *const m_commandDispatch;
-
-    std::map<uint32, LSCChannel *> m_channels;  //we own these pointers
 
     //make sure you add things to the constructor too
     PyCallable_DECL_CALL(GetChannels)
     PyCallable_DECL_CALL(GetRookieHelpChannel)
-    PyCallable_DECL_CALL(JoinChannels)
-    PyCallable_DECL_CALL(LeaveChannels)
-    PyCallable_DECL_CALL(LeaveChannel)
+//    PyCallable_DECL_CALL(JoinChannels)
+//    PyCallable_DECL_CALL(LeaveChannels)
+//    PyCallable_DECL_CALL(LeaveChannel)
     PyCallable_DECL_CALL(CreateChannel)
     PyCallable_DECL_CALL(Configure)
     PyCallable_DECL_CALL(DestroyChannel)
     PyCallable_DECL_CALL(GetMembers)
     PyCallable_DECL_CALL(GetMember)
-    PyCallable_DECL_CALL(SendMessage)
+//    PyCallable_DECL_CALL(SendMessage)
     PyCallable_DECL_CALL(Invite)
     PyCallable_DECL_CALL(AccessControl)
 
@@ -111,14 +93,6 @@ protected:
     PyCallable_DECL_CALL(DeleteMessages)
 
 private:
-    LSCChannel *CreateChannel(uint32 channelID, const char * name, const char * motd, LSCChannel::Type type, const char * compkey,
-        uint32 ownerID, bool memberless, const char * password, bool maillist, uint32 cspa, uint32 temporary, uint32 mode);
-    LSCChannel *CreateChannel(uint32 channelID, const char * name, const char * motd, LSCChannel::Type type, bool maillist = false);
-    LSCChannel *CreateChannel(uint32 channelID, const char * name, LSCChannel::Type type, bool maillist = false);
-    LSCChannel *CreateChannel(uint32 channelID, LSCChannel::Type type);
-    LSCChannel *CreateChannel(uint32 channelID);
-    LSCChannel *CreateChannel(const char * name, bool maillist = false);
-    void InitiateStaticChannels();
 };
 
 
