@@ -44,11 +44,7 @@ PyRep *MarketDB::GetStationAsks(uint32 stationID) {
         return NULL;
     }
 
-    //NOTE: this SHOULD return a crazy dbutil.RowDict object which is
-    //made up of packed blue.DBRow objects, but we do not understand
-    //the marshalling of those well enough right now, and this object
-    //provides the same interface. It is significantly bigger on the wire though.
-    return(DBResultToIndexRowset(res, "typeID"));
+    return(DBResultToRowDict(res, "typeID"));
 }
 
 PyRep *MarketDB::GetSystemAsks(uint32 solarSystemID) {
@@ -68,11 +64,7 @@ PyRep *MarketDB::GetSystemAsks(uint32 solarSystemID) {
         return NULL;
     }
 
-    //NOTE: this SHOULD return a crazy dbutil.RowDict object which is
-    //made up of packed blue.DBRow objects, but we do not understand
-    //the marshalling of those well enough right now, and this object
-    //provides the same interface. It is significantly bigger on the wire though.
-    return(DBResultToIndexRowset(res, "typeID"));
+    return(DBResultToRowDict(res, "typeID"));
 }
 
 PyRep *MarketDB::GetRegionBest(uint32 regionID) {
@@ -83,7 +75,6 @@ PyRep *MarketDB::GetRegionBest(uint32 regionID) {
         "    typeID, MIN(price) AS price, volRemaining, stationID "
         " FROM srvMarket_orders "
         " WHERE regionID=%u AND bid=%d"
-        //" WHERE regionID=%u"
         " GROUP BY typeID"
         " ,price, volRemaining, stationID",
             regionID, TransactionTypeSell))
@@ -92,11 +83,7 @@ PyRep *MarketDB::GetRegionBest(uint32 regionID) {
         return NULL;
     }
 
-    //NOTE: this SHOULD return a crazy dbutil.RowDict object which is
-    //made up of packed blue.DBRow objects, but we do not understand
-    //the marshalling of those well enough right now, and this object
-    //provides the same interface. It is significantly bigger on the wire though.
-    return(DBResultToIndexRowset(res, "typeID"));
+    return(DBResultToRowDict(res, "typeID"));
 }
 
 PyRep *MarketDB::GetOrders( uint32 regionID, uint32 typeID )
@@ -409,7 +396,7 @@ PyRep *MarketDB::GetMarketGroups() {
 
     if (!DBcore::RunQuery(res,
                           "SELECT parentGroupID, marketGroupID, marketGroupName, "
-                          "description, graphicID, hType AS hasTypes, iconID, dataID, "
+                          "IFNULL(description, ''), graphicID, hType AS hasTypes, iconID, dataID, "
                           "marketGroupNameID, descriptionID "
                           " FROM invMarketGroups LEFT JOIN extInvMarketGroups USING(marketGroupID)"))
     {
@@ -450,7 +437,7 @@ PyRep *MarketDB::GetMarketGroups() {
         pyrow->SetField(3, new PyString(row.GetText( 3 ) ) ); //description
         pyrow->SetField(4, row.IsNull( 4 ) ? 
             (PyRep*)(new PyNone()) : new PyInt(row.GetUInt( 4 ))  ); //graphicID
-        pyrow->SetField(5, new PyBool((row.GetText(5))[0] == 1)); //hasTypes
+        pyrow->SetField(5, new PyBool((row.GetText(5))[0] != 0)); //hasTypes
         pyrow->SetField(6, row.IsNull( 6 ) ? 
             (PyRep*)(new PyNone()) : new PyInt(row.GetUInt( 6 ))  ); // iconID 
         pyrow->SetField(7, new PyInt( row.GetUInt(7) )  ); //dataID
