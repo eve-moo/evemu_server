@@ -99,7 +99,7 @@ PyResult AchievementTrackerMgrService::Handle_UpdateClientAchievmentsAndCounters
         }
         // TO-DO: save these values.
     }
-    for(auto pair : dict1->items)
+    for(auto pair : dict2->items)
     {
         std::string key = pyAs(String, pair.first)->content();
         uint64 value = 0;
