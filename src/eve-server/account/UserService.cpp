@@ -87,30 +87,13 @@ PyResult UserService::Handle_ReportISKSpammer( PyCallArgs& call )
 
 PyResult UserService::Handle_GetMultiCharactersTrainingSlots( PyCallArgs& call )
 {
-    PyTuple *tuple = new PyTuple(3);
-    PyObject *object = new PyObject(
-            new PyString( "carbon.common.script.net.objectCaching.CachedMethodCallResult" ),
-            tuple
-            );
-    // Construct version check.
-    PyTuple *run = new PyTuple(3);
-    run->items[0] = new PyString("run");
-    run->items[1] = new PyNone();
-    run->items[2] = new PyNone();
-    PyDict *versionCheck = new PyDict();
-    versionCheck->SetItemString("versionCheck", run);
-    tuple->items[0] = versionCheck;
+    PyDict *slots = new PyDict();
+    // Construct results.
+    // TO-DO: create table for training slots and times.
+    //uint32 trainingID = 0;
+    //uint64 trainingExpiry = Win32TimeNow() + Win32Time_Month;
+    //slots->SetItem(new PyInt(trainingID), new PyLong(expiryTime));
 
-    // Construct result.
-    tuple->items[1] = new PyDict();
-
-    // Construct timestamp and version.
-    PyList *timestampVersion = new PyList();
-    timestampVersion->AddItem(new PyLong(Win32TimeNow()));
-    uint32 version = 61145237;
-    timestampVersion->AddItem(new PyInt(version));
-    tuple->items[2] = timestampVersion;
-    
-    object->Dump(DEBUG__DEBUG, "TrainingSlots");
-    return object;
+    PySubStream *ret = new PySubStream(slots);
+    return PyService::_BuildCachedReturn(&ret, CacheCheckTime::check_Run);;
 }
