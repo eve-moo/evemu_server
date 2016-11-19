@@ -112,6 +112,7 @@ trapfpe()
 #include "mail/MailingListMgrService.h"
 #include "mail/NotificationMgrService.h"
 // manufacturing services
+#include "manufacturing/BlueprintManager.h"
 #include "manufacturing/FactoryService.h"
 #include "manufacturing/RamProxyService.h"
 // map services
@@ -319,6 +320,7 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new AuthService());
     PyServiceMgr::RegisterService(new BillMgrService());
     PyServiceMgr::RegisterService(new BeyonceService());
+    PyServiceMgr::RegisterService(new BlueprintManager());
     PyServiceMgr::RegisterService(new BookmarkService());
     PyServiceMgr::RegisterService(new BrowserLockdownService());
     PyServiceMgr::RegisterService(new BulkMgrService());

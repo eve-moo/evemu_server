@@ -159,6 +159,9 @@ public:
      */
     PyDict *GetBlueprintAttributes() const;
 
+    PyPackedRow *getBlueprintRow() const;
+    void getBlueprintRow(PyPackedRow *into) const;
+
 protected:
     Blueprint(
         uint32 _blueprintID,

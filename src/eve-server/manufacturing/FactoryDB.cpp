@@ -27,7 +27,8 @@
 
 #include "manufacturing/FactoryDB.h"
 
-PyRep *FactoryDB::GetMaterialsForTypeWithActivity(const uint32 blueprintTypeID) {
+PyRep *FactoryDB::GetMaterialsForTypeWithActivity(const uint32 blueprintTypeID)
+{
     DBQueryResult res;
 
     if(!DBcore::RunQuery(res,
@@ -43,7 +44,8 @@ PyRep *FactoryDB::GetMaterialsForTypeWithActivity(const uint32 blueprintTypeID) 
     return DBResultToRowset(res);
 }
 
-PyRep *FactoryDB::GetMaterialCompositionOfItemType(const uint32 typeID) {
+PyRep *FactoryDB::GetMaterialCompositionOfItemType(const uint32 typeID)
+{
     DBQueryResult res;
 
     if(!DBcore::RunQuery(res,
@@ -59,5 +61,25 @@ PyRep *FactoryDB::GetMaterialCompositionOfItemType(const uint32 typeID) {
     }
 
     return DBResultToRowset(res);
+}
+
+bool FactoryDB::getBlueprintIDsForOwner(const uint32 ownerID, std::vector<int64> &into)
+{
+    DBQueryResult res;
+
+    if(!DBcore::RunQuery(res,
+                "SELECT itemID"
+                " FROM srvEntity"
+                " WHERE ownerID=%u AND typeID IN"
+                " (SELECT typeID FROM invTypes WHERE groupID IN (SELECT groupID FROM invGroups WHERE categoryID=9))",
+                         ownerID
+                ))
+    {
+        _log(DATABASE__ERROR, "Could not retrieve blueprints for ownerID %u: %s", ownerID, res.error.c_str());
+        return false;
+    }
+
+    DBResultToIntList(res, into);
+    return true;
 }
 

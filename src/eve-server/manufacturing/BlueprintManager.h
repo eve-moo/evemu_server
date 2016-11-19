@@ -20,25 +20,28 @@
     Place - Suite 330, Boston, MA 02111-1307, USA, or go to
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
-    Author:        Zhur
+    Author:        eve-moo
 */
 
-#ifndef __FACTORY_DB_H__
-#define __FACTORY_DB_H__
+#ifndef BLUEPRINTMANAGER_H
+#define BLUEPRINTMANAGER_H
 
-#include "ServiceDB.h"
+#include "eve-compat.h"
+#include "PyService.h"
 
-class FactoryDB : public ServiceDB
+class BlueprintManager
+: public PyService
 {
-protected:
-    FactoryDB() = delete;
-
 public:
-    static PyRep *GetMaterialsForTypeWithActivity(const uint32 blueprintTypeID);
-    static PyRep *GetMaterialCompositionOfItemType(const uint32 typeID);
+    BlueprintManager();
+    virtual ~BlueprintManager();
 
-    static bool getBlueprintIDsForOwner(const uint32 ownerID, std::vector<int64> &into);
+private:
+    class Dispatcher;
+
+    PyCallable_DECL_CALL(GetBlueprintDataByOwner)
+
 };
 
-#endif
+#endif /* BLUEPRINTMANAGER_H */
 

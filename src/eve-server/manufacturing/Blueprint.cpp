@@ -225,4 +225,61 @@ void Blueprint::SaveBlueprint() const
     );
 }
 
+PyPackedRow *Blueprint::getBlueprintRow() const
+{
+    DBRowDescriptor* header = new DBRowDescriptor();
+    header->AddColumn("itemID", DBTYPE_I8);
+    header->AddColumn("typeID", DBTYPE_I4);
+    header->AddColumn("ownerID", DBTYPE_I4);
+    header->AddColumn("locationID", DBTYPE_I8);
+    header->AddColumn("locationTypeID", DBTYPE_I4);
+    header->AddColumn("locationFlagID", DBTYPE_I4);
+    header->AddColumn("flagID", DBTYPE_I2);
+    header->AddColumn("quantity", DBTYPE_I4);
+    header->AddColumn("timeEfficiency", DBTYPE_I4);
+    header->AddColumn("materialEfficiency", DBTYPE_I4);
+    header->AddColumn("runs", DBTYPE_I4);
+    header->AddColumn("productTypeID", DBTYPE_I4);
+    header->AddColumn("facilityID", DBTYPE_I8);
+    header->AddColumn("jobID", DBTYPE_I4);
 
+    // Create the packed row.
+    PyPackedRow* row = new PyPackedRow(header);
+    getBlueprintRow(row);
+
+    return row;
+}
+
+void Blueprint::getBlueprintRow(PyPackedRow* into) const
+{
+    int32 locationType = 0;
+    InventoryItemRef loc = ItemFactory::GetItem(m_locationID);
+    if(loc.get() != nullptr)
+    {
+        locationType = loc->typeID();
+    }
+    into->SetField("itemID", new PyLong(m_itemID));
+    into->SetField("typeID", new PyInt(m_type->typeID));
+    into->SetField("ownerID", new PyInt(m_ownerID));
+    into->SetField("locationID", new PyLong(m_locationID));
+    // For corporate blueprints:
+    // locationID will be The itemID of the corporations station office.
+    // locationTypeID will be 27 ("Office") possibly others?
+    // locationFlagID will be 4, 116-121 for the hanger it's in.
+    into->SetField("locationTypeID", new PyInt(locationType));
+    into->SetField("locationFlagID", new PyInt(m_flag));
+    into->SetField("flagID", new PyInt(m_flag));
+    uint32 qty = m_singleton ? -1 : m_quantity;
+    qty = m_copy ? -2 : qty;
+    into->SetField("quantity", new PyInt(qty));
+    into->SetField("timeEfficiency", new PyInt(m_productivityLevel));
+    into->SetField("materialEfficiency", new PyInt(m_materialLevel));
+    int runs = m_copy ? m_licensedProductionRunsRemaining : -1;
+    into->SetField("runs", new PyInt(runs));
+    into->SetField("facilityID", new PyLong(m_locationID));
+    int jobID = 0;
+    int productType = 0;
+    // TO-DO: if the blueprint is being used set it's job id  and product typeID here.
+    into->SetField("productTypeID", new PyInt(productType));
+    into->SetField("jobID", new PyInt(jobID));
+}
