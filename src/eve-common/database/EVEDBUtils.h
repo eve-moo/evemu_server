@@ -62,6 +62,7 @@ PyDict *DBResultToIntIntDict(DBQueryResult &result);
 void DBResultToIntIntDict(DBQueryResult &result, std::map<int32, int32> &into);
 void DBResultToUIntUIntDict(DBQueryResult &result, std::map<uint32, uint32> &into);
 void DBResultToIntIntlistDict(DBQueryResult &result, std::map<int32, PyRep *> &into);
+void DBResultToIntList(DBQueryResult &result, std::vector<int64> &into);
 
 PyList *DBResultToPackedRowList(DBQueryResult &result);
 PyTuple *DBResultToPackedRowListTuple(DBQueryResult &result);

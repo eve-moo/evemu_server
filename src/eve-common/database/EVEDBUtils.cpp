@@ -476,6 +476,16 @@ void DBResultToIntIntlistDict( DBQueryResult &result, std::map<int32, PyRep *> &
         l->AddItemInt( row.GetInt( 1 ) );
     }
 }
+void DBResultToIntList( DBQueryResult &result, std::vector<int64> &into ) {
+    DBResultRow row;
+    while( result.GetRow( row ) )
+    {
+        if(!row.IsNull(0))
+        {
+            into.push_back(row.GetInt64(0));
+        }
+    }
+}
 
 void FillPackedRow( const DBResultRow& row, PyPackedRow* into )
 {

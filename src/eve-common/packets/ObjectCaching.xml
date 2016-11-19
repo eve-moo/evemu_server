@@ -146,6 +146,45 @@
         </objectInline>
     </elementDef>
 
+    <!-- The packet structure for CachedMethodCalls with versioncheck as Always has changed-->
+    <elementDef name="objectCaching_CallResult_object">
+        <objectInline>
+            <stringInline value="carbon.common.script.net.objectCaching.CachedMethodCallResult" />
+            <tupleInline>
+                <!-- 0: details -->
+                <dictInline>
+                    <dictInlineEntry key="versionCheck">
+                        <!-- almost all simple objects on live use never...
+                            a few use run, we default to run to be more flexible. -->
+                        <tupleInline>
+                            <!-- these fields are one of:
+                                 (always, never, (set of times))
+                            -->
+                            <!-- 0: clientWhen: expiry in the client -->
+                            <string name="clientWhen" default="always" />
+                            <none />
+                            <none />
+                            <!-- TODO Need to Find a way for it to be a String Or None -->
+                            <!-- 1: proxyWhen: expiry on the proxy, may be None -->
+                            <!-- <string name="proxyWhen" />-->
+                            <!-- 2: serverWhen: expiry on the server, may be None -->
+                            <!-- <string name="serverWhen" />-->
+                        </tupleInline>
+                    </dictInlineEntry>
+                </dictInline>
+                <!-- 1: result -->
+                <raw name="call_return" />
+                <!-- 2: version -->
+                <listInline>
+                    <!-- 0 -->
+                    <long name="timeStamp" />
+                    <!-- 1: binascii.crc_hqx(call_return, (macho.version + 170472)) -->
+                    <int name="version" />
+                </listInline>
+            </tupleInline>
+        </objectInline>
+    </elementDef>
+
     <!-- A representation of a simple cached method call objectID, with no arguments -->
     <elementDef name="MethodCallID">
         <tupleInline>

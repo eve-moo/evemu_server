@@ -76,10 +76,12 @@ protected:
         check_in_15_seconds,
         check_in_5_seconds,
         check_in_1_second,
+        check_Run,
         _checkCount
     } CacheCheckTime;
     static const char *const s_checkTimeStrings[_checkCount];
     PyObject *_BuildCachedReturn(PySubStream **result, const char *sessionInfo, CacheCheckTime check);
+    PyObject *_BuildCachedReturn(PySubStream **result, CacheCheckTime check);
 
     //you MUST overload this factory method if you offer any bound services:
     virtual PyBoundObject *_CreateBoundObject(Client *c, const PyRep *bind_args);

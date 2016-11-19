@@ -154,7 +154,8 @@ const char *const PyService::s_checkTimeStrings[_checkCount] = {
      "30 seconds",
      "15 seconds",
      "5 seconds",
-     "1 second"
+     "1 second",
+     "Run"
 };
 
 /* this is untested... */
@@ -177,6 +178,33 @@ PyObject *PyService::_BuildCachedReturn( PySubStream** in_result, const char* se
 
     cached.call_return = result;    //this entire result is going to get cloned in the Encode(), and then destroyed when we return... what a waste...
     cached.sessionInfo = sessionInfo;
+    cached.clientWhen = s_checkTimeStrings[ check ];
+
+    cached.timeStamp = Win32TimeNow();
+    //we can use whatever checksum we want here, as the client just remembers it and sends it back to us.
+    cached.version = crc_hqx( &result->data()->content()[0], result->data()->content().size(), 0 );
+
+    return cached.Encode();
+}
+
+PyObject *PyService::_BuildCachedReturn( PySubStream** in_result, CacheCheckTime check )
+{
+    objectCaching_CallResult_object cached;
+
+    PySubStream* result = *in_result;
+    *in_result = NULL;        //consume it.
+
+    //we need to checksum the marshaled data...
+    result->EncodeData();
+    if( result->data() == NULL )
+    {
+        _log( SERVICE__ERROR, "%s: Failed to build cached return", GetName() );
+
+        PyDecRef( result );
+        return NULL;
+    }
+
+    cached.call_return = result;    //this entire result is going to get cloned in the Encode(), and then destroyed when we return... what a waste...
     cached.clientWhen = s_checkTimeStrings[ check ];
 
     cached.timeStamp = Win32TimeNow();
