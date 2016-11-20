@@ -41,6 +41,17 @@ SET( inv_SOURCE
      "${TARGET_SOURCE_DIR}/inv/InvBlueprintType.cpp"
 )
 
+SET( map_INCLUDE
+     "${TARGET_INCLUDE_DIR}/map/MapDenormalize.h"
+     "${TARGET_INCLUDE_DIR}/map/MapRegion.h"
+     "${TARGET_INCLUDE_DIR}/map/MapSolarSystem.h"
+)
+SET( map_SOURCE
+     "${TARGET_SOURCE_DIR}/map/MapDenormalize.cpp"
+     "${TARGET_SOURCE_DIR}/map/MapRegion.cpp"
+     "${TARGET_SOURCE_DIR}/map/MapSolarSystem.cpp"
+)
+
 SET( sta_INCLUDE
      "${TARGET_INCLUDE_DIR}/blk/BlkShipType.h"
      "${TARGET_INCLUDE_DIR}/sta/StaStationType.h"
@@ -65,6 +76,7 @@ SOURCE_GROUP( "src\\inv"           FILES ${inv_SOURCE} )
 SOURCE_GROUP( "src\\sta"           FILES ${sta_SOURCE} )
 SOURCE_GROUP( "src\\blk"           FILES ${blk_SOURCE} )
 SOURCE_GROUP( "src\\chr"           FILES ${chr_SOURCE} )
+SOURCE_GROUP( "src\\map"           FILES ${map_SOURCE} )
 
 ADD_LIBRARY( "${TARGET_NAME}"
 ${SOURCE}
@@ -72,6 +84,7 @@ ${inv_SOURCE}
 ${sta_SOURCE}
 ${blk_SOURCE}
 ${chr_SOURCE}
+${map_SOURCE}
 )
 
 TARGET_INCLUDE_DIRECTORIES( "${TARGET_NAME}"

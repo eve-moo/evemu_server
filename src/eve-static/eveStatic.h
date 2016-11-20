@@ -67,6 +67,9 @@ protected:
     static bool loadStaStationTypes();
     static bool loadBlkShipTypes();
     static bool loadChrBloodlines();
+    static bool loadMapSolarSystems();
+    static bool loadMapRegions();
+    static bool loadMapDenormalize();
 
 private:
     static bool staticLoaded;

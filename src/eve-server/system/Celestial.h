@@ -38,7 +38,8 @@ public:
         double _radius = 0.0,
         double _security = 0.0,
         uint8 _celestialIndex = 0,
-        uint8 _orbitIndex = 0
+        uint8 _orbitIndex = 0,
+        uint8 _solarSystemID = 0
     );
 
     // Data members:
@@ -46,6 +47,7 @@ public:
     double security;
     uint8 celestialIndex;
     uint8 orbitIndex;
+    uint32 solarSystemID;
 };
 
 /**
@@ -97,6 +99,8 @@ public:
     double      security() const { return m_security; }
     uint8       celestialIndex() const { return m_celestialIndex; }
     uint8       orbitIndex() const { return m_orbitIndex; }
+    uint32      solarSystemID() const { return m_solarSystemID; }
+    MapSolarSystemRef getSolarSystem() { return MapSolarSystem::getSystem(m_solarSystemID); }
 
 protected:
     /*
@@ -158,6 +162,7 @@ protected:
     double m_security;
     uint8 m_celestialIndex;
     uint8 m_orbitIndex;
+    uint32 m_solarSystemID;
 };
 
 

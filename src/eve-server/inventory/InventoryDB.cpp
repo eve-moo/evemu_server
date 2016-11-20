@@ -31,6 +31,7 @@
 #include "ship/Ship.h"
 #include "station/Station.h"
 #include "system/SolarSystem.h"
+#include "map/MapSolarSystem.h"
 
 bool InventoryDB::GetCharacterTypeByBloodline(uint32 bloodlineID, uint32 &characterTypeID) {
     DBQueryResult res;
@@ -978,7 +979,7 @@ bool InventoryDB::GetCelestialObject(uint32 celestialID, CelestialObjectData &in
         // This Celestial object is a static celestial, so get its data from the 'mapDenormalize' table:
         if(!DBcore::RunQuery(res,
             "SELECT"
-            " security, radius, celestialIndex, orbitIndex"
+            " security, radius, celestialIndex, orbitIndex, solarSystemID"
             " FROM mapDenormalize"
             " WHERE itemID = %u",
             celestialID))
@@ -998,6 +999,7 @@ bool InventoryDB::GetCelestialObject(uint32 celestialID, CelestialObjectData &in
         into.radius = (row.IsNull(1) ? 0 : row.GetDouble(1));
         into.celestialIndex = (row.IsNull(2) ? 0 : row.GetUInt(2));
         into.orbitIndex = (row.IsNull(3) ? 0 : row.GetUInt(3));
+        into.solarSystemID = (row.IsNull(4) ? 0 : row.GetUInt(4));
     }
     else
     {
@@ -1005,10 +1007,10 @@ bool InventoryDB::GetCelestialObject(uint32 celestialID, CelestialObjectData &in
         // and if it's not there either, then flag an error.
         if(!DBcore::RunQuery(res,
             "SELECT"
-            " srvEntity.itemID, "
-            " invTypes.radius "
+            " invTypes.radius, "
+            " srvEntity.locationID, "
             " FROM srvEntity "
-                             "  LEFT JOIN invTypes ON USING(typeID)"
+            "  LEFT JOIN invTypes ON USING(typeID)"
             " WHERE srvEntity.itemID = %u",
             celestialID))
         {
@@ -1024,9 +1026,16 @@ bool InventoryDB::GetCelestialObject(uint32 celestialID, CelestialObjectData &in
         }
 
         into.security = 1.0;
-        into.radius = (row.IsNull(1) ? 0 : row.GetDouble(1));
+        into.radius = (row.IsNull(0) ? 0 : row.GetDouble(0));
         into.celestialIndex = 0;
         into.orbitIndex = 0;
+        into.solarSystemID = (row.IsNull(1) ? 0 : row.GetUInt(1));
+        // We are assuming that the location is a solar system.  but check it to be sure.
+        if(MapSolarSystem::getSystem(into.solarSystemID).get() == nullptr)
+        {
+            // Not a solar system.
+            into.solarSystemID = 0;
+        }
     }
 
     return true;

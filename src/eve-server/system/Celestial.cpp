@@ -37,11 +37,13 @@ CelestialObjectData::CelestialObjectData(
     double _radius,
     double _security,
     uint8 _celestialIndex,
-    uint8 _orbitIndex)
+    uint8 _orbitIndex,
+    uint8 _solarSystemID)
 : radius(_radius),
   security(_security),
   celestialIndex(_celestialIndex),
-  orbitIndex(_orbitIndex)
+  orbitIndex(_orbitIndex),
+  solarSystemID(_solarSystemID)
 {
 }
 
@@ -71,7 +73,8 @@ CelestialObject::CelestialObject(
   m_radius(_cData.radius),
   m_security(_cData.security),
   m_celestialIndex(_cData.celestialIndex),
-  m_orbitIndex(_cData.orbitIndex)
+  m_orbitIndex(_cData.orbitIndex),
+  m_solarSystemID(_cData.solarSystemID)
 {
 }
 

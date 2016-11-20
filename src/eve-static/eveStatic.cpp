@@ -100,6 +100,30 @@ bool EVEStatic::loadStaticData()
         return false;
     }
 
+    //-------------------------------
+    // Load the mapSolarSystem table
+    //-------------------------------
+    if (!loadMapSolarSystems())
+    {
+        return false;
+    }
+
+    //-------------------------------
+    // Load the mapRegions table
+    //-------------------------------
+    if (!loadMapRegions())
+    {
+        return false;
+    }
+
+    //-------------------------------
+    // Load the mapDenormalize table
+    //-------------------------------
+    if (!loadMapDenormalize())
+    {
+        return false;
+    }
+
     staticLoaded = true;
     return true;
 }
