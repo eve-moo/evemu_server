@@ -28,6 +28,7 @@
 
 #include "inventory/InventoryItem.h"
 #include "system/SystemEntity.h"
+#include "map/MapSolarSystem.h"
 
 /**
  * Data container for celestial object.
