@@ -45,18 +45,22 @@ SET( map_INCLUDE
      "${TARGET_INCLUDE_DIR}/map/MapDenormalize.h"
      "${TARGET_INCLUDE_DIR}/map/MapRegion.h"
      "${TARGET_INCLUDE_DIR}/map/MapSolarSystem.h"
+     "${TARGET_INCLUDE_DIR}/map/MapJump.h"
 )
 SET( map_SOURCE
      "${TARGET_SOURCE_DIR}/map/MapDenormalize.cpp"
      "${TARGET_SOURCE_DIR}/map/MapRegion.cpp"
      "${TARGET_SOURCE_DIR}/map/MapSolarSystem.cpp"
+     "${TARGET_SOURCE_DIR}/map/MapJump.cpp"
 )
 
 SET( ram_INCLUDE
      "${TARGET_INCLUDE_DIR}/ram/RamAssemblyLineType.h"
+     "${TARGET_INCLUDE_DIR}/ram/RamInstallationTypeContent.h"
 )
 SET( ram_SOURCE
      "${TARGET_SOURCE_DIR}/ram/RamAssemblyLineType.cpp"
+     "${TARGET_SOURCE_DIR}/ram/RamInstallationTypeContent.cpp"
 )
 
 SET( sta_INCLUDE

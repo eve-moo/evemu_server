@@ -70,6 +70,7 @@ protected:
     static bool loadMapSolarSystems(std::map<uint32, std::vector<uint32>> &regionSystems, std::map<uint32, std::vector<uint32>> &systemGates);
     static bool loadMapRegions(std::map<uint32, std::vector<uint32>> &regionSystems);
     static bool loadMapDenormalize(std::map<uint32, std::vector<uint32>> &systemGates);
+    static bool loadMapJumps();
     static bool loadRamAssemblyLineTypes();
     static bool loadRamInstallationTypeContents();
 

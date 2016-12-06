@@ -32,47 +32,7 @@
 #include <vector>
 
 class MapSolarSystem;
-class MapJump;
 typedef std::shared_ptr<MapSolarSystem> MapSolarSystemRef;
-typedef std::shared_ptr<MapJump> MapJumpRef;
-
-class MapJump
-{
-public:
-    MapJump(
-            uint32 _gateID,
-            uint32 _destinationID
-            );
-
-    const uint32 gateID;
-    const uint32 destinationID;
-
-    static MapJumpRef getJump(uint32 gateID)
-    {
-        auto itr = s_AllJumps.find(gateID);
-        if (itr == s_AllJumps.end())
-        {
-            return std::shared_ptr<MapJump>();
-        }
-        return itr->second;
-    }
-
-    static bool getJump(uint32 gateID, MapJumpRef &gate)
-    {
-        auto itr = s_AllJumps.find(gateID);
-        if (itr == s_AllJumps.end())
-        {
-            gate.reset();
-            return false;
-        }
-        gate = itr->second;
-        return true;
-    }
-
-private:
-    static std::map<uint32, MapJumpRef> s_AllJumps;
-
-};
 
 class MapSolarSystem
 {

@@ -121,6 +121,14 @@ bool EVEStatic::loadStaticData()
     }
 
     //-------------------------------
+    // Load the mapJumps table
+    //-------------------------------
+    if (!loadMapJumps())
+    {
+        return false;
+    }
+
+    //-------------------------------
     // Load the mapRegions table
     //-------------------------------
     if (!loadMapRegions(regionSystems))
@@ -132,6 +140,14 @@ bool EVEStatic::loadStaticData()
     // Load the ramAssemblyLineTypes table
     //-------------------------------
     if (!loadRamAssemblyLineTypes())
+    {
+        return false;
+    }
+
+    //-------------------------------
+    // Load the ramAssemblyLineTypeContents table
+    //-------------------------------
+    if (!loadRamInstallationTypeContents())
     {
         return false;
     }

@@ -23,50 +23,57 @@
     Author:        eve-moo
  */
 
-#include "RamInstallationTypeContent.h"
+#ifndef MAPJUMP_H
+#define MAPJUMP_H
 
-#include "eveStatic.h"
-#include "log/SystemLog.h"
-#include "database/EVEDBUtils.h"
+#include "math/Vector3D.h"
+#include <map>
+#include <memory>
+#include <vector>
 
-RamInstallationTypeContent::RamInstallationTypeContent(
-            uint32 _installationTypeID,
-            uint32 _assemblyLineTypeID,
-            uint32 _quantity
-) :
-installationTypeID(_installationTypeID),
-assemblyLineTypeID(_assemblyLineTypeID),
-quantity(_quantity)
+class MapJump;
+typedef std::shared_ptr<MapJump> MapJumpRef;
+
+class MapJump
 {
-}
+public:
+    MapJump(
+            uint32 _gateID,
+            uint32 _destinationID
+            );
 
-RamInstallationTypeContent::~RamInstallationTypeContent()
-{
-}
+    const uint32 gateID;
+    const uint32 destinationID;
 
-bool EVEStatic::loadRamInstallationTypeContents()
-{
-    DBQueryResult result;
-    DBResultRow row;
-    std::string columns = "installationTypeID, assemblyLineTypeID, quantity";
-    std::string qry = "SELECT " + columns + " FROM ramInstallationTypeContents";
-    if (!DBcore::RunQuery(result, qry.c_str()))
+    static MapJumpRef getJump(uint32 gateID)
     {
-        SysLog::Error("Static DB", "Error in query: %s", result.error.c_str());
-        return false;
-    }
-    while (result.GetRow(row))
-    {
-        uint32 _installationTypeID = row.GetUInt(0);
-        uint32 _assemblyLineTypeID = row.GetUInt(1);
-        uint32 _quantity = row.GetUInt(2);
-
-        new RamInstallationTypeContent(
-                _installationTypeID,
-                _assemblyLineTypeID,
-                _quantity
-                       );
+        auto itr = s_AllJumps.find(gateID);
+        if (itr == s_AllJumps.end())
+        {
+            return std::shared_ptr<MapJump>();
+        }
+        return itr->second;
     }
 
-    return true;
-}
+    static bool getJump(uint32 gateID, MapJumpRef &gate)
+    {
+        auto itr = s_AllJumps.find(gateID);
+        if (itr == s_AllJumps.end())
+        {
+            gate.reset();
+            return false;
+        }
+        gate = itr->second;
+        return true;
+    }
+
+private:
+    MapJump(const MapJump& orig) = delete;
+    virtual ~MapJump();
+
+    static std::map<uint32, MapJumpRef> s_AllJumps;
+
+};
+
+#endif /* MAPJUMP_H */
+

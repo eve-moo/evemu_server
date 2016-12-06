@@ -23,33 +23,32 @@
     Author:        eve-moo
  */
 
-#include "RamInstallationTypeContent.h"
+#include "MapJump.h"
 
 #include "eveStatic.h"
 #include "log/SystemLog.h"
 #include "database/EVEDBUtils.h"
 
-RamInstallationTypeContent::RamInstallationTypeContent(
-            uint32 _installationTypeID,
-            uint32 _assemblyLineTypeID,
-            uint32 _quantity
-) :
-installationTypeID(_installationTypeID),
-assemblyLineTypeID(_assemblyLineTypeID),
-quantity(_quantity)
+std::map<uint32, MapJumpRef> MapJump::s_AllJumps;
+
+MapJump::MapJump(
+            uint32 _gateID,
+            uint32 _destinationID
+                               ) :
+gateID(_gateID),
+destinationID(_destinationID)
 {
+    s_AllJumps[_gateID] = MapJumpRef(this, [](MapJump * type){delete type;});
 }
 
-RamInstallationTypeContent::~RamInstallationTypeContent()
-{
-}
+MapJump::~MapJump() { }
 
-bool EVEStatic::loadRamInstallationTypeContents()
+bool EVEStatic::loadMapJumps()
 {
     DBQueryResult result;
     DBResultRow row;
-    std::string columns = "installationTypeID, assemblyLineTypeID, quantity";
-    std::string qry = "SELECT " + columns + " FROM ramInstallationTypeContents";
+    std::string columns = "stargateID, destinationID";
+    std::string qry = "SELECT " + columns + " FROM mapJumps";
     if (!DBcore::RunQuery(result, qry.c_str()))
     {
         SysLog::Error("Static DB", "Error in query: %s", result.error.c_str());
@@ -57,15 +56,14 @@ bool EVEStatic::loadRamInstallationTypeContents()
     }
     while (result.GetRow(row))
     {
-        uint32 _installationTypeID = row.GetUInt(0);
-        uint32 _assemblyLineTypeID = row.GetUInt(1);
-        uint32 _quantity = row.GetUInt(2);
+        uint32 _stargateID = row.GetInt(0);
+        uint32 _destinationID = row.GetInt(1);
 
-        new RamInstallationTypeContent(
-                _installationTypeID,
-                _assemblyLineTypeID,
-                _quantity
-                       );
+        // Save the reference for the jump.
+        new MapJump(
+                _stargateID,
+                _destinationID
+                           );
     }
 
     return true;
