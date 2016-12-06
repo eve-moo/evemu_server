@@ -28,7 +28,9 @@
 
 #include "math/Vector3D.h"
 #include <map>
+#include <vector>
 #include <memory>
+#include "inv/InvType.h"
 
 class MapDenormalize;
 typedef std::shared_ptr<MapDenormalize> MapDenormalizeRef;
@@ -72,13 +74,14 @@ public:
 
     // Convenience values.
     const Vector3D location;
+    const InvTypeRef typeRef;
 
     /**
      * Get the MapDenormalize for the specified map entity.
      * @param itemID Of the item to find.
      * @return The MapDenormalize or nullptr if not found.
      */
-    static MapDenormalizeRef getSystem(uint32 itemID)
+    static MapDenormalizeRef getDenormalize(uint32 itemID)
     {
         auto itr = s_AllDenormalize.find(itemID);
         if (itr == s_AllDenormalize.end())
@@ -104,6 +107,30 @@ public:
         }
         denorm = itr->second;
         return true;
+    }
+
+    static bool getSystemObjects(uint32 systemID, std::vector<MapDenormalizeRef> &into)
+    {
+        for(auto item : s_AllDenormalize)
+        {
+            MapDenormalizeRef ref = item.second;
+            if(ref->solarSystemID == systemID)
+            {
+                into.push_back(ref);
+            }
+        }
+    }
+
+    static bool getRegionObjects(uint32 regionID, std::vector<MapDenormalizeRef> &into)
+    {
+        for(auto item : s_AllDenormalize)
+        {
+            MapDenormalizeRef ref = item.second;
+            if(ref->regionID == regionID)
+            {
+                into.push_back(ref);
+            }
+        }
     }
 
 private:

@@ -29,6 +29,7 @@
 #include "math/Vector3D.h"
 #include <map>
 #include <memory>
+#include <vector>
 
 class MapRegion;
 typedef std::shared_ptr<MapRegion> MapRegionRef;
@@ -49,7 +50,8 @@ public:
                 double _yMax,
                 double _zMax,
                 uint32 _factionID,
-                double _radius
+                double _radius,
+                std::vector<uint32> _systems
                    );
 
     const uint32 regionID;
@@ -65,6 +67,9 @@ public:
     const double zMax;
     const uint32 factionID;
     const double radius;
+
+    //
+    const std::vector<uint32> solarSystems;
 
     // Convenience values.
     const Vector3D location;

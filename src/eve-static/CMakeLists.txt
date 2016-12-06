@@ -52,6 +52,13 @@ SET( map_SOURCE
      "${TARGET_SOURCE_DIR}/map/MapSolarSystem.cpp"
 )
 
+SET( ram_INCLUDE
+     "${TARGET_INCLUDE_DIR}/ram/RamAssemblyLineType.h"
+)
+SET( ram_SOURCE
+     "${TARGET_SOURCE_DIR}/ram/RamAssemblyLineType.cpp"
+)
+
 SET( sta_INCLUDE
      "${TARGET_INCLUDE_DIR}/blk/BlkShipType.h"
      "${TARGET_INCLUDE_DIR}/sta/StaStationType.h"
@@ -77,6 +84,7 @@ SOURCE_GROUP( "src\\sta"           FILES ${sta_SOURCE} )
 SOURCE_GROUP( "src\\blk"           FILES ${blk_SOURCE} )
 SOURCE_GROUP( "src\\chr"           FILES ${chr_SOURCE} )
 SOURCE_GROUP( "src\\map"           FILES ${map_SOURCE} )
+SOURCE_GROUP( "src\\ram"           FILES ${ram_SOURCE} )
 
 ADD_LIBRARY( "${TARGET_NAME}"
 ${SOURCE}
@@ -85,6 +93,7 @@ ${sta_SOURCE}
 ${blk_SOURCE}
 ${chr_SOURCE}
 ${map_SOURCE}
+${ram_SOURCE}
 )
 
 TARGET_INCLUDE_DIRECTORIES( "${TARGET_NAME}"

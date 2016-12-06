@@ -28,6 +28,7 @@
 #include "eveStatic.h"
 #include "log/SystemLog.h"
 #include "database/EVEDBUtils.h"
+#include "inv/InvType.h"
 
 std::map<uint32, MapDenormalizeRef> MapDenormalize::s_AllDenormalize;
 
@@ -63,7 +64,8 @@ itemName(_itemName),
 security(_security),
 celestialIndex(_celestialIndex),
 orbitIndex(_orbitIndex),
-location(_x, _y, _z)
+location(_x, _y, _z),
+typeRef(InvType::getType(_typeID))
 {
     s_AllDenormalize[itemID] = MapDenormalizeRef(this, [](MapDenormalize * type)
     {
@@ -73,7 +75,7 @@ location(_x, _y, _z)
 
 MapDenormalize::~MapDenormalize() { }
 
-bool EVEStatic::loadMapDenormalize()
+bool EVEStatic::loadMapDenormalize(std::map<uint32, std::vector<uint32>> &systemGates)
 {
     DBQueryResult result;
     DBResultRow row;
@@ -103,6 +105,11 @@ bool EVEStatic::loadMapDenormalize()
         uint32 _celestialIndex = row.getIntNC(13);
         uint32 _orbitIndex = row.getIntNC(14);
         
+        if(_groupID == 10)
+        {
+            // This is a jump gate save the referance for the system.
+            systemGates[_solarSystemID].push_back(_itemID);
+        }
         new MapDenormalize(
                 _itemID,
                 _typeID,

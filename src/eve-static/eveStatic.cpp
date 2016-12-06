@@ -101,9 +101,21 @@ bool EVEStatic::loadStaticData()
     }
 
     //-------------------------------
+    std::map<uint32, std::vector<uint32>> systemGates;
+    std::map<uint32, std::vector<uint32>> regionSystems;
+
+    //-------------------------------
+    // Load the mapDenormalize table
+    //-------------------------------
+    if (!loadMapDenormalize(systemGates))
+    {
+        return false;
+    }
+
+    //-------------------------------
     // Load the mapSolarSystem table
     //-------------------------------
-    if (!loadMapSolarSystems())
+    if (!loadMapSolarSystems(regionSystems, systemGates))
     {
         return false;
     }
@@ -111,15 +123,15 @@ bool EVEStatic::loadStaticData()
     //-------------------------------
     // Load the mapRegions table
     //-------------------------------
-    if (!loadMapRegions())
+    if (!loadMapRegions(regionSystems))
     {
         return false;
     }
 
     //-------------------------------
-    // Load the mapDenormalize table
+    // Load the ramAssemblyLineTypes table
     //-------------------------------
-    if (!loadMapDenormalize())
+    if (!loadRamAssemblyLineTypes())
     {
         return false;
     }

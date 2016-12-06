@@ -29,9 +29,50 @@
 #include "math/Vector3D.h"
 #include <map>
 #include <memory>
+#include <vector>
 
 class MapSolarSystem;
+class MapJump;
 typedef std::shared_ptr<MapSolarSystem> MapSolarSystemRef;
+typedef std::shared_ptr<MapJump> MapJumpRef;
+
+class MapJump
+{
+public:
+    MapJump(
+            uint32 _gateID,
+            uint32 _destinationID
+            );
+
+    const uint32 gateID;
+    const uint32 destinationID;
+
+    static MapJumpRef getJump(uint32 gateID)
+    {
+        auto itr = s_AllJumps.find(gateID);
+        if (itr == s_AllJumps.end())
+        {
+            return std::shared_ptr<MapJump>();
+        }
+        return itr->second;
+    }
+
+    static bool getJump(uint32 gateID, MapJumpRef &gate)
+    {
+        auto itr = s_AllJumps.find(gateID);
+        if (itr == s_AllJumps.end())
+        {
+            gate.reset();
+            return false;
+        }
+        gate = itr->second;
+        return true;
+    }
+
+private:
+    static std::map<uint32, MapJumpRef> s_AllJumps;
+
+};
 
 class MapSolarSystem
 {
@@ -62,7 +103,8 @@ public:
                 uint32 _factionID,
                 double _radius,
                 uint32 _sunTypeID,
-                std::string _securityClass
+                std::string _securityClass,
+                std::vector<uint32> _gates
                    );
 
     const uint32 solarSystemID;
@@ -91,6 +133,9 @@ public:
     const double radius;
     const uint32 sunTypeID;
     const std::string securityClass;
+    
+    //
+    const std::vector<uint32> jumpGates;
 
     // Convenience values.
     const Vector3D location;
@@ -128,6 +173,18 @@ public:
         }
         system = itr->second;
         return true;
+    }
+
+    static bool getRegionSystems(uint32 regionID, std::vector<MapSolarSystemRef> &into)
+    {
+        for(auto item : s_AllSolarSystems)
+        {
+            MapSolarSystemRef ref = item.second;
+            if(ref->regionID == regionID)
+            {
+                into.push_back(ref);
+            }
+        }
     }
 
 private:

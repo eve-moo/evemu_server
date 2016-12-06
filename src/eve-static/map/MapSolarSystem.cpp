@@ -57,7 +57,8 @@ MapSolarSystem::MapSolarSystem(
                 uint32 _factionID,
                 double _radius,
                 uint32 _sunTypeID,
-                std::string _securityClass
+                std::string _securityClass,
+                std::vector<uint32> _gates
                                ) :
 solarSystemID(_solarSystemID),
 solarSystemName(_solarSystemName),
@@ -87,7 +88,8 @@ sunTypeID(_sunTypeID),
 securityClass(_securityClass),
 location(_x, _y, _z),
 locationMin(_xMin, _yMin, _zMin),
-locationMax(_xMax, _yMax, _zMax)
+locationMax(_xMax, _yMax, _zMax),
+jumpGates(_gates)
 {
     s_AllSolarSystems[solarSystemID] = MapSolarSystemRef(this, [](MapSolarSystem * type)
     {
@@ -97,7 +99,7 @@ locationMax(_xMax, _yMax, _zMax)
 
 MapSolarSystem::~MapSolarSystem() { }
 
-bool EVEStatic::loadMapSolarSystems()
+bool EVEStatic::loadMapSolarSystems(std::map<uint32, std::vector<uint32>> &regionSystems, std::map<uint32, std::vector<uint32>> &systemGates)
 {
     DBQueryResult result;
     DBResultRow row;
@@ -140,6 +142,8 @@ bool EVEStatic::loadMapSolarSystems()
         uint32 _sunTypeID = row.getIntNC(24);
         std::string _securityClass = row.getTextNC(25);
 
+        // Save the reference for the region.
+        regionSystems[_regionID].push_back(_solarSystemID);
         new MapSolarSystem(
                 _solarSystemID,
                 _solarSystemName,
@@ -166,7 +170,8 @@ bool EVEStatic::loadMapSolarSystems()
                 _factionID,
                 _radius,
                 _sunTypeID,
-                _securityClass
+                _securityClass,
+                systemGates[_solarSystemID]
                            );
     }
 

@@ -44,7 +44,8 @@ MapRegion::MapRegion(
                 double _yMax,
                 double _zMax,
                 uint32 _factionID,
-                double _radius
+                double _radius,
+                std::vector<uint32> _systems
                                ) :
 regionID(_regionID),
 regionName(_regionName),
@@ -61,7 +62,8 @@ factionID(_factionID),
 radius(_radius),
 location(_x, _y, _z),
 locationMin(_xMin, _yMin, _zMin),
-locationMax(_xMax, _yMax, _zMax)
+locationMax(_xMax, _yMax, _zMax),
+solarSystems(_systems)
 {
     s_AllRegions[regionID] = MapRegionRef(this, [](MapRegion * type)
     {
@@ -71,7 +73,7 @@ locationMax(_xMax, _yMax, _zMax)
 
 MapRegion::~MapRegion() { }
 
-bool EVEStatic::loadMapRegions()
+bool EVEStatic::loadMapRegions(std::map<uint32, std::vector<uint32>> &regionSystems)
 {
     DBQueryResult result;
     DBResultRow row;
@@ -113,7 +115,8 @@ bool EVEStatic::loadMapRegions()
                 _yMax,
                 _zMax,
                 _factionID,
-                _radius
+                _radius,
+                regionSystems[_regionID]
                            );
     }
 

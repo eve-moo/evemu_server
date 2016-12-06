@@ -67,9 +67,11 @@ protected:
     static bool loadStaStationTypes();
     static bool loadBlkShipTypes();
     static bool loadChrBloodlines();
-    static bool loadMapSolarSystems();
-    static bool loadMapRegions();
-    static bool loadMapDenormalize();
+    static bool loadMapSolarSystems(std::map<uint32, std::vector<uint32>> &regionSystems, std::map<uint32, std::vector<uint32>> &systemGates);
+    static bool loadMapRegions(std::map<uint32, std::vector<uint32>> &regionSystems);
+    static bool loadMapDenormalize(std::map<uint32, std::vector<uint32>> &systemGates);
+    static bool loadRamAssemblyLineTypes();
+    static bool loadRamInstallationTypeContents();
 
 private:
     static bool staticLoaded;
