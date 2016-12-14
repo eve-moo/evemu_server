@@ -28,8 +28,6 @@
 #include "inventory/InventoryDB.h"
 #include "inventory/ItemRef.h"
 
-class ItemGroup;
-
 class Inventory;
 
 class ItemFactory
@@ -181,19 +179,8 @@ public:
 
     static void UnsetUsingClient();
 
-    /*
-     * ID Authority Functions:
-     */
-    static uint32 GetNextEntityID();
-
 protected:
     static Client * m_pClient; // pointer to client currently using the ItemFactory, we do not own this
-
-    /*
-     * Member functions and variables:
-     */
-    // Groups:
-    static std::map<uint32, ItemGroup *> m_groups;
 
     // Types:
     // Items:
@@ -204,8 +191,6 @@ protected:
 
     static std::map<uint32, InventoryItemRef> m_items;
 
-	// ID Authority:
-	static uint32 m_nextEntityID;		// holds the next valid ID for in-memory only objects of EVEDB::invCategories::Entity
 };
 
 

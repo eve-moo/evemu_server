@@ -43,8 +43,6 @@ std::unique_lock<std::mutex> getItemLock()
     static std::mutex m_itemsMutex;
     return std::unique_lock<std::mutex>(m_itemsMutex);
 }
-// Initialize ID Authority variables:
-uint32 ItemFactory::m_nextEntityID = EVEMU_MINIMUM_ENTITY_ID;
 
 void ItemFactory::Shutdown()
 {
@@ -301,24 +299,4 @@ Client * ItemFactory::GetUsingClient()
 void ItemFactory::UnsetUsingClient()
 {
     m_pClient = NULL;
-}
-
-uint32 ItemFactory::GetNextEntityID()
-{
-	uint32 nextID = 0;
-
-	// This algorithm should be improved to search for reusable IDs that are no longer used,
-	// but for now, just implement a simple wrap-around method once IDs have reached the maximum value:
-	if( m_nextEntityID < EVEMU_MAXIMUM_ENTITY_ID )
-	{
-		nextID = m_nextEntityID;
-		m_nextEntityID++;
-	}
-	else
-	{
-		m_nextEntityID = EVEMU_MINIMUM_ENTITY_ID;
-		nextID = m_nextEntityID;
-	}
-
-	return nextID;
 }
