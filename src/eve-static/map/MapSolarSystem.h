@@ -27,6 +27,8 @@
 #define MAPSOLARSYSTEM_H
 
 #include "math/Vector3D.h"
+#include "MapJump.h"
+#include "MapDenormalize.h"
 #include <map>
 #include <memory>
 #include <vector>
@@ -96,7 +98,7 @@ public:
     
     //
     const std::vector<uint32> jumpGates;
-
+    
     // Convenience values.
     const Vector3D location;
     const Vector3D locationMin;
@@ -147,11 +149,28 @@ public:
         }
     }
 
+    void getStations(std::vector<uint32> &stations);
+
+    std::map<int, int> &getDistanceMap()
+    {
+        // Have we initialized this map?
+        if(distanceMap.size() == 0)
+        {
+            // No, get the map.
+            getDistanceMap(distanceMap);
+        }
+        return distanceMap;
+    }
+    void getSystemsInRange(int range, std::vector<int> &systems);
+
 private:
     MapSolarSystem(const MapSolarSystem& orig) = delete;
     virtual ~MapSolarSystem();
 
     static std::map<uint32, MapSolarSystemRef> s_AllSolarSystems;
+    
+    std::map<int, int> distanceMap;
+    void getDistanceMap(std::map<int, int> &distanceMap);
 };
 
 #endif /* MAPSOLARSYSTEM_H */

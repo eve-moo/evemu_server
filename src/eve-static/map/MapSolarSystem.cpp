@@ -177,3 +177,100 @@ bool EVEStatic::loadMapSolarSystems(std::map<uint32, std::vector<uint32>> &regio
 
     return true;
 }
+
+void MapSolarSystem::getStations(std::vector<uint32> &stations)
+{
+    std::vector<MapDenormalizeRef> systemObjects;
+    MapDenormalize::getSystemObjects(solarSystemID, systemObjects);
+    for(MapDenormalizeRef obj : systemObjects)
+    {
+        if(obj->typeRef->getCategoryID() == EVEItemCategories::Station)
+        {
+            stations.push_back(obj->itemID);
+        }
+    }
+}
+
+void MapSolarSystem::getDistanceMap(std::map<int, int> &distanceMap)
+{
+    distanceMap.clear();
+    std::vector<int> systems;
+    distanceMap[solarSystemID] = 0;
+    systems.push_back(solarSystemID);
+    while(systems.size() > 0)
+    {
+        std::vector<int>::iterator begin = systems.begin();
+        int _solarSystemID = *begin;
+        systems.erase(begin);
+        MapSolarSystemRef system = MapSolarSystem::getSystem(_solarSystemID);
+        if(system.get() == nullptr)
+        {
+            // Something went wrong, skip this system.
+            continue;
+        }
+        int distance = distanceMap[_solarSystemID];
+        for(int gateID : jumpGates)
+        {
+            MapJumpRef gate = MapJump::getJump(gateID);
+            if(gate.get() != nullptr)
+            {
+                // Something went wrong, skip this gate.
+                continue;
+            }
+            int destinationGateID = gate->destinationID;
+            MapDenormalizeRef destinationGate = MapDenormalize::getDenormalize(destinationGateID);
+            if(destinationGate.get() == nullptr)
+            {
+                // Something went wrong, skip this gate.
+                continue;
+            }
+            int destinationSystemID = destinationGate->solarSystemID;
+            if(distanceMap.find(destinationSystemID) != distanceMap.end())
+            {
+                // Was this route shorter?
+                if(distanceMap[destinationSystemID] > distance)
+                {
+                    // Yes, save the new distance.
+                    distanceMap[destinationSystemID] = distance;
+                    // Are we still waiting to map this system?
+                    if(std::find(systems.begin(), systems.end(), destinationSystemID) == systems.end())
+                    {
+                        // No, so we need to redo this system.
+                        systems.push_back(destinationSystemID);
+                    }
+                }
+                else
+                {
+                    //No, so skip it.
+                    continue;
+                }
+            }
+            else
+            {
+                // We have never reached this system before.
+                distanceMap[destinationSystemID] = distance;
+                systems.push_back(destinationSystemID);
+            }
+        }
+    }
+}
+
+void MapSolarSystem::getSystemsInRange(int range, std::vector<int> &systems)
+{
+    std::map<int, int> &distanceMap = getDistanceMap();
+    systems.clear();
+    for(auto entry : distanceMap)
+    {
+        if(entry.second > range)
+        {
+            // To far away, skip it.
+            continue;
+        }
+        int systemID = entry.first;
+        MapSolarSystemRef system = MapSolarSystem::getSystem(systemID);
+        if(system.get() != nullptr && system->regionID == regionID)
+        {
+            systems.push_back(systemID);
+        }
+    }
+}
