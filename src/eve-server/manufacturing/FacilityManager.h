@@ -20,30 +20,31 @@
     Place - Suite 330, Boston, MA 02111-1307, USA, or go to
     http://www.gnu.org/copyleft/lesser.txt.
     ------------------------------------------------------------------------------------
-    Author:        Zhur
+    Author:        eve-moo
 */
 
+#ifndef FACILITYMANAGER_H
+#define FACILITYMANAGER_H
 
-#ifndef __STATIONDB_H_INCL__
-#define __STATIONDB_H_INCL__
+#include "eve-compat.h"
+#include "PyService.h"
 
-#include "ServiceDB.h"
-
-class PyRep;
-
-class StationDB : public ServiceDB
+class FacilityManager
+: public PyService
 {
-protected:
-    StationDB() = delete;
-
 public:
-    static PyPackedRow *GetSolarSystem(uint32 ssid);
-    static PyRep *DoGetStation(uint32 ssid);
-    static PyRep *GetStationItemBits(uint32 sid);
-    
-    static bool getStationAssemblyLineTypes(uint32 stationID, std::vector<uint32> &into);
+    FacilityManager();
+    virtual ~FacilityManager();
 
-protected:
+private:
+    class Dispatcher;
+
+    PyCallable_DECL_CALL(GetFacility)
+    PyCallable_DECL_CALL(GetFacilities)
+    PyCallable_DECL_CALL(GetFacilityLocations)
+    PyCallable_DECL_CALL(GetMaxActivityModifiers)
+
 };
 
-#endif
+#endif /* FACILITYMANAGER_H */
+

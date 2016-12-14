@@ -113,6 +113,7 @@ trapfpe()
 #include "mail/NotificationMgrService.h"
 // manufacturing services
 #include "manufacturing/BlueprintManager.h"
+#include "manufacturing/FacilityManager.h"
 #include "manufacturing/FactoryService.h"
 #include "manufacturing/RamProxyService.h"
 // map services
@@ -345,6 +346,7 @@ int main( int argc, char* argv[] )
     PyServiceMgr::RegisterService(new DungeonExplorationMgrService());
     PyServiceMgr::RegisterService(new DungeonService());
     PyServiceMgr::RegisterService(new FactionWarMgrService());
+    PyServiceMgr::RegisterService(new FacilityManager());
     PyServiceMgr::RegisterService(new FactoryService());
     PyServiceMgr::RegisterService(new FleetManager());
     PyServiceMgr::RegisterService(new FleetObject());

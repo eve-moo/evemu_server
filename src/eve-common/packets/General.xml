@@ -432,6 +432,12 @@
         </tupleInline>
     </elementDef>
 
+    <elementDef name="Call_SingleLongArg">
+        <tupleInline>
+            <long name="arg" />
+        </tupleInline>
+    </elementDef>
+
     <elementDef name="Call_SingleRealArg">
         <tupleInline>
             <real name="arg" />
@@ -442,6 +448,13 @@
         <tupleInline>
             <int name="arg1" />
             <int name="arg2" />
+        </tupleInline>
+    </elementDef>
+
+    <elementDef name="Call_TwoLongArgs">
+        <tupleInline>
+            <long name="arg1" />
+            <long name="arg2" />
         </tupleInline>
     </elementDef>
 

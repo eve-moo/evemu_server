@@ -425,3 +425,25 @@ PyRep *StationDB::GetStationItemBits(uint32 sid) {
 
     return result;
 }
+
+bool StationDB::getStationAssemblyLineTypes(uint32 stationID, std::vector<uint32> &into)
+{
+    DBQueryResult res;
+
+    if(!DBcore::RunQuery(res,
+        "SELECT assemblyLineTypeID FROM ramAssemblyLineStations"
+        " WHERE stationID=%u", stationID
+    ))
+    {
+        _log(SERVICE__ERROR, "Error in GetSolarSystem query: %s", res.error.c_str());
+        return false;
+    }
+
+    DBResultRow row;
+    while(res.GetRow(row))
+    {
+        into.push_back(row.getIntNC(0));
+    }
+
+    return true;
+}

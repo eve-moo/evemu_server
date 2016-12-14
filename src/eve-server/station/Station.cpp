@@ -28,6 +28,9 @@
 #include "inventory/AttributeEnum.h"
 #include "ship/DestinyManager.h"
 #include "station/Station.h"
+#include "map/MapSolarSystem.h"
+#include "StationDB.h"
+#include "ram/RamAssemblyLineType.h"
 
 /*
  * StationData
@@ -75,6 +78,7 @@ m_stationType(StaStationType::getType(_type->typeID)),
   m_reprocessingStationsTake(_stData.reprocessingStationsTake),
   m_reprocessingHangarFlag(_stData.reprocessingHangarFlag)
 {
+    StationDB::getStationAssemblyLineTypes(m_itemID, m_assemblyLineTypeIDs);
 }
 
 StationRef Station::Load(uint32 stationID)
@@ -125,6 +129,107 @@ uint32 Station::_Spawn(
     }
 
     return stationID;
+}
+
+PyDict *Station::getFacilityDict()
+{
+    MapSolarSystemRef system = MapSolarSystem::getSystem(solarSystemID());
+    uint32 owner = ownerID();
+
+    PyDict *dogmaMods = new PyDict();
+    PyDict *activities = new PyDict();
+    PyDict *facilityDict = new PyDict();
+
+    facilityDict->SetItem(new PyString("dogmaModifiers"), dogmaMods);
+    facilityDict->SetItem(new PyString("activities"), activities);
+    // TO-DO: get actual tax.
+    facilityDict->SetItem(new PyString("tax"), new PyFloat(0.1));
+    // TO-DO: I've only seen serviceAccess on citadels.
+    // These are PyInt, PyBool key value pairs.  only keys 20-24 and 30-34 have been observed.
+    facilityDict->SetItem(new PyString("serviceAccess"), new PyDict());
+    facilityDict->SetItem(new PyString("ownerID"), new PyInt(owner));
+    facilityDict->SetItem(new PyString("typeID"), new PyInt(typeID()));
+    facilityDict->SetItem(new PyString("facilityID"), new PyLong(itemID()));
+    facilityDict->SetItem(new PyString("regionID"), new PyInt(system->regionID));
+    facilityDict->SetItem(new PyString("allianceID"), new PyNone());
+    facilityDict->SetItem(new PyString("online"), new PyBool(true));
+    facilityDict->SetItem(new PyString("solarSystemID"), new PyInt(system->solarSystemID));
+
+    for(uint32 lineTypeID : m_assemblyLineTypeIDs)
+    {
+        RamAssemblyLineTypeRef assemblyLine = RamAssemblyLineType::getType(lineTypeID);
+        if(assemblyLine.get() != nullptr)
+        {
+            // activity tuple
+            PyList *timeModifiers = new PyList();
+            PyList *materialModifiers = new PyList();
+            PyList *costModifiers = new PyList();
+            BuiltinSet *categories = new BuiltinSet();
+            BuiltinSet *groups = new BuiltinSet();
+            PyTuple *activity = new PyTuple(5);
+            activity->items.push_back(timeModifiers);
+            activity->items.push_back(materialModifiers);
+            activity->items.push_back(costModifiers);
+            activity->items.push_back(categories);
+            activity->items.push_back(groups);
+            activities->SetItem(new PyInt(assemblyLine->activityID), activity);
+            // Get system modifiers.
+            // TO-DO: get a real system cost modifier, for now fake a 1% cost.
+            PyFloat *amount = new PyFloat(0.01);
+            PyRep *categoryID = new PyNone();
+            PyRep *groupID = new PyNone();
+            PyRep *reference = new PyInt(FacilityReference::SYSTEM);
+            costModifiers->AddItem(new_tuple(amount, categoryID, groupID, reference));
+            // Get categoryIDs and modifiers.
+            for(auto detail : assemblyLine->categoryDetails)
+            {
+                categories->addValue(new PyInt(detail.first));
+                if(detail.second->timeMultiplier != 1.0)
+                {
+                    timeModifiers->AddItem(detail.second->getCostModifier());
+                }
+                if(detail.second->materialMultiplier != 1.0)
+                {
+                    materialModifiers->AddItem(detail.second->getCostModifier());
+                }
+                if(detail.second->costMultiplier != 1.0)
+                {
+                    costModifiers->AddItem(detail.second->getCostModifier());
+                }
+            }
+            // Get groupIDs and modifiers.
+            for(auto detail : assemblyLine->groupDetails)
+            {
+                groups->addValue(new PyInt(detail.first));
+                if(detail.second->timeMultiplier != 1.0)
+                {
+                    timeModifiers->AddItem(detail.second->getCostModifier());
+                }
+                if(detail.second->materialMultiplier != 1.0)
+                {
+                    materialModifiers->AddItem(detail.second->getCostModifier());
+                }
+                if(detail.second->costMultiplier != 1.0)
+                {
+                    costModifiers->AddItem(detail.second->getCostModifier());
+                }
+            }
+            // Get facility modifier.
+            if(assemblyLine->baseTimeMultiplier != 1.0)
+            {
+                timeModifiers->AddItem(assemblyLine->getCostModifier());
+            }
+            if(assemblyLine->baseMaterialMultiplier != 1.0)
+            {
+                materialModifiers->AddItem(assemblyLine->getCostModifier());
+            }
+            if(assemblyLine->baseCostMultiplier != 1.0)
+            {
+                costModifiers->AddItem(assemblyLine->getCostModifier());
+            }
+        }
+    }
+    return facilityDict;
 }
 
 using namespace Destiny;

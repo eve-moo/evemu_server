@@ -29,6 +29,7 @@
 #include "sta/StaStationType.h"
 #include "inventory/Inventory.h"
 #include "system/Celestial.h"
+#include "ram/RamAssemblyLineType.h"
 
 /**
  * Data container for station.
@@ -94,6 +95,8 @@ public:
     {
         return m_stationType;
     }
+
+    PyDict *getFacilityDict();
 
 protected:
     Station(
@@ -169,6 +172,8 @@ protected:
     double m_reprocessingEfficiency;
     double m_reprocessingStationsTake;
     EVEItemFlags m_reprocessingHangarFlag;
+
+    std::vector<uint32> m_assemblyLineTypeIDs;
 };
 
 
