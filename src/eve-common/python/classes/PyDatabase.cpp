@@ -113,7 +113,7 @@ void DBRowDescriptor::dump(std::ostringstream &ss, const std::string &pfx) const
     std::string pfx1(pfx + "    ");
     std::string pfx2(pfx1 + "    ");
     ss << pfx << "[DBRowDescriptor]" << std::endl;
-    for(int i = 0; i < ColumnCount(); i++)
+    for(int i = 0; i < (int)ColumnCount(); i++)
     {
         ss << pfx1 << "['" << GetColumnName(i) << "' [" << DBTYPE_NAME[GetColumnType(i)] <<"] ]" << std::endl;
     }
@@ -190,7 +190,7 @@ void CRowSet::dump(std::ostringstream &ss, const std::string &pfx) const
     }
     desc->dump(ss, pfx1);
     ss << pfx1 << "Rows:" << std::endl;
-    for(int i = 0; i < GetRowCount(); i++)
+    for(int i = 0; i < (int)GetRowCount(); i++)
     {
         PyPackedRow *row = GetRow(i);
         if(row != nullptr)

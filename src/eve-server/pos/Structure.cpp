@@ -155,6 +155,7 @@ bool Structure::ValidateAddItem(EVEItemFlags flag, InventoryItemRef item) const
         }
         return true;
     }
+    return false;
 }
 
 void Structure::AddItem(InventoryItemRef item)

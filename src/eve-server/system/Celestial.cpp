@@ -212,7 +212,7 @@ void CelestialEntity::EncodeDestiny( Buffer& into ) const
     const Vector3D& position = GetPosition();
     const std::string itemName( GetName() );
 
-    /*if(m_orbitingID != 0) {
+    if(m_orbitingID != 0) {
         #pragma pack(1)
         struct AddBall_Orbit {
             BallHeader head;
@@ -257,7 +257,7 @@ void CelestialEntity::EncodeDestiny( Buffer& into ) const
 
         item->name.name_len = slen;    // in number of unicode chars
         //strcpy_fake_unicode(item->name.name, GetName());
-    } else *//*{
+    } else {
         BallHeader head;
         head.entityID = GetID();
         head.mode = Destiny::DSTBALL_STOP;

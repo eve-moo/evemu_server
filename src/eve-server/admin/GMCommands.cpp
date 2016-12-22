@@ -262,7 +262,6 @@ PyResult Command_tr( Client* who, const Seperator& args )
 
 	// Argument Discovery
 	Client * p_targetClient = NULL;
-	SystemEntity * destinationEntity = NULL;
 	uint32 solarSystemID = 0;
 	Vector3D destinationPoint(0,0,0);
 	uint32 argsCount = args.argCount();
@@ -1289,24 +1288,33 @@ PyResult Command_repairmodules( Client* who, const Seperator& args )
 
 PyResult Command_unspawn( Client* who, const Seperator& args )
 {
-    uint32 entityID = 0;
+    //uint32 entityID = 0;
     uint32 itemID = 0;
 
     if( (args.argCount() < 3) || (args.argCount() > 3) )
+    {
         throw PyException( MakeCustomError("Correct Usage: /unspawn (entityID) (itemID), and for now (entityID) is unused, so just type 0, and use the itemID from the entity table for (itemID)") );
+    }
 
     if( !(args.isNumber( 1 )) )
+    {
         throw PyException( MakeCustomError( "Argument 1 should be an item entity ID" ) );
+    }
 
     if( !(args.isNumber( 2 )) )
+    {
         throw PyException( MakeCustomError( "Argument 2 should be an item item ID" ) );
+    }
 
-    entityID = atoi( args.arg( 1 ).c_str() );
+    //entityID = atoi( args.arg( 1 ).c_str() );
     itemID = atoi( args.arg( 2 ).c_str() );
 
     if( !who->IsInSpace() )
+    {
         throw PyException( MakeCustomError( "You must be in space to unspawn things." ) );
+    }
 
+        
     // Search for the itemRef for itemID:
     InventoryItemRef itemRef = ItemFactory::GetItem(itemID);
     SystemEntity * entityRef = who->System()->get( itemID );
@@ -1331,21 +1339,25 @@ PyResult Command_dogma( Client* who, const Seperator& args )
 {
     //"dogma" "140019878" "agility" "=" "0.2"
 
-    if( !(args.argCount() == 5) ) {
+    if( !(args.argCount() == 5) )
+    {
         throw PyException( MakeCustomError("Correct Usage: /dogma [itemID] [attributeName] = [value]") );
     }
 
-    if( !args.isNumber( 1 ) ){
+    if( !args.isNumber( 1 ) )
+    {
         throw PyException( MakeCustomError("Invalid itemID. \n Correct Usage: /dogma [itemID] [attributeName] = [value]") );
     }
     uint32 itemID = atoi( args.arg( 1 ).c_str() );
 
-    if( args.isNumber( 2 ) ) {
+    if( args.isNumber( 2 ) )
+    {
         throw PyException( MakeCustomError("Invalid attributeName. \n Correct Usage: /dogma [itemID] [attributeName] = [value]") );
     }
     const char *attributeName = args.arg( 2 ).c_str();
 
-    if( !args.isNumber( 4 ) ){
+    if( !args.isNumber( 4 ) )
+    {
         throw PyException( MakeCustomError("Invalid attribute value. \n Correct Usage: /dogma [itemID] [attributeName] = [value]") );
     }
     double attributeValue = atof( args.arg( 4 ).c_str() );

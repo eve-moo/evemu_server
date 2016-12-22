@@ -222,7 +222,7 @@ void Asteroid::EncodeDestiny( Buffer& into ) const
     utf8::utf8to16( itemName.begin(), itemName.end(), name );
 }
 
-/*PyDict *Asteroid::MakeSlimItem() const {
+PyDict *Asteroid::MakeSlimItem() const {
     PyDict *slim = new PyDict();
     slim->add("typeID", new PyInt(m_typeID));
     slim->add("ownerID", new PyInt(500021));    //no idea.

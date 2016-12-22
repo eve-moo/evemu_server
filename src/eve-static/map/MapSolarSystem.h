@@ -137,7 +137,7 @@ public:
         return true;
     }
 
-    static bool getRegionSystems(uint32 regionID, std::vector<MapSolarSystemRef> &into)
+    static void getRegionSystems(uint32 regionID, std::vector<MapSolarSystemRef> &into)
     {
         for(auto item : s_AllSolarSystems)
         {

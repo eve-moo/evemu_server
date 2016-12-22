@@ -199,11 +199,11 @@ PyResult BookmarkService::Handle_BookmarkLocation(PyCallArgs &call)
         locationID = call.client->GetLocationID();       // locationID of bm is current sol system
         itemID = locationID;      //  locationID = itemID for coord bm.  shows jumps, s/c/r in bm window, green in system
     }else if (typeID == 2502){  // typeCheck is not player-owned...maybe char is in station.  make station as bm
-        point.x, point.y, point.z = 0, 0, 0;      // no x,y,z location.  bm type is station
+        point.set(0, 0, 0);      // no x,y,z location.  bm type is station
         itemID =  pyAs(Int, call.tuple->GetItem( 0 ))->value();  // this is stationID
         locationID = call.client->GetSystemID();       // get sol system of current station
     }else{      // char is passing systemID from map.  char is marking a solar systemID for bm
-        point.x, point.y, point.z = 0, 0, 0;      // no x,y,z location.  bm type is solar system
+        point.set(0, 0, 0);      // no x,y,z location.  bm type is solar system
         locationID = pyAs(Int, call.tuple->GetItem( 0 ))->value();  // this is systemID from map
         itemID = locationID;      //  locationID = itemID for coord bm.  shows jumps, s/c/r in bm window, green in system
     }
@@ -358,7 +358,7 @@ PyResult BookmarkService::Handle_UpdateBookmark(PyCallArgs &call)       // worki
     double z;
     uint32 locationID;
     uint32 creatorID;
-    uint32 folderID;
+    uint32 folderID = 0;
     std::string note;
     std::string newNote;
 

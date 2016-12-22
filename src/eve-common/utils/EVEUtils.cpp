@@ -47,7 +47,9 @@ UserError* MakeCustomError( const char* fmt, ... )
     va_start( va, fmt );
 
     char* str = NULL;
-    vasprintf( &str, fmt, va );
+    if(vasprintf( &str, fmt, va ) == -1)
+    {
+    }
     assert( str );
 
     va_end( va );
@@ -146,6 +148,9 @@ bool DBTYPE_IsCompatible( DBTYPE type, const PyRep* rep )
 
         case DBTYPE_WSTR:
             return pyIs(WString, rep);
+            
+        case DBTYPE_ERROR:
+            return false;
     }
 
     return false;

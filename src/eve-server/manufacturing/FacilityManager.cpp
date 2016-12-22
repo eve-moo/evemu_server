@@ -112,23 +112,23 @@ PyResult FacilityManager::Handle_GetFacilityLocations(PyCallArgs &call)
         return NULL;
     }
     uint32 facilityID = arg.arg1; // may be PyLong
-    uint32 ownerID = arg.arg2;
+    //uint32 ownerID = arg.arg2;
 
     PyList *locations = new PyList();
     InventoryItemRef item = ItemFactory::GetItem(facilityID);
     if(item.get() != nullptr)
     {
-      PyDict *dict = new PyDict();
-      PyTuple *token = new_tuple(new PyToken("industry.job.Location"));
-      dict->SetItem("itemID", new PyLong(item->itemID()));
-      dict->SetItem("typeID", new PyLong(item->typeID()));
-      // May be other values for corp?
-      dict->SetItem("flagID", new PyInt(4));
-      dict->SetItem("canTake", new PyBool(true));
-      dict->SetItem("ownerID", new PyLong(item->ownerID()));
-      dict->SetItem("canView", new PyBool(true));
-      PyObjectEx_Type2 *facility = new PyObjectEx_Type2(token, dict);
-      locations->AddItem(facility);
+        PyDict *dict = new PyDict();
+        PyTuple *token = new_tuple(new PyToken("industry.job.Location"));
+        dict->SetItem("itemID", new PyLong(item->itemID()));
+        dict->SetItem("typeID", new PyLong(item->typeID()));
+        // May be other values for corp?
+        dict->SetItem("flagID", new PyInt(4));
+        dict->SetItem("canTake", new PyBool(true));
+        dict->SetItem("ownerID", new PyLong(item->ownerID()));
+        dict->SetItem("canView", new PyBool(true));
+        PyObjectEx_Type2 *facility = new PyObjectEx_Type2(token, dict);
+        locations->AddItem(facility);
     }
     
     return locations;
@@ -136,6 +136,7 @@ PyResult FacilityManager::Handle_GetFacilityLocations(PyCallArgs &call)
 
 PyResult FacilityManager::Handle_GetMaxActivityModifiers(PyCallArgs &call)
 {
+    SysLog::Debug( "FacilityManager", "Called GetMaxActivityModifiers stub." );
     PyDict *mods = new PyDict();
     //double modifier = 0.1;
     //int activityID = 1;

@@ -152,7 +152,7 @@ public:
 
     InvTypeRef productType()
     {
-        InvType::getType(m_blueprintType->productTypeID);
+        return InvType::getType(m_blueprintType->productTypeID);
     }
     /*
      * Primary public packet builders:

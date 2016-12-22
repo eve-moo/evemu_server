@@ -675,7 +675,7 @@ PyTuple * DBResultToTupleColumnList(const DBQueryResult &result)
 {
     PyTuple *tupleList = new PyTuple(result.ColumnCount());
 
-    for(int i = 0; i < result.ColumnCount(); i++)
+    for(unsigned int i = 0; i < result.ColumnCount(); i++)
     {
         PyTuple* col = new PyTuple(2);
         col->SetItem(0, new PyString(result.ColumnName(i)));

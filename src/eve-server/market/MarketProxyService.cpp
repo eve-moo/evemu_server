@@ -397,7 +397,7 @@ PyResult MarketProxyService::Handle_PlaceCharOrder(PyCallArgs &call) {
         }
 
         if((item->singleton() && args.quantity != 1)
-           || item->quantity() < (uint32)args.quantity ) {
+           || item->quantity() < (int32)args.quantity ) {
             codelog(MARKET__ERROR, "%s: Tried to sell %d of item %d which has qty %d singleton %d", call.client->GetName(), args.quantity, item->itemID(), item->quantity(), item->singleton());
             call.client->SendErrorMsg("You cannot sell more than you have.");
             return NULL;
@@ -438,7 +438,7 @@ PyResult MarketProxyService::Handle_PlaceCharOrder(PyCallArgs &call) {
         //TODO: take broker cost.
 
         //take item from seller
-        if(item->quantity() == (uint32)args.quantity) {
+        if(item->quantity() == (int32)args.quantity) {
             item->Delete();
         } else {
             //update the item.
@@ -697,7 +697,7 @@ void MarketProxyService::_ExecuteBuyOrder(uint32 buy_order_id, uint32 stationID,
         codelog(MARKET__WARNING, "%s: Selling an item to ourself... this may not work...", seller->GetName());
     }
 
-    if(item->singleton() || item->quantity() == quantity) {
+    if(item->singleton() || item->quantity() == (int)quantity) {
         //entire item is moving...
         if(item->locationID() != stationID) {
             //do not notify for this move, the owner change will take care of everything for us.
@@ -725,7 +725,7 @@ void MarketProxyService::_ExecuteBuyOrder(uint32 buy_order_id, uint32 stationID,
     seller->AddBalance(money);
     //TODO: record this in the wallet history.
 
-    Client *buyer = EntityList::FindCharacter(orderOwnerID);
+    //Client *buyer = EntityList::FindCharacter(orderOwnerID);
     if(quantity == qtyReq) {
         _log(MARKET__TRACE, "%s: Completely satisfied order %u, deleting.", seller->GetName(), buy_order_id);
         PyRep* order = MarketDB::GetOrderRow(buy_order_id);

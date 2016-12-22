@@ -649,23 +649,6 @@ bool InventoryDB::GetCorpMemberInfo(uint32 characterID, CorpMemberInfo &into) {
 #define _VoN(app, v) \
     ((const char *)(app.IsNull_##v() ? "NULL" : _ToStr(app.Get_##v()).c_str()))
 
-/* a 32 bits unsigned integer can be max 0xFFFFFFFF.
-   this results in a text string: '4294967295' which
-   is 10 long. Including the '\0' at the end of the
-   string it is max 11.
- */
-static std::string _ToStr(uint32 v) {
-    char buf[11];
-    snprintf(buf, 11, "%u", v);
-    return(buf);
-}
-
-static std::string _ToStr(double v) {
-    char buf[32];
-    snprintf(buf, 32, "%.13f", v);
-    return(buf);
-}
-
 bool InventoryDB::NewCharacter(uint32 characterID, const CharacterData &data, const CorpMemberInfo &corpData) {
     DBerror err;
 
@@ -1368,49 +1351,47 @@ bool InventoryDB::GetModulePowerSlotByTypeID(uint32 typeID, uint32 &into)
 bool InventoryDB::GetOpenPowerSlots(uint32 slotType, ShipRef ship, uint32 &into)
 {
     DBQueryResult res;
-    uint32 attributeID = 0;
-    uint32 firstFlag;
+    uint32 firstFlag = 0;
     DBResultRow row;
-    uint32 slotsOnShip;
+    uint32 slotsOnShip = 0;
 
     if( slotType == 0 )
     {
         //TODO: Implement Rigs
-        attributeID = 1137;
         firstFlag = 92; //rigslot0
         //slotsOnShip = ship->rigSlots();
         slotsOnShip = static_cast<uint32>(ship->getAttribute(AttrRigSlots).get_int());
     }
     else if( slotType == 1 )
     {
-        attributeID = 12;
         firstFlag = 11; //lowslot0
         //slotsOnShip = ship->lowSlots();
         slotsOnShip = static_cast<uint32>(ship->getAttribute(AttrLowSlots).get_int());
     }
     else if( slotType == 2 )
     {
-        attributeID = 13;
         firstFlag = 19; //medslot0
         //slotsOnShip = ship->medSlots();
         slotsOnShip = static_cast<uint32>(ship->getAttribute(AttrMedSlots).get_int());
     }
     else if( slotType == 3 )
     {
-        attributeID = 14;
         firstFlag = 27; //hislot0
         //slotsOnShip = ship->hiSlots();
         slotsOnShip = static_cast<uint32>(ship->getAttribute(AttrHiSlots).get_int());
     }
 
-    for( uint32 flag = firstFlag; flag < (firstFlag + slotsOnShip); flag++ )
+    if(firstFlag != 0)
     {
-        // this is far from efficient as we are iterating trough all of the ships item slots.... every iteration... so this will be slow when you got loads of players
-        // with a single free slot.
-        if(ship->IsEmptyByFlag((EVEItemFlags)flag))
+        for( uint32 flag = firstFlag; flag < (firstFlag + slotsOnShip); flag++ )
         {
-            into = flag;
-            return true;
+            // this is far from efficient as we are iterating trough all of the ships item slots.... every iteration... so this will be slow when you got loads of players
+            // with a single free slot.
+            if(ship->IsEmptyByFlag((EVEItemFlags)flag))
+            {
+                into = flag;
+                return true;
+            }
         }
     }
 

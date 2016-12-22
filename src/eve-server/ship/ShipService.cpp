@@ -438,7 +438,6 @@ PyResult ShipBound::Handle_Drop(PyCallArgs &call) {
     Call_SingleIntList successfully_dropped;
 
     std::vector< std::pair< uint32, uint32 > > toDropList;
-    uint32 contID = 0;
 
     //Get location of our ship
     Vector3D location(call.client->GetPosition());
@@ -455,7 +454,6 @@ PyResult ShipBound::Handle_Drop(PyCallArgs &call) {
     PyTuple * tuple = call.tuple;
     PyList * PyToDropList;
     uint32 ownerID;
-    bool unknown;
     bool d3 = tuple->items.size() == 3;
 
     if(!drop3args.Decode(&call.tuple))
@@ -476,7 +474,6 @@ PyResult ShipBound::Handle_Drop(PyCallArgs &call) {
 
         PyToDropList = drop3args.toDrop;
         ownerID = (uint32)(drop3args.ownerID);
-        unknown = drop3args.unknown;
     }
     else
     {
@@ -486,11 +483,11 @@ PyResult ShipBound::Handle_Drop(PyCallArgs &call) {
     }
 
     uint32 itemID;
-    uint32 itemQuantity;
+    //uint32 itemQuantity;
     for( uint32 i=0; i<PyToDropList->size(); i++ )
     {
         itemID = (uint32)(pyAs(Int, pyAs(Tuple, PyToDropList->items.at(i))->items.at(0))->value());
-        itemQuantity = (uint32)(pyAs(Int, pyAs(Tuple, PyToDropList->items.at(i))->items.at(1))->value());
+        //itemQuantity = (uint32)(pyAs(Int, pyAs(Tuple, PyToDropList->items.at(i))->items.at(1))->value());
 
         cargoItem = ItemFactory::GetItem(itemID);
         if( !cargoItem )

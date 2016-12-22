@@ -58,7 +58,7 @@ void DGM_Types_to_Wrecks_Table::_Populate()
 
     //counter
 	uint32 total_wreck_count = 0;
-	uint32 error_count = 0;
+	//uint32 error_count = 0;
 
 	//go through and populate each effect
     DBResultRow row;

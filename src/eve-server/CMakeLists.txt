@@ -389,6 +389,7 @@ SET( ship_modules_INCLUDE
 SET( ship_modules_SOURCE
      "${TARGET_SOURCE_DIR}/ship/modules/ActiveModules.cpp"
      "${TARGET_SOURCE_DIR}/ship/modules/ModuleDB.cpp"
+     "${TARGET_SOURCE_DIR}/ship/modules/ModuleDefs.cpp"
      "${TARGET_SOURCE_DIR}/ship/modules/ModuleEffects.cpp"
      "${TARGET_SOURCE_DIR}/ship/modules/Modules.cpp"
      "${TARGET_SOURCE_DIR}/ship/modules/armor_modules/ArmorRepairer.cpp"

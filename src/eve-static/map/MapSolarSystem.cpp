@@ -86,10 +86,10 @@ factionID(_factionID),
 radius(_radius),
 sunTypeID(_sunTypeID),
 securityClass(_securityClass),
+jumpGates(_gates),
 location(_x, _y, _z),
 locationMin(_xMin, _yMin, _zMin),
-locationMax(_xMax, _yMax, _zMax),
-jumpGates(_gates)
+locationMax(_xMax, _yMax, _zMax)
 {
     s_AllSolarSystems[solarSystemID] = MapSolarSystemRef(this, [](MapSolarSystem * type)
     {

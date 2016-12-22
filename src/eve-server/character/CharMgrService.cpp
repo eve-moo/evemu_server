@@ -150,7 +150,7 @@ PyResult CharMgrService::Handle_AddToBounty( PyCallArgs& call ) {
         SysLog::Error("CharMgrService", "AddToBounty Error decoding arguments for Call_TwoIntegerArgs");
         return NULL;
     }
-    if(call.client->GetCharacterID() == args.arg1) {
+    if(call.client->GetCharacterID() == (uint32)args.arg1) {
         SysLog::Error("CharMgrService", "AddToBounty: Char %u tried to add bounty to themself", args.arg1);
         call.client->SendNotifyMsg("You cannot add a bounty to yourself.");
         return NULL;

@@ -95,7 +95,7 @@ PyResult MailMgrService::Handle_PrimeOwners(PyCallArgs &call)
 
 PyResult MailMgrService::Handle_SyncMail(PyCallArgs &call)
 {
-    int firstId = 0, secondId = 0;
+    //int firstId = 0, secondId = 0;
 
     if (call.tuple->size() == 2 && !pyIs(None, call.tuple->GetItem(0)) && !pyIs(None, call.tuple->GetItem(1)))
     {
@@ -107,7 +107,7 @@ PyResult MailMgrService::Handle_SyncMail(PyCallArgs &call)
         }
 
         // referring to a mail id range
-        int firstId = args.arg1, secondId = args.arg2;
+        //int firstId = args.arg1, secondId = args.arg2;
     }
 
     PyDict* dummy = new PyDict;
@@ -257,7 +257,7 @@ PyResult MailMgrService::Handle_MarkAsReadByLabel(PyCallArgs &call)
         return NULL;
     }
 
-    int labelId = args.arg;
+    //int labelId = args.arg;
 
     return NULL;
 }
@@ -271,7 +271,7 @@ PyResult MailMgrService::Handle_MarkAsReadByList(PyCallArgs &call)
         return NULL;
     }
 
-    int listId = args.arg;
+    //int listId = args.arg;
 
     return NULL;
 }
@@ -301,7 +301,7 @@ PyResult MailMgrService::Handle_MarkAsUnreadByLabel(PyCallArgs &call)
         return NULL;
     }
 
-    int labelId = args.arg;
+    //int labelId = args.arg;
 
     return NULL;
 }
@@ -315,7 +315,7 @@ PyResult MailMgrService::Handle_MarkAsUnreadByList(PyCallArgs &call)
         return NULL;
     }
 
-    int listId = args.arg;
+    //int listId = args.arg;
 
     return NULL;
 }
@@ -368,7 +368,7 @@ PyResult MailMgrService::Handle_MoveToTrashByLabel(PyCallArgs &call)
         return NULL;
     }
 
-    int labelId = args.arg;
+    //int labelId = args.arg;
 
     return NULL;
 }
@@ -382,7 +382,7 @@ PyResult MailMgrService::Handle_MoveToTrashByList(PyCallArgs &call)
         return NULL;
     }
 
-    int listId = args.arg;
+    //int listId = args.arg;
 
     return NULL;
 }

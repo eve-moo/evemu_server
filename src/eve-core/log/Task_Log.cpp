@@ -61,18 +61,18 @@ const char* const Task_Log::COLOR_TABLE[ COLOR_COUNT ] =
 #endif /* !HAVE_WINDOWS_H */
 
 Task_Log::Task_Log()
-: mLogfile( NULL ),
-  mTime( 0 ),
-  mLogFilename( "" )
+: mLogFilename( "" ),
+  mLogfile( NULL ),
+  mTime( 0 )
 {
-	assert(false);		// DO NOT EVER call the empty parameter constructor!
+    assert(false);		// DO NOT EVER call the empty parameter constructor!
     m_initialized = false;
 }
 
 Task_Log::Task_Log(std::string logPath, std::string logSubdirectory, std::string logFilename)
-: mLogfile( NULL ),
-  mTime( 0 ),
-  mLogFilename( "" )
+: mLogFilename( "" ),
+  mLogfile( NULL ),
+  mTime( 0 )
 {
     // use default logpath if logPath is empty
     if( logPath.empty() )

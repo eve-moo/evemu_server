@@ -465,6 +465,7 @@ bool MarshalStream::VisitPackedRow( const PyPackedRow* rep )
             case DBTYPE_BYTES:
             case DBTYPE_STR:
             case DBTYPE_WSTR:
+            case DBTYPE_ERROR:
             {
                 /* incorrect implemented so we make sure we crash here */
                 assert( false );

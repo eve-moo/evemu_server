@@ -88,7 +88,7 @@ PyResult BlueprintManager::Handle_GetBlueprintDataByOwner(PyCallArgs &call) {
             // We count ALL BPs even if they are not in our location.
             uint32 locID = b->locationID();
             facilityMap[locID]++;
-            if(locationID != 0 && locID != locationID)
+            if(locationID != 0 && (int)locID != locationID)
             {
                 // We are looking for only the BPs in a specific location.
                 // This one is not there!

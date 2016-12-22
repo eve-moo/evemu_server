@@ -314,7 +314,7 @@ PyResult PlanetMgrBound::Handle_UserUpdateNetwork(PyCallArgs &call) {
         return NULL;
     }
 
-    for(int i = 0; i < uuncl.commandList->size(); i++) {
+    for(unsigned int i = 0; i < uuncl.commandList->size(); i++) {
         UUNCommand uunc;
         if(!uunc.Decode(pyAs(Tuple, uuncl.commandList->GetItem(i))))
         {

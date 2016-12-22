@@ -69,7 +69,7 @@ public:
     const double mass;
     const double volume;
     const double capacity;
-    const uint32 portionSize;
+    const int32 portionSize;
     const uint32 raceID;
     const double basePrice;
     const bool published;

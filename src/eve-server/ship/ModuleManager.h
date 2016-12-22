@@ -40,8 +40,6 @@ class Task_Log;
 
 //////////////////////////////////////////////////////////////////////////////////
 // Container for all ships modules
-#pragma region ModuleContainer
-
 class ModuleContainer
 {
 public:
@@ -151,13 +149,11 @@ private:
     ModuleManager * m_MyManager;        // we do not own this
 };
 
-#pragma endregion
 /////////////////////////// END MODULECONTAINER //////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////
 // Classes for passing effects around to targets
-#pragma region Effect Passing
 
 static const uint8 MAX_EFFECT_COUNT = 5;  //arbitrary, lazy etc.  The bigger this number, the larger these message classes will be
 
@@ -231,13 +227,11 @@ private:
 
 };
 
-#pragma endregion
 /////////////////////////// END MODULE EFFECTS //////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////
 // Primary Module Manager class
-#pragma region ModuleManager
 
 class ModuleManager
 {
@@ -304,7 +298,6 @@ private:
 	Task_Log * m_pLog;
 };
 
-#pragma endregion
 /////////////////////////// END MODULE MANAGER //////////////////////////////////
 
 #endif  /* MODULE_MANAGER_H */

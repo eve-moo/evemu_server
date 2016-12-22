@@ -116,7 +116,7 @@ void Colony::UpgradeCommandCenter(uint32 pinID, uint32 level) {
 
 bool Colony::UpgradeLink(uint32 src, uint32 dest, uint32 level, bool ccConnected) {
     bool rtn = false;
-    for (int i = 0; i < ccPin.links.size(); i++) {
+    for (unsigned int i = 0; i < ccPin.links.size(); i++) {
         Link tmp = ccPin.links.front();
         ccPin.links.pop_front();
         if((tmp.endpoint1 == src || tmp.endpoint1 == dest) && (tmp.endpoint2 == src || tmp.endpoint2 == dest)) {
@@ -129,7 +129,7 @@ bool Colony::UpgradeLink(uint32 src, uint32 dest, uint32 level, bool ccConnected
 
 bool Colony::RemovePin(uint32 pinID) {
     bool rtn = false;
-    for(int i = 0;i < ccPin.pins.size();i++) {
+    for(unsigned int i = 0;i < ccPin.pins.size();i++) {
         Pin tmp = ccPin.pins.front();
         ccPin.pins.pop_front();
         if(tmp.id != pinID)
@@ -142,7 +142,7 @@ bool Colony::RemovePin(uint32 pinID) {
 
 bool Colony::RemoveLink(uint32 src, uint32 dest, bool ccConnected) {
     bool rtn = false;
-    for (int i = 0; i < ccPin.links.size(); i++) {
+    for (unsigned int i = 0; i < ccPin.links.size(); i++) {
         Link tmp = ccPin.links.front();
         ccPin.links.pop_front();
         if((tmp.endpoint1 == src || tmp.endpoint1 == dest) && (tmp.endpoint2 == src || tmp.endpoint2 == dest)) {

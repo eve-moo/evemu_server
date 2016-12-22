@@ -455,22 +455,25 @@ void SpawnManager::Process() {
     }
 }
 
-SpawnEntry * SpawnManager::_FindSpawnForBubble(SystemBubble &thisBubble)
+SpawnEntry *SpawnManager::_FindSpawnForBubble(SystemBubble &thisBubble)
 {
-	SystemBubble * bubble = NULL;
-	std::map<uint32, SpawnEntry *>::iterator cur, end;
+    //SystemBubble * bubble = NULL;
+    std::map<uint32, SpawnEntry *>::iterator cur, end;
     cur = m_spawns.begin();
     end = m_spawns.end();
-    for(; cur != end; cur++) {
-		// Check each Spawn Entry to find a match for this bubble:
-		if( !(cur->second->bounds.empty()) )
-		{
-			if( thisBubble.InBubble( cur->second->bounds.at(0) ) )
-				// Found this SpawnEntry in this Bubble:
-				return (cur->second);
-		}
-	}
+    for(; cur != end; cur++)
+    {
+        // Check each Spawn Entry to find a match for this bubble:
+        if( !(cur->second->bounds.empty()) )
+        {
+            if( thisBubble.InBubble( cur->second->bounds.at(0) ) )
+            {
+                // Found this SpawnEntry in this Bubble:
+                return (cur->second);
+            }
+        }
+    }
 
-	// Could not find a Spawn Entry for this bubble, return NULL:
-	return NULL;
+    // Could not find a Spawn Entry for this bubble, return NULL:
+    return NULL;
 }

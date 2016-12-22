@@ -26,6 +26,8 @@
 #ifndef EvilNumber_h__
 #define EvilNumber_h__
 
+#include "eve-compat.h"
+
 #define MAX_EVIL_INTEGER    0x7FFFFFFFFFFFFFFFLL      // 64-bit signed integer
 
 

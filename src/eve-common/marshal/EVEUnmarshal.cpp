@@ -284,7 +284,7 @@ PyRep* UnmarshalStream::LoadStringTable()
 
 PyRep* UnmarshalStream::LoadWStringUCS2Char()
 {
-    const Buffer::const_iterator<uint16> wstr = Read<uint16>( 1 );
+    //const Buffer::const_iterator<uint16> wstr = Read<uint16>( 1 );
 
     // convert to UTF-8
     std::string str;
@@ -625,6 +625,11 @@ PyRep* UnmarshalStream::LoadPackedRow()
                 }
 
                 row->SetField( index, el );
+            } break;
+            case DBTYPE_ERROR:
+            {
+                // There was an error.
+                return nullptr;
             } break;
         }
     }

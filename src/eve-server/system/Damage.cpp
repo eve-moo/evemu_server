@@ -140,14 +140,14 @@ static const char *DamageMessageIDs_Self[6] = {
     "AttackHit6R"    //strikes you  perfectly, wrecking
 };
 
-static const char *DamageMessageIDs_SelfNamed[6] = {
-    "AttackHit1RD",    //barely scratches
-    "AttackHit2RD",    //lightly hits
-    "AttackHit3RD",    //hits
-    "AttackHit4RD",    //aims well at you
-    "AttackHit5RD",    //places an excellent hit
-    "AttackHit6RD"    //strikes you  perfectly, wrecking
-};
+//static const char *DamageMessageIDs_SelfNamed[6] = {
+//    "AttackHit1RD",    //barely scratches
+//    "AttackHit2RD",    //lightly hits
+//    "AttackHit3RD",    //hits
+//    "AttackHit4RD",    //aims well at you
+//    "AttackHit5RD",    //places an excellent hit
+//    "AttackHit6RD"    //strikes you  perfectly, wrecking
+//};
 
 static const char *DamageMessageIDs_Other[6] = {
     "AttackHit1",    //barely scratches
@@ -235,7 +235,7 @@ bool ItemSystemEntity::ApplyDamage(Damage &d) {
     double shield_uniformity = available_shield / m_self->shieldCapacity();
     if( shield_uniformity < ( 1.0  - m_self->shieldUniformity() ) )
     {
-        /*
+        *
          * As far i can see mostly npc/entities have a
          * chance of transpassing when the shield is below 25%
         /
@@ -505,7 +505,7 @@ bool NPC::ApplyDamage(Damage &d) {
     double shield_uniformity = available_shield / m_self->shieldCapacity();
     if( shield_uniformity < ( 1.0  - m_self->shieldUniformity() ) )
     {
-        /*
+        *
          * As far i can see mostly npc/entities have a
          * chance of transpassing when the shield is below 25%
         /
@@ -808,7 +808,6 @@ void Client::Killed(Damage &fatal_blow) {
 
 		//TODO: explode the capsule and make a new one in the last medical clone's station:
 		Vector3D deadPodPosition = GetPosition();
-		uint32 oldPodItemID = GetShipID();
 		Vector3D capsulePosition = Vector3D(0,0,0);
 
 		ShipRef deadPodRef = GetShip();    //grab a ship ref to ensure that nobody else nukes it first.
@@ -905,7 +904,6 @@ void Client::Killed(Damage &fatal_blow) {
         //our ship has been destroyed. Off to our capsule.
         //We are currently not keeping our real capsule around in the DB, so we need to make a new one.
 		Vector3D deadShipPosition = GetPosition();
-		uint32 oldShipItemID = GetShipID();
 		Vector3D capsulePosition = GetPosition();
 
 		//set capsule position 500m off from old ship:

@@ -388,7 +388,7 @@ public:
      * Check if we can use a skill injector.
      * @param The injector or stack of injectors to use.
      */
-    bool useInjector(InventoryItemRef injector, uint32 qty);
+    bool useInjector(InventoryItemRef injector, int32 qty);
     /**
      * Send a OnFreeSkillPointsChanged notification.
      */

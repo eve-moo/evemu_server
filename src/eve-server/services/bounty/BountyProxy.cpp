@@ -103,7 +103,7 @@ PyResult BountyProxyService::Handle_GetBountiesAndKillRights(PyCallArgs &call)
     header->AddColumn("bounty", DBTYPE_CY);
     header->AddColumn("corporationID", DBTYPE_I4);
     header->AddColumn("allianceID", DBTYPE_I4);
-    for(int i = 0; i < bountiesList->size(); i++)
+    for(int i = 0; i < (int)bountiesList->size(); i++)
     {
         PyRep *itm = bountiesList->GetItem(i);
         PyInt *val;
@@ -121,7 +121,7 @@ PyResult BountyProxyService::Handle_GetBountiesAndKillRights(PyCallArgs &call)
         row->SetField("allianceID", new PyInt(0));
         resBounties->AddItem(new_tuple(new PyInt(id), row));
     }
-    for(int i = 0; i < list1->size(); i++)
+    for(int i = 0; i < (int)list1->size(); i++)
     {
         PyRep *itm = list1->GetItem(i);
         PyInt *val;
@@ -129,7 +129,7 @@ PyResult BountyProxyService::Handle_GetBountiesAndKillRights(PyCallArgs &call)
         {
             continue;
         }
-        uint32 id = val->value();
+        //uint32 id = val->value();
         // TO-DO: populate list with results.
     }
     PyTuple *resTuple = new PyTuple(2);
@@ -172,7 +172,7 @@ PyResult BountyProxyService::Handle_GetBounties(PyCallArgs &call)
     header->AddColumn("bounty", DBTYPE_CY);
     header->AddColumn("corporationID", DBTYPE_I4);
     header->AddColumn("allianceID", DBTYPE_I4);
-    for(int i = 0; i < bountiesList->size(); i++)
+    for(int i = 0; i < (int)bountiesList->size(); i++)
     {
         PyRep *itm = bountiesList->GetItem(i);
         PyInt *val;

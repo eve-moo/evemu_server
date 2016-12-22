@@ -256,7 +256,6 @@ m_balance(_charData.balance),
 m_aurBalance(_charData.aurBalance),
 m_securityRating(_charData.securityRating),
 m_logonMinutes(_charData.logonMinutes),
-m_totalSPtrained(((double) (_charData.skillPoints))),
 m_corporationID(_charData.corporationID),
 m_corpHQ(_corpData.corpHQ),
 m_allianceID(_charData.allianceID),
@@ -279,6 +278,7 @@ m_startDateTime(_charData.startDateTime),
 m_createDateTime(_charData.createDateTime),
 m_corporationDateTime(_charData.corporationDateTime),
 m_shipID(_charData.shipID),
+m_totalSPtrained(((double) (_charData.skillPoints))),
 m_freeSkillPoints(_charData.freeSkillPoints)
 {
     // allow characters to be only singletons
@@ -713,7 +713,7 @@ void Character::stopTraining(bool notify)
     // Get current skill points.
     double currentPoints = stopTraining->getAttribute(AttrSkillPoints).get_float();
     // Get SP to finish level.
-    double SPToNextLevel = nextLevelPoints - currentPoints;
+    //double SPToNextLevel = nextLevelPoints - currentPoints;
     // Get SP rate.
     double SPPerMinute = GetSPPerMin(stopTraining);
     // Get stop time.
@@ -1211,7 +1211,7 @@ uint32 Character::getInjectorSP()
     return 500000;
 }
 
-bool Character::useInjector(InventoryItemRef injector, uint32 qty)
+bool Character::useInjector(InventoryItemRef injector, int32 qty)
 {
     // TO-DO: implement using injectors
     sendSkillFreePointsChanged();

@@ -897,8 +897,6 @@ bool InventoryItem::SetQuantity(uint32 qty_new, bool notify)
         return false;
     }
 
-    uint32 old_qty = m_quantity;
-
     m_quantity = qty_new;
 
     if(m_quantity == 0)
@@ -933,7 +931,6 @@ bool InventoryItem::SetFlag(EVEItemFlags new_flag, bool notify)
         return false;
     }
 
-    EVEItemFlags old_flag = m_flag;
     m_flag = new_flag;
 
     DBerror err;
@@ -1474,6 +1471,10 @@ bool InventoryItem::ResetAttribute(uint32 attrID, bool notify)
         return true;
     }
     bool success = m_AttributeMap.ResetAttribute(attrID, true);
+    if(!success)
+    {
+        return success;
+    }
     EvilNumber nVal = m_AttributeMap.GetAttribute(attrID);
     // modify the value by attribute modifiers applied by modules and enemy's.
     double amount = 0;

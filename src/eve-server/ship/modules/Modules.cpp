@@ -148,15 +148,21 @@ void GenericModule::generateModifiers()
         std::shared_ptr<MEffect> effect = itr.second;
         int nEffects = effect->GetSizeOfAttributeList();
         if (nEffects == 0)
+        {
             continue;
+        }
         for (int i = 0; i < nEffects; i++)
         {
             // ignore anything that affects a non attribute.
             if (effect->GetSourceAttributeID(i) == 0 || effect->GetTargetAttributeID(i) == 0)
+            {
                 continue;
-            bool Stack = false;
+            }
+            //bool Stack = false;
             if (effect->GetStackingPenaltyApplied(i) != 0)
-                Stack = true;
+            {
+                //Stack = true;
+            }
             AttributeModifierRef mod = AttributeModifierRef(new AttributeModifier(m_item, effect, i, true));
             // get the module type that causes the effect.
             uint32 affecting = effect->GetAffectingID(i);
@@ -171,16 +177,24 @@ void GenericModule::generateModifiers()
                     if (groupID == 6) // target ship
                     {
                         if (state == EFFECT_ONLINE)
+                        {
                             m_shipModifiers->addModifier(mod);
+                        }
                         if (state == EFFECT_ACTIVE)
+                        {
                             m_shipActiveModifiers->addModifier(mod);
+                        }
                         if (state == EFFECT_PASSIVE)
+                        {
                             m_shipPassiveModifiers->addModifier(mod);
+                        }
                     }
                     else if (groupID == 0) // target self
                     {
                         if (state == EFFECT_OVERLOAD)
+                        {
                             m_overloadModifiers->addModifier(mod);
+                        }
                     }
                     else // target module
                     {
@@ -188,7 +202,9 @@ void GenericModule::generateModifiers()
                         if (state == EFFECT_ONLINE)
                         {
                             if (m_moduleModifiers.find(groupID) == m_moduleModifiers.end())
+                            {
                                 m_moduleModifiers[groupID] = AttributeModifierSourceRef(new AttributeModifierSource(m_item));
+                            }
                             m_moduleModifiers[groupID]->addModifier(mod);
                         }
                     }

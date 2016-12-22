@@ -102,7 +102,7 @@ PyResult MailingListMgrService::Handle_Leave(PyCallArgs& call)
         return NULL;
     }
 
-    int listID = args.arg;
+    //int listID = args.arg;
     // no return values
     return NULL;
 }
@@ -117,7 +117,7 @@ PyResult MailingListMgrService::Handle_Delete(PyCallArgs& call)
         return NULL;
     }
 
-    int listID = args.arg;
+    //int listID = args.arg;
     // no return values
     return NULL;
 }
@@ -145,7 +145,7 @@ PyResult MailingListMgrService::Handle_GetMembers(PyCallArgs& call)
         return NULL;
     }
 
-    int listID = args.arg;
+    //int listID = args.arg;
     // return value is dict of members
     return NULL;
 }
@@ -234,7 +234,7 @@ PyResult MailingListMgrService::Handle_GetInfo(PyCallArgs& call)
         return NULL;
     }
 
-    int listID = args.arg;
+    //int listID = args.arg;
     return NULL;
 }
 
@@ -248,7 +248,7 @@ PyResult MailingListMgrService::Handle_GetSettings(PyCallArgs& call)
         return NULL;
     }
 
-    int listID = args.arg;
+    //int listID = args.arg;
     return NULL;
 }
 
@@ -262,7 +262,7 @@ PyResult MailingListMgrService::Handle_GetWelcomeMail(PyCallArgs& call)
         return NULL;
     }
 
-    int listID = args.arg;
+    //int listID = args.arg;
     return NULL;
 }
 
@@ -300,7 +300,7 @@ PyResult MailingListMgrService::Handle_ClearWelcomeMail(PyCallArgs& call)
         return NULL;
     }
 
-    int listID = args.arg;
+    //int listID = args.arg;
     // no return value
     return NULL;
 }

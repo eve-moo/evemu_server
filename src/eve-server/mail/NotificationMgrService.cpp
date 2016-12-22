@@ -55,7 +55,7 @@ PyResult NotificationMgrService::Handle_GetByGroupID(PyCallArgs &call)
         codelog(CLIENT__ERROR, "Failed to decode args for GetByGroupID call");
         return NULL;
     }
-    int groupID = args.arg;
+    //int groupID = args.arg;
     return new PyTuple(0);
 }
 
@@ -72,7 +72,7 @@ PyResult NotificationMgrService::Handle_MarkGroupAsProcessed(PyCallArgs &call)
         codelog(CLIENT__ERROR, "Failed to decode args for MarkGroupAsProcessed call");
         return NULL;
     }
-    int groupID = args.arg;
+    //int groupID = args.arg;
     return NULL;
 }
 
@@ -89,7 +89,7 @@ PyResult NotificationMgrService::Handle_MarkAsProcessed(PyCallArgs &call)
         codelog(CLIENT__ERROR, "Failed to decode args for MarkAsProcessed call");
         return NULL;
     }
-    PyRep* notificationsList = args.arg;
+    //PyRep* notificationsList = args.arg;
     return NULL;
 }
 
@@ -101,7 +101,7 @@ PyResult NotificationMgrService::Handle_DeleteGroupNotifications(PyCallArgs &cal
         codelog(CLIENT__ERROR, "Failed to decode args for DeleteGroupNotifications call");
         return NULL;
     }
-    int groupID = args.arg;
+    //int groupID = args.arg;
     return NULL;
 }
 
@@ -118,7 +118,7 @@ PyResult NotificationMgrService::Handle_DeleteNotifications(PyCallArgs &call)
         codelog(CLIENT__ERROR, "Failed to decode args for DeleteNotifications call");
         return NULL;
     }
-    PyRep* notificationsIDs = args.arg;
+    //PyRep* notificationsIDs = args.arg;
     return NULL;
 }
 

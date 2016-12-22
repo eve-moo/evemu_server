@@ -109,11 +109,12 @@ bool ClassDumpGenerator::ProcessElementPtr( const TiXmlElement* field )
         "    std::string %s_n( pfx );\n"
         "    %s_n += \"    \";\n"
         "\n"
-        "    if( %s == NULL )\n"
+        "    if( %s == NULL ){\n"
         "        _log( l_type, \"%%sERROR: NULL OBJECT!\", %s_n.c_str() );\n"
-        "    else\n"
+        "    }"
+        "    else {\n"
         "        %s->Dump( l_type, %s_n.c_str() );\n"
-        "\n",
+        "    }\n",
         name,
         name,
         name,
@@ -140,11 +141,12 @@ bool ClassDumpGenerator::ProcessRaw( const TiXmlElement* field )
         "    std::string %s_n( pfx );\n"
         "    %s_n += \"    \";\n"
         "\n"
-        "    if( %s == NULL )\n"
+        "    if( %s == NULL ) {\n"
         "        _log( l_type, \"%%sERROR: NULL REP!\", %s_n.c_str() );\n"
-        "    else\n"
+        "    }"
+        "    else {\n"
         "        %s->Dump( l_type, %s_n.c_str() );\n"
-        "\n",
+        "    }\n",
         name,
         name,
         name,
@@ -346,11 +348,12 @@ bool ClassDumpGenerator::ProcessToken( const TiXmlElement* field )
         "    std::string %s_n( pfx );\n"
         "    %s_n += \"    \";\n"
         "\n"
-        "    if( %s == NULL )\n"
+        "    if( %s == NULL ) {\n"
         "        _log( l_type, \"%%sNULL\", %s_n.c_str() );\n"
-        "    else\n"
+        "    }"
+        "    else {\n"
         "        %s->Dump( l_type, %s_n.c_str() );\n"
-        "\n",
+        "    }\n",
         name,
 
         name,
@@ -395,8 +398,9 @@ bool ClassDumpGenerator::ProcessObject( const TiXmlElement* field )
     fprintf( mOutputFile,
         "    _log( l_type, \"%%s%s:\", pfx );\n"
         "\n"
-        "    if( NULL == %s )\n"
+        "    if( NULL == %s ) {\n"
         "        _log( l_type, \"%%s    NULL\", pfx );\n"
+        "    }"
         "    else\n"
         "    {\n"
         "        std::string %s_n( pfx );\n"
@@ -445,8 +449,9 @@ bool ClassDumpGenerator::ProcessObjectEx( const TiXmlElement* field )
     fprintf( mOutputFile,
         "    _log( l_type, \"%%s%s (%s):\", pfx );\n"
         "\n"
-        "    if( %s == NULL )\n"
+        "    if( %s == NULL ) {\n"
         "        _log( l_type, \"%%s    NULL\", pfx );\n"
+        "    }"
         "    else\n"
         "    {\n"
         "        std::string %s_n( pfx );\n"
@@ -481,11 +486,12 @@ bool ClassDumpGenerator::ProcessTuple( const TiXmlElement* field )
         "    std::string %s_n( pfx );\n"
         "    %s_n += \"    \";\n"
         "\n"
-        "    if( %s == NULL )\n"
+        "    if( %s == NULL ) {\n"
         "        _log( l_type, \"%%sERROR: NULL TUPLE!\", %s_n.c_str() );\n"
-        "    else\n"
+        "    }"
+        "    else {\n"
         "        %s->Dump( l_type, %s_n.c_str() );\n"
-        "\n",
+        "    }\n",
         name,
 
         name,
@@ -521,11 +527,12 @@ bool ClassDumpGenerator::ProcessList( const TiXmlElement* field )
         "    std::string %s_n( pfx );\n"
         "    %s_n += \"    \";\n"
         "\n"
-        "    if( %s == NULL )\n"
+        "    if( %s == NULL ) {\n"
         "        _log( l_type, \"%%sERROR: NULL LIST!\", %s_n.c_str() );\n"
-        "    else\n"
+        "    }"
+        "    else {\n"
         "        %s->Dump( l_type, %s_n.c_str() );\n"
-        "\n",
+        "    }\n",
         name,
 
         name,
@@ -561,9 +568,9 @@ bool ClassDumpGenerator::ProcessListInt( const TiXmlElement* field )
         "    std::vector<int32>::const_iterator %s_cur, %s_end;\n"
         "    %s_cur = %s.begin();\n"
         "    %s_end = %s.end();\n"
-        "    for( int %s_index = 0; %s_cur != %s_end; %s_cur++, %s_index++ )\n"
+        "    for( int %s_index = 0; %s_cur != %s_end; %s_cur++, %s_index++ ) {\n"
         "        _log( l_type, \"%%s   [%%02d] %%d\", pfx, %s_index, *%s_cur );\n"
-        "\n",
+        "    }\n",
         name, name,
         name, name,
         name, name,
@@ -590,9 +597,9 @@ bool ClassDumpGenerator::ProcessListLong( const TiXmlElement* field )
         "    std::vector<int64>::const_iterator %s_cur, %s_end;\n"
         "    %s_cur = %s.begin();\n"
         "    %s_end = %s.end();\n"
-        "    for( int %s_index = 0; %s_cur != %s_end; %s_cur++, %s_index++ )\n"
+        "    for( int %s_index = 0; %s_cur != %s_end; %s_cur++, %s_index++ ) {\n"
         "        _log( l_type, \"%%s   [%%02d] %%\" PRId64, pfx, %s_index, *%s_cur );\n"
-        "\n",
+        "    }\n",
         name, name,
         name, name,
         name, name,
@@ -619,9 +626,9 @@ bool ClassDumpGenerator::ProcessListStr( const TiXmlElement* field )
         "    std::vector<std::string>::const_iterator %s_cur, %s_end;\n"
         "    %s_cur = %s.begin();\n"
         "    %s_end = %s.end();\n"
-        "    for( int %s_index = 0; %s_cur != %s_end; %s_cur++, %s_index++ )\n"
+        "    for( int %s_index = 0; %s_cur != %s_end; %s_cur++, %s_index++ ) {\n"
         "        _log( l_type, \"%%s   [%%02d] %%s\", pfx, %s_index, ( *%s_cur ).c_str() );\n"
-        "\n",
+        "    }\n",
         name, name,
         name, name,
         name, name,
@@ -648,11 +655,12 @@ bool ClassDumpGenerator::ProcessDict( const TiXmlElement* field )
         "    std::string %s_n( pfx );\n"
         "    %s_n += \"    \";\n"
         "\n"
-        "    if( %s == NULL )\n"
+        "    if( %s == NULL ) {\n"
         "        _log( l_type, \"%%sERROR: NULL DICT!\", %s_n.c_str() );\n"
-        "    else\n"
+        "    }"
+        "    else {\n"
         "        %s->Dump( l_type, %s_n.c_str() );\n"
-        "\n",
+        "    }\n",
         name,
 
         name,
@@ -729,10 +737,10 @@ bool ClassDumpGenerator::ProcessDictRaw( const TiXmlElement* field )
         "    std::map<%s, %s>::const_iterator %s_cur, %s_end;\n"
         "    %s_cur = %s.begin();\n"
         "    %s_end = %s.end();\n"
-        "    for(; %s_cur != %s_end; %s_cur++)\n"
+        "    for(; %s_cur != %s_end; %s_cur++) {\n"
         "        //total crap casting here since we do not know the correct printf format\n"
         "        _log( l_type, \"%%s   Key: %%u -> Value: %%u\", pfx, uint32( %s_cur->first ), uint32( %s_cur->second ) );\n"
-        "\n",
+        "    }\n",
         name, name,
         key, value, name, name,
         name, name,

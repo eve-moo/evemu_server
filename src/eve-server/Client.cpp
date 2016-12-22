@@ -42,6 +42,7 @@ static const uint32 PING_INTERVAL_US = 60000;
 Client::Client(EVETCPConnection** con, EVEServerConfig::EVEConfigNet &net)
 : DynamicSystemEntity(NULL),
 EVEClientSession(con),
+  m_networkConfig(net),
   m_pingTimer(PING_INTERVAL_US),
   m_system(NULL),
 //  m_destinyTimer(1000, true), //accurate timing is essential
@@ -52,8 +53,7 @@ EVEClientSession(con),
   m_timeEndTrain(0),
   m_destinyEventQueue( new PyList ),
   m_destinyUpdateQueue( new PyList ),
-m_nextNotifySequence(1),
-m_networkConfig(net)
+m_nextNotifySequence(1)
 //  m_nextDestinyUpdate(46751)
 {
     m_moveTimer.Disable();
@@ -198,7 +198,10 @@ void Client::SendErrorMsg( const char* fmt, ... )
     va_start( args, fmt );
 
     char* str = NULL;
-    vasprintf( &str, fmt, args );
+    if(vasprintf( &str, fmt, args ) == -1)
+    {
+        assert(false);
+    }
     assert( str );
 
     SysLog::Error("Client","Sending Error Message to %s:", GetName() );
@@ -220,7 +223,10 @@ void Client::SendErrorMsg( const char* fmt, ... )
 void Client::SendErrorMsg( const char* fmt, va_list args )
 {
     char* str = NULL;
-    vasprintf( &str, fmt, args );
+    if(vasprintf( &str, fmt, args ) == -1)
+    {
+        assert(false);
+    }
     assert( str );
 
     SysLog::Error("Client","Sending Error Message to %s:", GetName() );
@@ -246,7 +252,10 @@ void Client::SendInfoModalMsg( const char* fmt, ... )
     va_start( args, fmt );
 
     char* str = NULL;
-    vasprintf( &str, fmt, args );
+    if(vasprintf( &str, fmt, args ) == -1)
+    {
+        assert(false);
+    }
     assert( str );
 
     SysLog::Log("Client","Info Modal to %s:", GetName() );
@@ -272,7 +281,10 @@ void Client::SendNotifyMsg( const char* fmt, ... )
     va_start( args, fmt );
 
     char* str = NULL;
-    vasprintf( &str, fmt, args );
+    if(vasprintf( &str, fmt, args ) != -1)
+    {
+        assert(false);
+    }
     assert( str );
 
     SysLog::Log("Client","Notify to %s:", GetName() );
@@ -294,7 +306,10 @@ void Client::SendNotifyMsg( const char* fmt, ... )
 void Client::SendNotifyMsg( const char* fmt, va_list args )
 {
     char* str = NULL;
-    vasprintf( &str, fmt, args );
+    if(vasprintf( &str, fmt, args ) == -1)
+    {
+        assert(false);
+    }
     assert( str );
 
     SysLog::Log("Client","Notify to %s:", GetName() );
@@ -319,7 +334,10 @@ void Client::SelfChatMessage( const char* fmt, ... )
     va_start( args, fmt );
 
     char* str = NULL;
-    vasprintf( &str, fmt, args );
+    if(vasprintf( &str, fmt, args ) == -1)
+    {
+        assert(false);
+    }
     assert( str );
 
     va_end( args );

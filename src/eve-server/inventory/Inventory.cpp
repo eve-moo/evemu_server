@@ -162,7 +162,7 @@ bool Inventory::LoadContents()
     ItemData into;
     uint32 characterID = 0;
     uint32 corporationID = 0;
-    uint32 locationID = 0;
+    //uint32 locationID = 0;
     std::vector<uint32>::iterator cur, end;
     cur = items.begin();
     end = items.end();
@@ -176,10 +176,12 @@ bool Inventory::LoadContents()
         {
             characterID = ItemFactory::GetUsingClient()->GetCharacterID();
             corporationID = ItemFactory::GetUsingClient()->GetCorporationID();
-            locationID = ItemFactory::GetUsingClient()->GetLocationID();
+            //locationID = ItemFactory::GetUsingClient()->GetLocationID();
         }
         else
+        {
             SysLog::Error("Inventory::LoadContents()", "Failed to resolve pointer to Client object currently using the ItemFactory.");
+        }
         if((into.ownerID == characterID) || (characterID == 0) || (into.ownerID == corporationID))// || (into.locationID == locationID) )
         {
             // Continue to GetItem() if the client calling this is owned by the character that owns this item

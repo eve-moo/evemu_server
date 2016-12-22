@@ -43,13 +43,14 @@ DevToolsProviderService::~DevToolsProviderService()
 PyResult DevToolsProviderService::Handle_GetLoader(PyCallArgs& call)
 {
     FILE *pFile;
-    if(pFile = fopen(EVEMU_ROOT"/etc/devtools.raw", "rb"))
+    if((pFile = fopen(EVEMU_ROOT"/etc/devtools.raw", "rb")))
     {
         fseek(pFile, 0, SEEK_END);
 	int size = ftell(pFile);
 	char * buf = new char[size];
 	fseek(pFile, 0, SEEK_SET);
-	fread(buf, 1, size, pFile);
+	if(fread(buf, 1, size, pFile) != (size_t)size)
+        {}
 	fclose(pFile);
 	return new PyString(buf, size);
     }

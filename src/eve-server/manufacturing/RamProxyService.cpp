@@ -73,13 +73,16 @@ PyResult RamProxyService::Handle_GetRelevantCharSkills(PyCallArgs &call) {
 
 PyResult RamProxyService::Handle_GetJobs2(PyCallArgs &call) {
     Call_GetJobs2 args;
-    if(!args.Decode(&call.tuple)) {
+    if(!args.Decode(&call.tuple))
+    {
         _log(SERVICE__ERROR, "Failed to decode call args.");
         return NULL;
     }
 
-    if((uint32)args.ownerID == call.client->GetCorporationID()) {
-        if((call.client->GetCorpRole() & corpRoleFactoryManager) != corpRoleFactoryManager) {
+    if((uint32)args.ownerID == call.client->GetCorporationID())
+    {
+        if((call.client->GetCorpRole() & corpRoleFactoryManager) != corpRoleFactoryManager)
+        {
             // I'm afraid we don't have proper error in our DB ...
             call.client->SendInfoModalMsg("You cannot view your corporation's jobs because you do not possess the role \"Factory Manager\".");
             return NULL;
@@ -92,24 +95,33 @@ PyResult RamProxyService::Handle_GetJobs2(PyCallArgs &call) {
 PyResult RamProxyService::Handle_AssemblyLinesSelect(PyCallArgs &call) {
     Call_AssemblyLinesSelect args;
 
-    if(!args.Decode(&call.tuple)) {
+    if(!args.Decode(&call.tuple))
+    {
         _log(SERVICE__ERROR, "Unable to decode args.");
         return NULL;
     }
 
     // unfinished
     if(args.filter == "region")
+    {
         return (RamProxyDB::AssemblyLinesSelectPublic(call.client->GetRegionID()));
+    }
     else if(args.filter == "char")
+    {
         return (RamProxyDB::AssemblyLinesSelectPersonal(call.client->GetCharacterID()));
+    }
     else if(args.filter == "corp")
+    {
         return (RamProxyDB::AssemblyLinesSelectCorporation(call.client->GetCorporationID()));
+    }
     else if(args.filter == "alliance")
     {
         //      return(RamProxyDB::AssemblyLinesSelectAlliance(...));
         call.client->SendInfoModalMsg("Alliances are not implemented yet.");
         return NULL;
-    } else {
+    }
+    else
+    {
         _log(SERVICE__ERROR, "Unknown filter '%s'.", args.filter.c_str());
         return NULL;
     }
@@ -118,7 +130,8 @@ PyResult RamProxyService::Handle_AssemblyLinesSelect(PyCallArgs &call) {
 PyResult RamProxyService::Handle_AssemblyLinesGet(PyCallArgs &call) {
     Call_SingleIntegerArg arg;  // containerID
 
-    if(!arg.Decode(&call.tuple)) {
+    if(!arg.Decode(&call.tuple))
+    {
         _log(SERVICE__ERROR, "Unable to decode args.");
         return NULL;
     }
@@ -128,7 +141,8 @@ PyResult RamProxyService::Handle_AssemblyLinesGet(PyCallArgs &call) {
 
 PyResult RamProxyService::Handle_InstallJob(PyCallArgs &call) {
     Call_InstallJob args;
-    if(!args.Decode(&call.tuple)) {
+    if(!args.Decode(&call.tuple))
+    {
         _log(SERVICE__ERROR, "Failed to decode args.");
         return NULL;
     }
@@ -136,15 +150,20 @@ PyResult RamProxyService::Handle_InstallJob(PyCallArgs &call) {
     // load installed item
     InventoryItemRef installedItem = ItemFactory::GetItem(args.installedItemID);
     if( !installedItem )
+    {
         return NULL;
+    }
 
     // if output flag not set, put it where it was
     if(args.flagOutput == flagAutoFit)
+    {
         args.flagOutput = installedItem->flag();
+    }
 
     // decode path to BOM location
     PathElement pathBomLocation;
-    if( !pathBomLocation.Decode( args.bomPath->GetItem(0) ) ) {
+    if( !pathBomLocation.Decode( args.bomPath->GetItem(0) ) )
+    {
         _log(SERVICE__ERROR, "Failed to decode BOM location.");
         return NULL;
     }
@@ -155,16 +174,22 @@ PyResult RamProxyService::Handle_InstallJob(PyCallArgs &call) {
     // this calculates some useful multipliers ... Rsp_InstallJob is used as container ...
     Rsp_InstallJob rsp;
     if(!_Calculate(args, (InventoryItemRef)installedItem, call.client, rsp))
+    {
         return NULL;
+    }
 
     // I understand sent maxJobStartTime as a limit, so this checks whether it's in limit
     if(rsp.maxJobStartTime > pyAs(Int, call.byname["maxJobStartTime"])->value())
+    {
         throw(PyException(MakeUserError("RamCannotGuaranteeStartTime")));
+    }
 
     // query required items for activity
     std::vector<RequiredItem> reqItems;
     if (!RamProxyDB::GetRequiredItems(installedItem->typeID(), (EVERamActivity) args.activityID, reqItems))
+    {
         return NULL;
+    }
 
     // if 'quoteOnly' is 1 -> send quote, if 0 -> install job
     if(pyAs(Int, call.byname["quoteOnly"])->value())
@@ -184,7 +209,9 @@ PyResult RamProxyService::Handle_InstallJob(PyCallArgs &call) {
         // calculate proper start time
         uint64 beginProductionTime = Win32TimeNow();
         if(beginProductionTime < (uint32)rsp.maxJobStartTime)
+        {
             beginProductionTime = rsp.maxJobStartTime;
+        }
 
         // register our job
         if (!RamProxyDB::InstallJob(
@@ -204,8 +231,10 @@ PyResult RamProxyService::Handle_InstallJob(PyCallArgs &call) {
         }
 
         // do some activity-specific actions
-        switch(args.activityID) {
-            case ramActivityManufacturing: {
+        switch(args.activityID)
+        {
+            case ramActivityManufacturing:
+            {
                 // decrease licensed production runs
                 BlueprintRef bp = BlueprintRef::StaticCast( installedItem );
                 if(!bp->infinite())
@@ -224,25 +253,35 @@ PyResult RamProxyService::Handle_InstallJob(PyCallArgs &call) {
         std::vector<RequiredItem>::iterator cur, end;
         cur = reqItems.begin();
         end = reqItems.end();
-        for(; cur != end; cur++) {
+        for(; cur != end; cur++)
+        {
             if(cur->isSkill)
+            {
                 continue;       // not interested
+            }
 
             // calculate needed quantity
-            uint32 qtyNeeded = static_cast<uint32>(ceil(cur->quantity * rsp.materialMultiplier * args.runs));
+            int32 qtyNeeded = static_cast<uint32>(ceil(cur->quantity * rsp.materialMultiplier * args.runs));
             if(cur->damagePerJob == 1.0)
+            {
                 qtyNeeded = static_cast<uint32>(ceil(qtyNeeded * rsp.charMaterialMultiplier));   // skill multiplier is applied only on fully consumed materials
+            }
 
             std::vector<InventoryItemRef>::iterator curi, endi;
             curi = items.begin();
             endi = items.end();
             // consume required materials
-            for(; curi != endi; curi++) {
-                if((*curi)->typeID() == cur->typeID && (*curi)->ownerID() == call.client->GetCharacterID()) {
-                    if(qtyNeeded >= (*curi)->quantity()) {
+            for(; curi != endi; curi++)
+            {
+                if((*curi)->typeID() == cur->typeID && (*curi)->ownerID() == call.client->GetCharacterID())
+                {
+                    if(qtyNeeded >= (*curi)->quantity())
+                    {
                         qtyNeeded -= (*curi)->quantity();
                         (*curi)->Delete();
-                    } else {
+                    }
+                    else
+                    {
                         (*curi)->AlterQuantity(-(int32)qtyNeeded);
                         break;  // we are done, stop searching
                     }
@@ -723,7 +762,7 @@ void RamProxyService::_VerifyInstallJob_Install(const Rsp_InstallJob &rsp, const
             // check materials
 
             // calculate needed quantity
-            uint32 qtyNeeded = static_cast<uint32>(ceil(cur->quantity * rsp.materialMultiplier * runs));
+            int32 qtyNeeded = static_cast<uint32>(ceil(cur->quantity * rsp.materialMultiplier * runs));
             if(cur->damagePerJob == 1.0)
                 qtyNeeded = static_cast<uint32>(ceil(qtyNeeded * rsp.charMaterialMultiplier));   // skill multiplier is applied only on fully consumed materials
 

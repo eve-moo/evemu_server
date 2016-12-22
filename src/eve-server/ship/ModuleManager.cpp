@@ -39,17 +39,14 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 // Modifier class definitions
-#pragma region Modifier
 
 // No functions defined here at this time.
 
-#pragma endregion
 /////////////////////////////// END MODIFIER /////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////
 // ModuleContainer class definitions
-#pragma region ModuleContainerClass
 ModuleContainer::ModuleContainer(uint32 lowSlots, uint32 medSlots, uint32 highSlots, uint32 rigSlots, uint32 subSystemSlots,
     uint32 turretSlots, uint32 launcherSlots, ModuleManager * myManager)
 {
@@ -423,11 +420,14 @@ uint32 ModuleContainer::GetAvailableSlotInBank(EveEffectEnum slotBank)
 
 uint32 ModuleContainer::GetFittedModuleCountByGroup(uint32 groupID)
 {
-    uint32 moduleCountByGroup = 0;
     if( m_ModulesFittedByGroupID.find(groupID) == m_ModulesFittedByGroupID.end() )
+    {
         return 0;
+    }
     else
+    {
         return m_ModulesFittedByGroupID.find(groupID)->second;
+    }
 }
 
 void ModuleContainer::GetModuleListOfRefs(std::vector<InventoryItemRef> * pModuleList)
@@ -528,9 +528,13 @@ void ModuleContainer::_removeModule(EVEItemFlags flag, GenericModule * mod)
 
     // Maintain Turret and Launcher Fitted module counts:
     if( mod->isTurretFitted() )
+    {
         m_TotalTurretsFitted--;
+    }
     if( mod->isLauncherFitted() )
+    {
         m_TotalLaunchersFitted--;
+    }
 
     // Maintain the Modules Fitted By Group counter for this module group:
     if( m_ModulesFittedByGroupID.find(mod->getItem()->groupID()) != m_ModulesFittedByGroupID.end() )
@@ -587,6 +591,8 @@ void ModuleContainer::_processEx(processType p, slotType t)
         COUNT = MAX_ASSEMBLY_COUNT;
         cur = m_SubSystemModules;
         break;
+    default:
+        return;
     }
 
     switch(p)
@@ -757,13 +763,11 @@ void ModuleContainer::_initializeModuleContainers()
         m_SubSystemModules[i] = NULL;
 
 }
-#pragma endregion
 /////////////////////////// END MODULECONTAINER //////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////
 // ModuleManager class definitions
-#pragma region ModuleManagerClass
 ModuleManager::ModuleManager(Ship *const ship)
 {
     // Create ModuleContainer object and initialize with sizes for all slot banks for this ship:
@@ -1596,5 +1600,4 @@ ModuleCommand ModuleManager::_translateEffectName(std::string s)
     return CMD_ERROR;
 }
 
-#pragma endregion
 //////////////////////////////////////////////////////////////////////////////////

@@ -127,7 +127,10 @@ void Client::SelfEveMail( const char* subject, const char* fmt, ... )
     va_start( args, fmt );
 
     char* str = NULL;
-    vasprintf( &str, fmt, args );
+    if(vasprintf( &str, fmt, args ) == -1)
+    {
+        assert(false);
+    }
     assert( str );
 
     va_end( args );

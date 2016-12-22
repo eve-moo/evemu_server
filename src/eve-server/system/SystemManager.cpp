@@ -55,7 +55,6 @@ SystemManager::SystemManager(uint32 systemID)//, ItemData idata)
     SystemDB::GetSystemInfo(GetID(), NULL, NULL, &m_systemName, &m_systemSecurity);
 
     m_solarSystemRef = ItemFactory::GetSolarSystem(systemID);
-    uint32 inventoryID = m_solarSystemRef->itemID();
 
     //create our chat channel
     PyServiceMgr::lscProxy_service->CreateSystemChannel(m_systemID);

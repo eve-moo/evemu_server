@@ -73,6 +73,7 @@ uint8 DBTYPE_GetSizeBits( DBTYPE type )
         case DBTYPE_BYTES:
         case DBTYPE_STR:
         case DBTYPE_WSTR:
+        case DBTYPE_ERROR:
             return 0;
     }
 

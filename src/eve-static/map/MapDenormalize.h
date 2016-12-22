@@ -109,7 +109,7 @@ public:
         return true;
     }
 
-    static bool getSystemObjects(uint32 systemID, std::vector<MapDenormalizeRef> &into)
+    static void getSystemObjects(uint32 systemID, std::vector<MapDenormalizeRef> &into)
     {
         for(auto item : s_AllDenormalize)
         {
@@ -121,7 +121,7 @@ public:
         }
     }
 
-    static bool getRegionObjects(uint32 regionID, std::vector<MapDenormalizeRef> &into)
+    static void getRegionObjects(uint32 regionID, std::vector<MapDenormalizeRef> &into)
     {
         for(auto item : s_AllDenormalize)
         {

@@ -60,10 +60,10 @@ yMax(_yMax),
 zMax(_zMax),
 factionID(_factionID),
 radius(_radius),
+solarSystems(_systems),
 location(_x, _y, _z),
 locationMin(_xMin, _yMin, _zMin),
-locationMax(_xMax, _yMax, _zMax),
-solarSystems(_systems)
+locationMax(_xMax, _yMax, _zMax)
 {
     s_AllRegions[regionID] = MapRegionRef(this, [](MapRegion * type)
     {

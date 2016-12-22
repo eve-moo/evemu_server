@@ -255,13 +255,13 @@ double Ship::GetRemainingVolumeByFlag(EVEItemFlags flag) const
     {
         flag = flagCargoHold;
     }
-    double capacity;
+    double capacity = 0;
     auto attrFlag = m_cargoFlagAttributeMap.find(flag);
     if (attrFlag != m_cargoFlagAttributeMap.end())
     {
         if (fetchAttribute(attrFlag->second, capacity))
         {
-            capacity - m_cargoHoldsUsedVolumeByFlag.find(flag)->second;
+            capacity -= m_cargoHoldsUsedVolumeByFlag.find(flag)->second;
         }
     }
     return capacity;

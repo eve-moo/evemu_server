@@ -477,7 +477,7 @@ PyResult InventoryBound::Handle_Voucher(PyCallArgs &call){
     return NULL;
 }
 
-PyRep *InventoryBound::_ExecAdd(Client *c, const std::vector<int32> &items, uint32 quantity, EVEItemFlags flag) {
+PyRep *InventoryBound::_ExecAdd(Client *c, const std::vector<int32> &items, int32 quantity, EVEItemFlags flag) {
     //If were here, we can try move all the items (validated)
 
     std::vector<int32>::const_iterator cur, end;

@@ -1218,21 +1218,24 @@ void DestinyManager::SetSpeedFraction(double fraction, bool update) {
 void DestinyManager::AlignTo(const Vector3D &direction, bool update) {
     State = DSTBALL_GOTO;
     m_targetPoint = m_position + (direction * 1.0e16);
-    bool process = false;
-    if(m_userSpeedFraction == 0.0f) {
+    if(m_userSpeedFraction == 0.0f)
+    {
         m_userSpeedFraction = 1.0f;
-        process = true;
     }
-    if(m_activeSpeedFraction != m_userSpeedFraction) {
+    if(m_activeSpeedFraction != m_userSpeedFraction)
+    {
         m_activeSpeedFraction = m_userSpeedFraction;
         _UpdateDerrived();
     }
 
     //Clear any pending docking operation since the user set a new course:
-	if( m_self->IsClient() )
-		m_self->CastToClient()->SetPendingDockOperation( false );
+    if( m_self->IsClient() )
+    {
+        m_self->CastToClient()->SetPendingDockOperation( false );
+    }
 
-    if(update) {
+    if(update)
+    {
         DoDestiny_GotoPoint du;
         du.entityID = m_self->GetID();
         du.x = direction.x;
@@ -1250,24 +1253,27 @@ void DestinyManager::AlignTo(const Vector3D &direction, bool update) {
 void DestinyManager::GotoDirection(const Vector3D &direction, bool update) {
     State = DSTBALL_GOTO;
     m_targetPoint = m_position + (direction * 1.0e16);
-    bool process = false;
-    if(m_userSpeedFraction == 0.0f) {
+    if(m_userSpeedFraction == 0.0f)
+    {
         m_userSpeedFraction = 1.0f;
-        process = true;
     }
-    if(m_activeSpeedFraction != m_userSpeedFraction) {
+    if(m_activeSpeedFraction != m_userSpeedFraction)
+    {
         m_activeSpeedFraction = m_userSpeedFraction;
         _UpdateDerrived();
     }
 
     //Clear any pending docking operation since the user set a new course:
-	if( m_self->IsClient() )
-		m_self->CastToClient()->SetPendingDockOperation( false );
+    if( m_self->IsClient() )
+    {
+        m_self->CastToClient()->SetPendingDockOperation( false );
+    }
 
     SysLog::Debug( "DestinyManager::GotoDirection()", "SystemEntity '%s' vectoring to (%f,%f,%f) at velocity %f",
                 m_self->GetName(), direction.x, direction.y, direction.z, m_maxVelocity );
 
-    if(update) {
+    if(update)
+    {
         DoDestiny_CmdGotoDirection du;
         du.entityID = m_self->GetID();
         du.x = direction.x;
@@ -1286,14 +1292,15 @@ PyResult DestinyManager::AttemptDockOperation()
     uint32 stationID = who->GetDockStationID();
     SystemEntity *station = sm->get(stationID);
 
-    if(station == NULL) {
+    if(station == NULL)
+    {
         codelog(CLIENT__ERROR, "%s: Station %u not found.", who->GetName(), stationID);
         return NULL;
     }
 
     Vector3D stationOrigin = static_cast< StationEntity* >( station )->GetPosition();
     Vector3D stationDockPoint = static_cast< StationEntity* >( station )->GetStationObject()->GetStationType()->dockEntry;     //station->GetPosition();
-    Vector3D stationDockOrientation = static_cast< StationEntity*>( station )->GetStationObject()->GetStationType()->dockOrientation;
+    //Vector3D stationDockOrientation = static_cast< StationEntity*>( station )->GetStationObject()->GetStationType()->dockOrientation;
     const Vector3D &position = who->GetPosition();
 
     // Leave stationOrigin alone, so that docking perimeter is a sphere centered on the station's center coordinate, not the undock point
@@ -1321,7 +1328,7 @@ PyResult DestinyManager::AttemptDockOperation()
 
     // WARNING: DO NOT uncomment the following line as it for some reason causes HEAP corruption to occur on auto-docking
     //if( !(who->GetPendingDockOperation()) )
-        GotoDirection( direction, true );   // Turn ship and move toward docking point
+    GotoDirection( direction, true );   // Turn ship and move toward docking point
 
     // Verify range to station is within docking perimeter of 500 meters:
     // (there is something WRONG with this as it will become true even when the client says ship is still about 14km from station)
@@ -1357,15 +1364,15 @@ PyResult DestinyManager::AttemptDockOperation()
     Stop(false);
 
     // When docking, Set X,Y,Z to origin so that when changing ships in stations, they don't appear outside:
-	who->MoveToLocation( stationID, stationDockPoint );		// if stationDockPoint does not help, try m_position
+    who->MoveToLocation( stationID, stationDockPoint );		// if stationDockPoint does not help, try m_position
 
     who->SetPendingDockOperation( false );
 
     //clear all targets
     who->targets.removeFromBubble();
 
-	//inform ship object that it is docking:
-	who->GetShip()->Dock();
+    //inform ship object that it is docking:
+    who->GetShip()->Dock();
 
     //Check if player is in pod, in which case they get a rookie ship for free
     if( who->GetShip()->typeID() == itemTypeCapsule )
@@ -1453,14 +1460,17 @@ void DestinyManager::UnCloak()
 void DestinyManager::WarpTo(const Vector3D &where, double distance, bool update) {
     SetSpeedFraction(1.0, update);
 
-    if(m_warpState != NULL) {
+    if(m_warpState != NULL)
+    {
         delete m_warpState;
         m_warpState = NULL;
     }
 
     //Clear any pending docking operation since the user initiated warp:
-	if( m_self->IsClient() )
-		m_self->CastToClient()->SetPendingDockOperation( false );
+    if( m_self->IsClient() )
+    {
+        m_self->CastToClient()->SetPendingDockOperation( false );
+    }
 
     State = DSTBALL_WARP;
     m_targetEntity.first = 0;
@@ -1468,15 +1478,20 @@ void DestinyManager::WarpTo(const Vector3D &where, double distance, bool update)
     m_targetPoint = where;
     m_targetDistance = distance;
 
-	double warpSpeedMultiplier = 1.0;
-	if( m_self->IsClient() )
-		warpSpeedMultiplier = m_self->CastToClient()->GetShip()->getAttribute(AttrWarpSpeedMultiplier).get_float();
-	else
-		warpSpeedMultiplier = m_self->Item()->getAttribute(AttrWarpSpeedMultiplier).get_float();
+    double warpSpeedMultiplier = 1.0;
+    if( m_self->IsClient() )
+    {
+        warpSpeedMultiplier = m_self->CastToClient()->GetShip()->getAttribute(AttrWarpSpeedMultiplier).get_float();
+    }
+    else
+    {
+        warpSpeedMultiplier = m_self->Item()->getAttribute(AttrWarpSpeedMultiplier).get_float();
+    }
 
     uint32 warpSpeedAUperSecondTimesTen = (uint32)(((double)BASE_WARP_SPEED) * warpSpeedMultiplier * 10);
 
-    if(update) {
+    if(update)
+    {
         std::vector<PyTuple *> updates;
 
         {

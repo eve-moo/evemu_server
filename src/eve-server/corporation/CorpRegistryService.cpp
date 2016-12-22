@@ -417,7 +417,7 @@ PyResult CorpRegistryBound::Handle_GetSuggestedTickerNames(PyCallArgs &call) {
         return NULL;
     }
 
-    PyList * result = new PyList;
+    //PyList * result = new PyList;
     std::string ticker;
     uint32 cnLen = arg.arg.length();
     // Easiest ticker-generation method: get the capital letters.
@@ -1074,8 +1074,8 @@ PyResult CorpRegistryBound::Handle_KickOutMember(PyCallArgs &call)
     {
         return new PyBool(false);
     }
-    uint32 oldCorpID = chr->corporationID();
-    uint32 oldCorpHQ = chr->corporationHQ();
+    //uint32 oldCorpID = chr->corporationID();
+    //uint32 oldCorpHQ = chr->corporationHQ();
     // Use a default if none found.
     uint32 corporationID = EVEServerConfig::character.startCorporation;
     // Look up corporation from bloodline.

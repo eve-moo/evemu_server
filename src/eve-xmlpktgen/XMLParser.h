@@ -54,6 +54,7 @@ public:
          * @retval false Parsing failed.
          */
         virtual bool Parse( const TiXmlElement* field ) = 0;
+        virtual ~ElementParser() {};
     };
 
     /**

@@ -86,19 +86,6 @@ StationRef Station::Load(uint32 stationID)
     return InventoryItem::Load<Station>( stationID );
 }
 
-template<class _Ty>
-RefPtr<_Ty> Station::_LoadStation(uint32 stationID,
-                                  // InventoryItem stuff:
-                                  const InvTypeRef type, const ItemData &data,
-                                  // CelestialObject stuff:
-                                  const CelestialObjectData &cData,
-                                  // Station stuff:
-                                  const StationData &stData)
-{
-    // ready to create
-    return StationRef(new Station(stationID, type, data, cData, stData));
-}
-
 bool Station::loadState()
 {
     // load contents
@@ -259,7 +246,7 @@ void StationEntity::EncodeDestiny( Buffer& into ) const
     const Vector3D& position = GetPosition();
     const std::string itemName( GetName() );
 /*
-    /*if(m_orbitingID != 0) {
+    if(m_orbitingID != 0) {
         #pragma pack(1)
         struct AddBall_Orbit {
             BallHeader head;

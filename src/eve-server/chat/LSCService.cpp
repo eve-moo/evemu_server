@@ -611,7 +611,7 @@ PyResult LSCService::Handle_AccessControl( PyCallArgs& call )
     // WARNING: This call contains manual packet decoding to handle Access Control since I didn't want to monkey around with the LSCPkts.xmlp.
     // -- Aknor Jaden (2010-11-26)
 
-    int32 channel_id = 0;
+    //int32 channel_id = 0;
 
     // BIG TODO:  The whole reason why normal players cannot post chats in other channels has to do with the Access Mode
     // in the channel settings dialog in the client.  Now, I don't know why chatting in the Help/Rookie Help is not allowed
@@ -652,7 +652,7 @@ PyResult LSCService::Handle_Invite(PyCallArgs &call)
     std::shared_ptr<LSCChannel> channel;
 
     uint32 channel_ID;
-    uint32 char_ID = call.client->GetCharacterID();
+    //uint32 char_ID = call.client->GetCharacterID();
     uint32 invited_char_ID;
 
     // Decode the call:
