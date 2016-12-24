@@ -44,7 +44,7 @@ void StreamPacketizer::Process()
     end = mBuffer.end<uint8>();
     while( true )
     {
-        if( sizeof( uint32 ) > ( end - cur ) )
+        if( (int)sizeof( uint32 ) > ( end - cur ) )
             break;
 
         const Buffer::const_iterator<uint32> len = cur.As<uint32>();

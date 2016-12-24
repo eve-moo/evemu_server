@@ -88,7 +88,7 @@ void TargetManager::process()
             case TargetEntry::PassiveLocking:
                 targetNum++;
                 //nothing to do right now...
-                if (targetNum > m_maxLockedTargets)
+                if (targetNum > (int)m_maxLockedTargets)
                 {
                     // This is a hack fix.
                     targetLost.push_back(cur.first);

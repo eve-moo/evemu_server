@@ -164,9 +164,11 @@ int vsprintf( std::string& str, const char* fmt, va_list ap )
         // Try to print into the buffer
         code = ::vsnprintf( &str[offset], size, fmt, ap );
         // Check for truncation
-        if( size <= code )
+        if( (int)size <= code )
+        {
             // Output truncated
             code = -1;
+        }
 
         // Double the size of the buffer
         size <<= 1;

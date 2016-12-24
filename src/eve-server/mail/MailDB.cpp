@@ -174,19 +174,29 @@ void MailDB::EditLabel(int characterID, Call_EditLabel& args)
 
     DBerror error;
     if (args.name.length() == 0)
+    {
         DBcore::RunQuery(error, "UPDATE srvMailLabel SET color = %u WHERE bit = %u AND ownerID = %u", args.color, bit, characterID);
+    }
     else if (args.color == -1)
+    {
         DBcore::RunQuery(error, "UPDATE srvMailLabel SET name = '%s' WHERE bit = %u AND ownerID = %u", args.name.c_str(), bit, characterID);
+    }
     else
+    {
         DBcore::RunQuery(error, "UPDATE srvMailLabel SET name = '%s', color = %u WHERE bit = %u AND ownerID = %u", args.name.c_str(), args.color, bit, characterID);
+    }
 }
 
 int MailDB::BitFromLabelID(int id)
 {
     // lets hope the compiler can do this better; I guess it still beats a floating point log, though
-    for (int i = 0; i < (sizeof(int)*8); i++)
+    for (int i = 0; i < (int)(sizeof(int)*8); i++)
+    {
         if ((id & (1 << i)) > 0)
+        {
             return i;
+        }
+    }
 
     // This just gets rid of a warning, code execution should never reach here.
     SysLog::Error("MailDB::BitFromLabelID", "ERROR: Could not get bit.");

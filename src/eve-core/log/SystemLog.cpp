@@ -182,7 +182,10 @@ bool SysLog::SetLogfile(const char* filename)
 #ifdef HAVE_UNISTD_H
 		// Change file owner to nobody:nobody to prevent possible permissions problems.
         // Used if the server is started with root permissions on a Linux host.
-        fchown(fileno(file), 99, 99);   // nobody:nobody
+        if(fchown(fileno(file), 99, 99) == -1)   // nobody:nobody
+        {
+            // error...
+        }
         fchmod(fileno(file), S_IWUSR | S_IRUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);    // -rw-rw-rw-
 #endif
     }

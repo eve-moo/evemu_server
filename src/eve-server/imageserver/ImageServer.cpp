@@ -71,7 +71,9 @@ std::shared_ptr<std::vector<char> > ImageServer::getImage(std::string& category,
     ret->resize(length);
 
     // Read the file.
-    fread(&((*ret)[0]), 1, length, fp);
+    if(fread(&((*ret)[0]), 1, length, fp) != length)
+    {
+    }
 
     return ret;
 }
@@ -135,11 +137,13 @@ void ImageServer::run()
 
     _basePath = EVEServerConfig::files.imageDir;
     if (_basePath[_basePath.size() - 1] != '/')
+    {
         _basePath += "/";
+    }
 
     CreateDirectory(_basePath.c_str(), NULL);
 
-    for (int i = 0; i < CategoryCount; i++)
+    for (int i = 0; i < (int)CategoryCount; i++)
     {
         std::string subdir = _basePath;
         subdir.append(Categories[i]);

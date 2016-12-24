@@ -282,8 +282,11 @@ bool PyNone::visit( PyVisitor& v ) const
 int32 PyNone::hash() const
 {
     /* damn hack... bleh.. but its done like this... in python and PyNone is a static singleton....*/
-    int32* hash = (int32*)this;
-    return *((int32*)&hash);
+//    int32* hash = (int32*)this;
+//    return *((int32*)&hash);
+    // A better way to hash the pointer?
+    std::hash<const PyNone *> hash;
+    return hash(this);
 }
 
 /************************************************************************/
